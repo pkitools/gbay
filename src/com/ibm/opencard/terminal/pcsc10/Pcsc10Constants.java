@@ -1,5 +1,5 @@
 /*
- * Copyright © 1997 - 1999 IBM Corporation.
+ * Copyright  1997 - 1999 IBM Corporation.
  * 
  * Redistribution and use in source (source code) and binary (object code)
  * forms, with or without modification, are permitted provided that the

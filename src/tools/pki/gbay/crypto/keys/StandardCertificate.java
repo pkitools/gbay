@@ -310,6 +310,7 @@ public class StandardCertificate implements CertificateInterface {
 	/* (non-Javadoc)
 	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#getSerialNumber()
 	 */
+	
 	@Override
 	public String getSerialNumber() {
 		return serialNumber;
