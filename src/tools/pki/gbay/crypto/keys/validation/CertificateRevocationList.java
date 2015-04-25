@@ -43,7 +43,6 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
-import tools.pki.ace.webservices.WebService;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.GbayCryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;

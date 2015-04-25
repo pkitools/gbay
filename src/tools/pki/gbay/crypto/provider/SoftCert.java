@@ -25,7 +25,6 @@ import tools.pki.gbay.crypto.keys.CertificateValiditor;
 import tools.pki.gbay.crypto.keys.KeyStorage;
 import tools.pki.gbay.crypto.keys.KeyStorage.CoupleKey;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
-import tools.pki.gbay.crypto.keys.validation.CrlCheckParameters;
 import tools.pki.gbay.crypto.keys.validation.IssuerPropertyFile;
 import tools.pki.gbay.crypto.texts.Base64;
 import tools.pki.gbay.crypto.texts.EncryptedText;

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import tools.pki.gbay.configuration.Configuration;
-import tools.pki.gbay.configuration.PropertyHelper;
+import tools.pki.gbay.configuration.IssuerPropertyHelper;
 import tools.pki.gbay.crypto.provider.CaFinderInterface;
 import tools.pki.gbay.errors.GbayCryptoException;
 
@@ -85,7 +85,7 @@ public class IssuerPropertyFile  implements CaFinderInterface {
 
 		public void initiate(HashMap<String, String> replacements, Properties propertyFile) throws FileNotFoundException, IOException {
 			log.debug("Innisiating Issuer property file " + propertyFile.toString());
-			PropertyHelper.GetInstance().initiate(constractDefualtReplacment(replacements),constractDefualtProperty(propertyFile));
+			IssuerPropertyHelper.GetInstance().initiate(constractDefualtReplacment(replacements),constractDefualtProperty(propertyFile));
 		}
 
 	
@@ -94,7 +94,7 @@ public class IssuerPropertyFile  implements CaFinderInterface {
 
 	public File getCARootCert(X509Certificate cert) {
 		log.debug("Getting CA Cert file...");
-		String caFile = PropertyHelper.GetInstance().getProperty(getSettingIssuerDn(cert.getIssuerDN()
+		String caFile = IssuerPropertyHelper.GetInstance().getProperty(getSettingIssuerDn(cert.getIssuerDN()
 				.toString()));
 		if (caFile == null || caFile.isEmpty())
 			return null;
@@ -113,14 +113,14 @@ public class IssuerPropertyFile  implements CaFinderInterface {
 
 	private String getSettingIssuerDn(String issuerDn) {
 		log.info("Finding proper key in property files ... ");
-		return PropertyHelper.GetInstance().replaceValuesWithReplacementKeys(issuerDn);	
+		return IssuerPropertyHelper.GetInstance().replaceValuesWithReplacementKeys(issuerDn);	
 	}
 	
 	
 	
 	public HashMap<String, String> getAllIssuers(){
       if(CA_ROOT_CERTS == null)
-    	CA_ROOT_CERTS=  PropertyHelper.GetInstance().retrieveKeys();
+    	CA_ROOT_CERTS=  IssuerPropertyHelper.GetInstance().retrieveKeys();
 		    return CA_ROOT_CERTS;
     }
 

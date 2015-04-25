@@ -51,7 +51,7 @@ import org.bouncycastle.cms.CMSSignedDataGenerator;
  * Actually the {@link #generate()} method (defined package private) is used only in 
  * {@link  tools.pki.gbay.hardware.cms.ManualCMSGenerator#generate(CMSProcessable, boolean)} .
  * <p>
- * For an usage example, see {@link tools.pki.gbay.hardware.cms.ManualCMSGenerator} and {@link it.trento.comune.j4sign.examples.PKCS11Supplier}.
+ * For an usage example, see {@link tools.pki.gbay.hardware.cms.ManualCMSGenerator} .
  *
  * @author  Araz Farhang
  * @version $Revision: 1.1 $ $Date: 2004/12/27 11:14:34 $

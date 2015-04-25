@@ -61,8 +61,7 @@ import org.bouncycastle.cms.CMSSignedDataGenerator;
  * signer info generator inner class has been promoted to the indipendent
  * {@link ManualSignerInfoGenerator}.
  * <p>
- * Here follows an example of usage; for a complete example, see
- * {@link PKCS11Supplier.trento.comune.j4sign.examples.CLITest}source code.
+ * Here follows an example of usage:
  * 
  * <pre>
  * 
@@ -171,8 +170,8 @@ public class ManualCMSGenerator {
      * <p>
      * Note: this assumes the CertStore will support null in the get methods.
      * 
-     * @param certStore
-     * @throws CertStoreException
+     * @param certStore Certificate store which contains certs and CRL
+     * @throws CertStoreException Error in opening store 
      * @throws CMSException
      */
     public void addCertificatesAndCRLs(CertStore certStore)
@@ -270,8 +269,17 @@ public class ManualCMSGenerator {
     /**
      * generate a CMS Signed Data object using the previously passed {@link ManualSignerInfoGenerator}
      * objects; if encapsulate is true a copy of the message will be
-     * included in the signature.
+     * included in the signature.   
+     * @param content real content
+     * @param encapsulate true if you want to put the original data in CMS
+     * @return CMS Signed data
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchProviderException
+     * @throws CMSException
+     * @throws InvalidAlgorithmParameterException
+     * @throws CertStoreException
      */
+   
     public CMSSignedData generate(CMSProcessable content, boolean encapsulate)
 
     throws NoSuchAlgorithmException, NoSuchProviderException, CMSException,

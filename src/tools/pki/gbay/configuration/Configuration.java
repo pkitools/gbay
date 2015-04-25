@@ -26,6 +26,8 @@
 
 package tools.pki.gbay.configuration;
 
+import tools.pki.gbay.crypto.provider.SignatureSetting;
+
 public class Configuration extends SecurityConcepts
 {
 
@@ -48,4 +50,11 @@ public static int getMaxRetryRepos() {
 public static int getMaxRetryCDP() {
 	return 0;
 }
+
+
+public static SignatureSetting getDefualtSignatureSettings(){
+	return null;
+
+}
+
 }

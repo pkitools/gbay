@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>tools.pki</groupId>
+  <artifactId>gbay</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>GBay Simple Crypto</name>
+   <url>http://maven.apache.org</url>
+  
+  <description>Easy to use cryptography library </description>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <resources>
+      <resource>
+        <directory>src</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source/>
+          <target/>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+   <dependency>
+	<groupId>commons-codec</groupId>
+	<artifactId>commons-codec</artifactId>
+	<version>1.10</version>
+</dependency>
+   
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+<dependency>
+	<groupId>org.bouncycastle</groupId>
+	<artifactId>bcprov-ext-jdk15on</artifactId>
+	<version>1.50</version>
+</dependency>
+
+  	<dependency>
+  		<groupId>bouncycastle</groupId>
+  		<artifactId>bcmail-jdk15</artifactId>
+  		<version>140</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>bouncycastle</groupId>
+  		<artifactId>bcprov-jdk15</artifactId>
+  		<version>140</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>log4j</groupId>
+  		<artifactId>log4j</artifactId>
+  		<version>1.2.12</version>
+  	</dependency>
+  </dependencies>
+</project>
