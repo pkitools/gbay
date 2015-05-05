@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import tools.pki.gbay.configuration.SecurityConcepts;
 import tools.pki.gbay.crypto.keys.CertificateInterface;
@@ -39,7 +40,7 @@ public class SignedText extends PlainText implements SignedTextInterface {
 
 	byte[] signedVal;
 	PlainText originalText;
-	CertificateIssuer trustedIssuers;
+	Set<CertificateIssuer> trustedIssuers;
 	CertificateRevocationList crl;
 	boolean attached;
 //	private IssuerPropertyFile issuerPropertyFile;
@@ -57,14 +58,20 @@ public class SignedText extends PlainText implements SignedTextInterface {
 		super(signedValue);
 		signedVal = signedValue;
 		this.originalText = new PlainText(originaltext);
-		this.attached = false;
+		if (originaltext!= null)
+			this.attached = true;
+		else
+			this.attached = false;
 	}
 
 	public SignedText(byte[] originaltext , byte[] signedValue) {
 		super(signedValue);	
 		signedVal = signedValue;
 		this.originalText = new PlainText(originaltext);
-		this.attached = false;
+		if (originaltext!= null)
+			this.attached = true;
+		else
+			this.attached = false;
 	}
 
 	public SignedText(String originaltext , CMSSignedData data , boolean attached) throws IOException {
@@ -74,7 +81,7 @@ public class SignedText extends PlainText implements SignedTextInterface {
 		this.attached = attached;
 	}
 
-    public SignedText(String originaltext , byte[] signedValue , CertificateIssuer trustedIssuer,CertificateRevocationList crl, boolean attached) {
+    public SignedText(String originaltext , byte[] signedValue , Set<CertificateIssuer> trustedIssuer,CertificateRevocationList crl, boolean attached) {
     	super(signedValue);
     	this.signedVal = signedValue;
     	this.originalText = new PlainText(originaltext);
@@ -89,7 +96,7 @@ public class SignedText extends PlainText implements SignedTextInterface {
     }
 
     
-    public SignedText(String originaltext , byte[] signedValue , CertificateIssuer trustedIssuer,CertificateRevocationList crl , List<CertificateInterface> signer) {
+    public SignedText(String originaltext , byte[] signedValue , Set<CertificateIssuer> trustedIssuer,CertificateRevocationList crl , List<CertificateInterface> signer) {
     	super(signedValue);
     	this.signedVal = signedValue;
     	this.originalText = new PlainText(originaltext);
@@ -208,12 +215,12 @@ public class SignedText extends PlainText implements SignedTextInterface {
 	}
 	
 	@Override
-	public CertificateIssuer getTrustedIssuers() {
+	public Set<CertificateIssuer> getTrustedIssuers() {
 		return trustedIssuers;
 	}
 
 	@Override
-	public void setTrustedIssuers(CertificateIssuer trustedIssuers) {
+	public void setTrustedIssuers(Set<CertificateIssuer> trustedIssuers) {
 		this.trustedIssuers = trustedIssuers;
 	}
 

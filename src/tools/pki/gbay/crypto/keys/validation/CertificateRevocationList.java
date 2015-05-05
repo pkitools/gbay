@@ -84,12 +84,13 @@ public final class CertificateRevocationList {
 
     
     public CertificateRevocationList(byte[] crlbyte) throws CRLException, CertificateException {
-    	logger.info("Setting CRL...");   
+    	logger.info("Setting CertificateRevocationList from byte array ..."); 
+    	logger.debug(crlbyte);
     	this.crl = fromByteArray(crlbyte);
     }
  
     public CertificateRevocationList(X509CRL crl){
-    	logger.info("Setting CRL...");
+    	logger.info("Setting CertificateRevocationList from CRL ...");
     	this.crl = crl;
     }
   
@@ -99,7 +100,8 @@ public final class CertificateRevocationList {
 	}
     
    public CertificateRevocationList(X509Certificate certFromFile) throws GbayCryptoException{
-	   logger.info("Getting cert from file");
+	   logger.info("Getting CertificateRevocationList from file");
+	   logger.debug(certFromFile);
 	   List<String> crlList;
 	try {
 		crlList = getCrlDistributionPoints(certFromFile);

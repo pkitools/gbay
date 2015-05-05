@@ -1,13 +1,13 @@
 package tools.pki.gbay.errors;
 
-import java.security.cert.CertificateException;
-
 public class GbayCryptoException extends Throwable{
 
 	public GbayCryptoException(CryptoError cryptoError) {
 		// TODO Auto-generated constructor stub
 	}
-
+	public GbayCryptoException(GlobalErrorCode txnFail,String message) {
+		// TODO Auto-generated constructor stub
+	}
 	public GbayCryptoException(Exception e) {
 		// TODO Auto-generated constructor stub
 	}

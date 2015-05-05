@@ -1,19 +1,17 @@
 
-package com.vladium.utils;
+package tools.pki.gbay.util.general;
 
 // ----------------------------------------------------------------------------
 /**
  * A default implementation of {@link IClassLoadStrategy} that should be suitable
  * for a variety of situations. See {@link #getClassLoader} for details.
  * 
- * @author (C) <a href="http://www.javaworld.com/columns/jw-qna-index.shtml">Vlad Roubtsov</a>, 2003
  */
 public
 class DefaultClassLoadStrategy implements IClassLoadStrategy
 {
-    // public: ................................................................
-    
-    // inherit javadoc
+
+
     public ClassLoader getClassLoader (final ClassLoadContext ctx)
     {
         if (ctx == null) throw new IllegalArgumentException ("null input: ctx");

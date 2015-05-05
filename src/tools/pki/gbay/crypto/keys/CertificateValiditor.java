@@ -39,11 +39,13 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.util.Set;
 
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.keys.validation.CertificateValidationResult;
 import tools.pki.gbay.crypto.keys.validation.CertificateValidator;
 import tools.pki.gbay.crypto.provider.CaFinderInterface;
+import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.GbayCryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
@@ -51,10 +53,15 @@ import tools.pki.gbay.util.general.CryptoFile;
 
 import org.apache.log4j.Logger;
 
+import com.google.inject.Inject;
+
 
 //to add generating from file and validatings to StandardCertificate
 public class CertificateValiditor extends StandardCertificate {
 
+	
+	@Inject
+	SignatureSettingInterface settings;
 	Logger log = Logger.getLogger(CertificateValiditor.class);
 	
 	/*
@@ -85,7 +92,7 @@ public class CertificateValiditor extends StandardCertificate {
 
 	
 	protected File fileAddress;
-	CertificateIssuer issuer;
+	Set<CertificateIssuer> issuer;
 	private boolean validated;
 	private CertificateValidationResult validationResult;
 	
@@ -133,15 +140,8 @@ public class CertificateValiditor extends StandardCertificate {
 		this.fileAddress = file.getFile();
 	}
 
-	public CertificateValiditor(X509Certificate certificate) {
-		extractCertDetail(certificate);
-	}
 
-	public CertificateValiditor(X509Certificate certificate,
-			CertificateIssuer trustedIssuers, X509CRL crl) throws GbayCryptoException {
-		this(certificate);
-		this.validationResult = validate(trustedIssuers,crl);
-	}
+
 	
 	/**
 	 * Initiate a public key with an attached interface that will be run to get the issuer
@@ -150,11 +150,10 @@ public class CertificateValiditor extends StandardCertificate {
 	 * @param crl
 	 * @throws GbayCryptoException
 	 */
-	public CertificateValiditor(X509Certificate certificate,
-			CaFinderInterface getIssuerFromCert, X509CRL crl) throws GbayCryptoException {
-		this(certificate);
+	public CertificateValiditor(X509Certificate certificate) throws GbayCryptoException {
+		extractCertDetail(certificate);
 		try {
-			this.validationResult = validate(getIssuerFromCert.getIssuer(certificate),crl);
+			this.validationResult = validate();
 		} catch (Exception e) {
 				throw new GbayCryptoException(e);
 		}
@@ -195,7 +194,7 @@ public class CertificateValiditor extends StandardCertificate {
 	/**
 	 * @return the issuer
 	 */
-	public CertificateIssuer getIssuer() {
+	public Set<CertificateIssuer> getIssuer() {
 		return issuer;
 	}
 
@@ -279,7 +278,7 @@ public class CertificateValiditor extends StandardCertificate {
 	 * @param issuer
 	 *            the issuer to set
 	 */
-	public void setIssuer(CertificateIssuer issuer) {
+	public void setIssuer(Set<CertificateIssuer> issuer) {
 		this.issuer = issuer;
 	}
 	
@@ -307,10 +306,9 @@ public class CertificateValiditor extends StandardCertificate {
 	}
 
 
-	public CertificateValidationResult validate(
-			CertificateIssuer trustedIssuer, X509CRL crl) throws GbayCryptoException {
+	public CertificateValidationResult validate() throws GbayCryptoException {
 		this.validated = true;	
-		CertificateValidator cv = new CertificateValidator(certificate, trustedIssuer, crl);
+		CertificateValidator cv = new CertificateValidator(certificate, settings.getIssuer(certificate), settings.getCrl(certificate));
 			return cv.validate();
 	}
 	

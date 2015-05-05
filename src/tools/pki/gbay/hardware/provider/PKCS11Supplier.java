@@ -47,6 +47,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import tools.pki.gbay.configuration.SecurityConcepts;
+import tools.pki.gbay.configuration.DefualtSignatureSetting;
+import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.texts.BasicText;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.GbayCryptoException;
@@ -71,6 +73,8 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
+
+import com.google.inject.Inject;
 
 
 /**
@@ -98,6 +102,14 @@ public class PKCS11Supplier {
 		public static String SHA1_DIGEST_ALGORYTHM = "1.3.14.3.2.26";
 	}
 
+	
+	@Inject
+	private SignatureSettingInterface settings;
+	
+	public SignatureSettingInterface getSettings() {
+		return settings;
+	}
+
 	Logger log = Logger.getLogger(PKCS11Supplier.class);
 	private static int WRAP_AFTER = 16;
 	/**
@@ -117,7 +129,7 @@ for(int i =0 ;i<1 ; i++){
 
 		PKCS11Supplier rt = null;
 
-		rt = new PKCS11Supplier("ShuttleCSP11.dll", "1", true, new DeviceFinderInterface() {
+		rt = new PKCS11Supplier("ShuttleCSP11.dll", "1",  new DeviceFinderInterface() {
 			
 			@Override
 			public int selectCard(List<CardInfo> conectedCardsList) {
@@ -204,11 +216,11 @@ for(int i =0 ;i<1 ; i++){
 	/**
 	 * @param cryptokiLib
 	 */
-	public PKCS11Supplier(String cryptokiLib, String pin, boolean attach, DeviceFinderInterface cardSelectorListener,RecursiveSignerInterface addExtraSignatureListener) {
+	public PKCS11Supplier(String cryptokiLib, String pin,DeviceFinderInterface cardSelectorListener,RecursiveSignerInterface addExtraSignatureListener) {
 		this(pin);
 		this.addmoreSignature = addExtraSignatureListener;
 		this.cardSelectingFunction = cardSelectorListener;
-		this.variables.encapsulate = attach;
+	
 		if (cryptokiLib != null) {
 			this.variables.cryptokiLib = cryptokiLib;
 			this.variables.forcingCryptoki = true;
@@ -699,12 +711,6 @@ for(int i =0 ;i<1 ; i++){
 
 	}
 
-	/**
-	 * @return the encapsulate
-	 */
-	public boolean isEncapsulate() {
-		return variables.encapsulate;
-	}
 
 	public boolean isForcingCryptoki() {
 		return variables.forcingCryptoki;
@@ -743,13 +749,7 @@ for(int i =0 ;i<1 ; i++){
 		this.variables.encryptionAlgorithm = encAlg;
 	}
 
-	/**
-	 * @param encapsulate
-	 *            the encapsulate to set
-	 */
-	public void setEncapsulate(boolean encapsulate) {
-		this.variables.encapsulate = encapsulate;
-	}
+
 
 	/**
 	 * @param forcingCryptoki
@@ -811,8 +811,7 @@ for(int i =0 ;i<1 ; i++){
 			if (addmoreSignature != null)
 				moreThan1Sign = true;
 
-			System.out
-					.println("========= CMS (PKCS7) Signed message  ========\n\n");
+			log.debug("========= CMS (PKCS7) Signed message  ========\n\n");
 
 			log.debug("Original Text :" + variables.plainText + "\n As exadecimal string:\t\t"+BasicText.toHexadecimalString(variables.plainText.getBytes(),
 					" ", WRAP_AFTER));
@@ -868,11 +867,11 @@ for(int i =0 ;i<1 ; i++){
 
 				// Generate CMS.
 				log.info("Generating CMSSignedData ");
-				CMSSignedData s = gen.generate(msg, variables.encapsulate);
+				CMSSignedData s = gen.generate(msg, settings.isEncapsulate());
 				variables.signingResult = s;
 
 				log.info("Signed:" + new String( Base64.encode(s.getEncoded())));
-				System.out.println("\nStarting CMSSignedData verification ... ");
+				log.info("\nStarting CMSSignedData verification ... ");
 				
 		/*
 				Store certs = s.getCertificates();
@@ -906,13 +905,13 @@ for(int i =0 ;i<1 ; i++){
 					// .toArray()[0];
 					log.info("Verifiying signature from:\n"
 							+ cert.getSubjectDN());
-					log.info("Certificate : " +Configuration.StarLine + Configuration.newLine+cert + Configuration.newLine + Configuration.StarLine);
+					log.info("Certificate : " +PropertyFileConfiguration.StarLine + PropertyFileConfiguration.newLine+cert + PropertyFileConfiguration.newLine + PropertyFileConfiguration.StarLine);
 
 		//			if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder()
 			//				.setProvider("BC").build(cert))) {
 			//			verified++;
 			//		} else {
-				//		log.warn("Certificate: "+cert.getSubjectDN() +Configuration.StarLine + Configuration.newLine + " could not be verified");
+				//		log.warn("Certificate: "+cert.getSubjectDN() +PropertyFileConfiguration.StarLine + PropertyFileConfiguration.newLine + " could not be verified");
 				//	}
 				}
 

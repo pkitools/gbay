@@ -16,6 +16,5 @@ public interface CryptoServiceProvider {
 	public SignedText sign(PlainText text) throws GbayCryptoException ;	
 	public EncryptedText encrypt(PlainText text) throws GbayCryptoException;
 	public VerificationInterface verify(SignedText text, PlainText originalText) throws GbayCryptoException;
-	public void includeOriginalText(boolean encapsulate);
 	public CMSSignedData getSignedData() throws GbayCryptoException;
 }

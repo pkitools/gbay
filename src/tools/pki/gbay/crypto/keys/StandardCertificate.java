@@ -45,7 +45,7 @@ import java.util.List;
 import javax.naming.NamingException;
 import javax.security.auth.x500.X500Principal;
 
-import tools.pki.gbay.configuration.Configuration;
+import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.keys.validation.CertificateRevocationList;
 import tools.pki.gbay.errors.CryptoError;
@@ -191,7 +191,7 @@ public class StandardCertificate implements CertificateInterface {
 			
 			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 		} catch (CRLException e) {
-			if (Configuration.DEBUG){
+			if (PropertyFileConfiguration.DEBUG){
 				e.printStackTrace();
 			}
 			log.error("CRL Exception happened, CERT's CRL had invalid format");
@@ -258,9 +258,7 @@ public class StandardCertificate implements CertificateInterface {
 		return digest;
 	}
 
-	/* (non-Javadoc)
-	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#getEndDate()
-	 */
+	
 	@Override
 	public Date getEndDate() {
 		return endDate;

@@ -9,6 +9,9 @@ import java.util.List;
 
 import tools.pki.gbay.crypto.keys.CertificateInterface;
 import tools.pki.gbay.crypto.keys.CertificateValiditor;
+import tools.pki.gbay.errors.CryptoError;
+import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.GlobalErrorCode;
 
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -26,7 +29,6 @@ public class PKCS11SupplierData {
 	public boolean makeDigestOnToken;
 	public String digestionAlgorithm;
 	public String encryptionAlgorithm;
-	public boolean encapsulate;
 	public String filePath;
 	private List<CertificateInterface> certs = new ArrayList<CertificateInterface>();
 
@@ -45,9 +47,9 @@ public class PKCS11SupplierData {
 
 	/**
 	 * @return the certs
-	 * @throws CertificateException 
+	 * @throws GbayCryptoException 
 	 */
-	public List<CertificateInterface> getCerts() throws CertificateException {
+	public List<CertificateInterface> getCerts() throws  GbayCryptoException {
 
 		 Store                   certStore = signingResult.getCertificates();
 		  SignerInformationStore  signers = signingResult.getSignerInfos();
@@ -60,10 +62,16 @@ public class PKCS11SupplierData {
 		      Collection<?>          certCollection = certStore.getMatches(signer.getSID());
 
 		      Iterator<?>              certIt = certCollection.iterator();
-		  	X509Certificate includedCert = new JcaX509CertificateConverter()
-			.getCertificate((X509CertificateHolder) certIt
-					.next());
-		  certs.add(new CertificateValiditor(includedCert));
+		  	X509Certificate includedCert;
+			try {
+				includedCert = new JcaX509CertificateConverter()
+				.getCertificate((X509CertificateHolder) certIt
+						.next());
+				 certs.add(new CertificateValiditor(includedCert));
+			} catch (CertificateException e) {
+			throw new GbayCryptoException(GlobalErrorCode.CERT_INVALID_FORMAT);
+			}
+		 
 		  }
 		 
 		return certs;

@@ -7,7 +7,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 
-import tools.pki.gbay.configuration.Configuration;
+import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.crypto.keys.CertificateValiditor;
 import tools.pki.gbay.errors.GbayCryptoException;
 
@@ -22,12 +22,7 @@ import org.apache.log4j.Logger;
 public class CertificateIssuer extends CertificateValiditor{
 	Logger log = Logger.getLogger(CertificateIssuer.class);
 
-	static HashMap<String, String> REPLACEMENS_IN_PROPERTIES;
-	static{
-		REPLACEMENS_IN_PROPERTIES = new HashMap<String, String>();
-		REPLACEMENS_IN_PROPERTIES.put("=", "[$eq]");
-		REPLACEMENS_IN_PROPERTIES.put(" ", "[$es]");
-	}
+
 	/**
 	 * generate certificate issuer
 	 * @param name name of issuer (as appeared in DN or a part of DN)
@@ -35,8 +30,9 @@ public class CertificateIssuer extends CertificateValiditor{
 	 * @param certificate {@link X509Certificate} of the issuer
 	 * @throws NoSuchAlgorithmException 
 	 * @throws CertificateEncodingException 
+	 * @throws GbayCryptoException 
 	 */
-	public CertificateIssuer(String name, X509Certificate certificates) throws CertificateEncodingException, NoSuchAlgorithmException {
+	public CertificateIssuer(String name, X509Certificate certificates) throws CertificateEncodingException, NoSuchAlgorithmException, GbayCryptoException {
 		super(certificates);
 		log.debug("Certificate issuer is constracting " + name);
 		this.name = name;
@@ -50,8 +46,8 @@ public class CertificateIssuer extends CertificateValiditor{
 	 */
 	public CertificateIssuer(String name, File fileaddress) throws GbayCryptoException {
 		super(fileaddress);
-		log.debug(Configuration.StarLine+"Issuer for "+name+" has been created from : " + fileaddress.getAbsolutePath());
-		log.debug("Root cert subjectDN : " +this.getSubjectDN()+Configuration.StarLine);
+		log.debug(PropertyFileConfiguration.StarLine+"Issuer for "+name+" has been created from : " + fileaddress.getAbsolutePath());
+		log.debug("Root cert subjectDN : " +this.getSubjectDN()+PropertyFileConfiguration.StarLine);
 		this.name = name;
 		this.hascert = true;
 	}

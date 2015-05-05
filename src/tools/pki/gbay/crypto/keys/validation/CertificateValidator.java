@@ -3,16 +3,24 @@ package tools.pki.gbay.crypto.keys.validation;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CertPath;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXCertPathBuilderResult;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
+import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +34,18 @@ import org.apache.log4j.Logger;
 
 
 
+
+
+
+
+
+
+
+
+
+
+import tools.pki.gbay.configuration.SecurityConcepts;
+import tools.pki.gbay.crypto.provider.SoftCert;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.GbayCryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
@@ -162,11 +182,7 @@ public class CertificateValidator {
 			throw new GbayCryptoException(new CryptoError(
 					GlobalErrorCode.CERT_ISSUER_NOT_FOUND));
 		} else {
-			Iterator<CertificateIssuer> iterator = _trustedissuers.iterator();
-
-			while (trusted && iterator.hasNext()) {
-				trusted = checkIssuer(iterator.next());
-			}
+			trusted = checkIssuer(_trustedissuers);
 		}
 		return trusted;
 
@@ -181,54 +197,90 @@ public class CertificateValidator {
 	 * @return True if chain is verified, false if chain can't be verified
 	 * @throws GbayCryptoException
 	 */
-	private boolean checkIssuer(CertificateIssuer issuer) throws GbayCryptoException {
+	private boolean checkIssuer(Set<CertificateIssuer> issuer) throws GbayCryptoException {
 		{
+			Set<X509Certificate> rootCerts = new HashSet<X509Certificate>() ;
+			Set<X509Certificate> intermedateCerts = new HashSet<X509Certificate>();
+		Set<String> caNames = new HashSet<String>();
 			log.debug("Check the issuer");
+			for (CertificateIssuer certificateIssuer : issuer) {
+				if (certificateIssuer.getCertificate()!=null){
+			
+					if (certificateIssuer.getName()!=null)
+						caNames.add(certificateIssuer.getName());
+					X509Certificate additionalCert = certificateIssuer.getCertificate();
+					try {
+						if (SoftCert.isSelfSigned(additionalCert)) {
+						        rootCerts.add(additionalCert);
+						    } else {
+						        intermedateCerts.add(additionalCert);
+						    }
+					} catch (CertificateException | NoSuchAlgorithmException
+							| NoSuchProviderException e) {
+					log.error("Error in parsing issuer "+e.getMessage());
+					}
+				}
+			}
 			if (issuer != null) {
 				try {
-					Certificate trust = issuer.getCertificate();
+//					Certificate trust = issuer.getCertificate();
 
-					log.debug("Root Certificate: " + trust);
+	//				log.debug("Root Certificate: " + trust);
 
 					/**
 					 * Put cert extracted from signature to ByteArrayInputStream
 					 * and generate cert from there
 					 */
 
-					if (trust != null) {
+					if (rootCerts.size() >0 ) {
 						CertificateFactory cf = CertificateFactory
 								.getInstance("X.509");
 				//		ByteArrayInputStream bis = new ByteArrayInputStream(
 				//				_cert.getEncoded());
-						List<X509Certificate> certList = new ArrayList<X509Certificate>();
+				//		List<X509Certificate> certList = new ArrayList<X509Certificate>();
 
-						certList.add(issuer.getCertificate());
+					//	certList.add(issuer.getCertificate());
 
-						CertPath cp = cf.generateCertPath(certList);
+					//	CertPath cp = cf.generateCertPath(certList);
 
-						TrustAnchor anchor = new TrustAnchor(
-								(X509Certificate) trust, null);
+//						TrustAnchor anchor = new TrustAnchor(
+	//							(X509Certificate) trust, null);
 
-						PKIXParameters params;
+		//				PKIXParameters params;
 
-						params = new PKIXParameters(
-								Collections.singleton(anchor));
+			//			params = new PKIXParameters(
+				//				Collections.singleton(anchor));
 
-						params.setRevocationEnabled(false);
-						CertPathValidator cpv;
+					//	params.setRevocationEnabled(false);
+				//		CertPathValidator cpv;
 						//cpv.validate(certPath, params)
-						cpv = CertPathValidator.getInstance("PKIX");
+					//	cpv = CertPathValidator.getInstance("PKIX");
 
-						PKIXCertPathValidatorResult result = (PKIXCertPathValidatorResult) cpv
-								.validate(cp, params);
-						log.debug(result.toString());
+						
+						PKIXCertPathValidatorResult result;
+						try {
+							result = verifyCertificate(_cert, rootCerts, intermedateCerts);
+							log.debug(result.toString());
+						} catch (NoSuchProviderException
+								| CertPathBuilderException e) {
+							return false;
+						}
+//								(PKIXCertPathValidatorResult) cpv
+			//					.validate(cp, params);
+					
 						return true;
 					}
 
-					else if (issuer.getName() != null){
-						log.debug("Issuer did not contain root cert but just the name:"+ issuer.getName() + tools.pki.gbay.configuration.Configuration.StarLine + "Cert issuer:"+_cert.getIssuerDN().getName().toString());
-						return _cert.getIssuerDN().getName().toString()
-								.contains(issuer.getName());
+					else 
+					{
+						for (String string : caNames) {
+							if (string != null){
+								log.debug("Issuer did not contain root cert but just the name:"+ string + tools.pki.gbay.configuration.PropertyFileConfiguration.StarLine + "Cert issuer:"+_cert.getIssuerDN().getName().toString());
+								if (_cert.getIssuerDN().getName().toString().contains(string))
+									return true;
+
+							}
+						}
 					}
 				} catch (InvalidAlgorithmParameterException e) {
 					log.error(e.getMessage());
@@ -239,9 +291,6 @@ public class CertificateValidator {
 					return false;
 
 				} catch (NoSuchAlgorithmException e) {
-					log.error(e.getMessage());
-					return false;
-				} catch (CertPathValidatorException e) {
 					log.error(e.getMessage());
 					return false;
 				}
@@ -255,6 +304,54 @@ public class CertificateValidator {
 		return false;
 	}
 
+	/**
+     * Attempts to build a certification chain for given certificate and to verify
+     * it. Relies on a set of root CA certificates (trust anchors) and a set of
+     * intermediate certificates (to be used as part of the chain).
+     * @param cert - certificate for validation
+     * @param trustedRootCerts - set of trusted root CA certificates
+     * @param intermediateCerts - set of intermediate certificates
+     * @return the certification chain (if verification is successful)
+	 * @throws NoSuchProviderException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws InvalidAlgorithmParameterException 
+	 * @throws CertPathBuilderException 
+     * @throws GeneralSecurityException - if the verification is not successful
+     *      (e.g. certification path cannot be built or some certificate in the
+     *      chain is expired)
+     */
+    private static PKIXCertPathBuilderResult verifyCertificate(X509Certificate cert, Set<X509Certificate> trustedRootCerts,
+            Set<X509Certificate> intermediateCerts) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CertPathBuilderException  {
+         
+        // Create the selector that specifies the starting certificate
+        X509CertSelector selector = new X509CertSelector(); 
+        selector.setCertificate(cert);
+         
+        // Create the trust anchors (set of root CA certificates)
+        Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
+        for (X509Certificate trustedRootCert : trustedRootCerts) {
+            trustAnchors.add(new TrustAnchor(trustedRootCert, null));
+        }
+         
+        // Configure the PKIX certificate builder algorithm parameters
+        PKIXBuilderParameters pkixParams = 
+            new PKIXBuilderParameters(trustAnchors, selector);
+         
+        // Disable CRL checks (this is done manually as additional step)
+        pkixParams.setRevocationEnabled(false);
+     
+        // Specify a list of intermediate certificates
+        CertStore intermediateCertStore = CertStore.getInstance("Collection",
+            new CollectionCertStoreParameters(intermediateCerts), SecurityConcepts.getProviderName());
+        pkixParams.addCertStore(intermediateCertStore);
+     
+        // Build and verify the certification chain
+        CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
+        PKIXCertPathBuilderResult result = 
+            (PKIXCertPathBuilderResult) builder.build(pkixParams);
+        return result;
+    }
+	
 	public boolean validatePeriod() {
 		return isExpired() && isStarted();
 	}

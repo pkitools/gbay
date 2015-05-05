@@ -1,6 +1,7 @@
 package tools.pki.gbay.crypto.texts;
 
 import java.util.List;
+import java.util.Set;
 
 import tools.pki.gbay.crypto.keys.CertificateInterface;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
@@ -13,6 +14,7 @@ public interface SignedTextInterface {
 	public abstract EncodedTextInterface toBase64();
 
 	/**
+	 * Signed value is the none-encoded signature
 	 * @return the signedVal
 	 */
 	public abstract byte[] getSignedVal();
@@ -38,12 +40,12 @@ public interface SignedTextInterface {
 	/**
 	 * @return the caCert
 	 */
-	public abstract CertificateIssuer getTrustedIssuers();
+	public abstract Set<CertificateIssuer> getTrustedIssuers();
 
 	/**
 	 * @param caCert the caCert to set
 	 */
-	public abstract void setTrustedIssuers(CertificateIssuer trustedIssuers);
+	public abstract void setTrustedIssuers(Set<CertificateIssuer> trustedIssuers);
 
 	/**
 	 * @return the crl

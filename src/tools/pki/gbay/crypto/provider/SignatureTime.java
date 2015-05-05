@@ -1,5 +1,7 @@
 package tools.pki.gbay.crypto.provider;
 
+import tools.pki.gbay.crypto.times.TimeInterface;
+
 
 public class SignatureTime {
 

@@ -91,17 +91,25 @@ Logger log = Logger.getLogger(CryptoFile.class);
 		this(file);
 		this.pin = pin.toCharArray();
 	}
-    public CryptoFile(byte[] content, String outputAddress) throws GbayCryptoException{
-    	setMode(OpenMode.write);
+	
+	public CryptoFile(byte[] content, String pin)  {
+		 setContent(content);
+		this.pin = pin.toCharArray();
+	}
+	
+    public CryptoFile(byte[] content, String outputAddress, OpenMode mode) throws GbayCryptoException{
+    	setMode(mode);
     	this.path = outputAddress;
 //    	file = new File(outputAddress);
     	this.content = new PlainText(content);
     	
+    	if (mode == OpenMode.write){
     	try {
 			write();
 		} catch (IOException e) {
 			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
 		}
+    	}
     }
 
     public CryptoFile(byte[] content, String outputAddress, String pin) throws GbayCryptoException{

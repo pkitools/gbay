@@ -1,0 +1,1 @@
+mvn install:install-file -Dfile=iaikPkcs11Wrapper.jar -DpomFile=pkcs11-wrapper.pom

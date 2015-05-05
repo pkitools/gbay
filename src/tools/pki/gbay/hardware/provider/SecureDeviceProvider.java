@@ -24,7 +24,7 @@ public class SecureDeviceProvider extends PKCS11Supplier implements CryptoServic
 	TokenFinderInterFace finderListener;
 	PKCS11Supplier rt;
 	public SecureDeviceProvider(String cryptokiLib, String pin, boolean attach, TokenFinderInterFace multiTokenListener, DeviceFinderInterface multiDeviceListener, RecursiveSignerInterface addAnotherSignatureListener) {
-		super(cryptokiLib, pin, attach,multiDeviceListener,addAnotherSignatureListener );
+		super(cryptokiLib, pin,multiDeviceListener,addAnotherSignatureListener );
 		this.deviceType = Type.smartCard;
 		this.finderListener = multiTokenListener;
 		  Security.insertProviderAt(new BouncyCastleProvider(), 3);
@@ -45,10 +45,7 @@ public class SecureDeviceProvider extends PKCS11Supplier implements CryptoServic
 			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.REQ_METHOD_NOT_ALLOWED));
 	}
 
-	@Override
-	public void includeOriginalText(boolean encapsulate) {
-		this.variables.encapsulate = !encapsulate;
-	}
+	
 
 	@Override
 	public CMSSignedData getSignedData() throws GbayCryptoException {
@@ -68,9 +65,6 @@ public class SecureDeviceProvider extends PKCS11Supplier implements CryptoServic
 			return (new SignedText(variables.plainText, variables.signingResult.getEncoded(), variables.getCerts()));
 		} catch (IOException e) {
 			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
-		} catch (CertificateException e) {
-			e.printStackTrace();
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 		} catch (GbayCryptoException e) {
 			throw e;
 		}

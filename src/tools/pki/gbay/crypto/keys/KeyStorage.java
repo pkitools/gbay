@@ -42,7 +42,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import tools.pki.gbay.configuration.Configuration;
+import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.crypto.provider.KeySelectionInterface;
 import tools.pki.gbay.crypto.texts.EncodedTextInterface;
 import tools.pki.gbay.crypto.texts.PlainText;
@@ -68,6 +68,7 @@ public class KeyStorage {
 	public class CoupleKey{
 		Logger log = Logger.getLogger(CoupleKey.class);
 		private PrivateKey privateKey;
+		@SuppressWarnings("unused")
 		private char[] pin;
 		private CertificateValiditor publicKey;
 		private String alias;
@@ -242,7 +243,7 @@ try{
 			throws KeyStoreException, NoSuchProviderException, IOException,
 			NoSuchAlgorithmException, CertificateException {
 		
-		log.debug("Getting Keystore from the value" +Configuration.StarLine+Configuration.StarLine +"Byte Array Representor of Store: "+ Configuration.StarLine + new PlainText(byteArray).toHexadecimalString()+Configuration.StarLine);
+		log.debug("Getting Keystore from the value" +PropertyFileConfiguration.StarLine+PropertyFileConfiguration.StarLine +"Byte Array Representor of Store: "+ PropertyFileConfiguration.StarLine + new PlainText(byteArray).toHexadecimalString()+PropertyFileConfiguration.StarLine);
 		ByteArrayInputStream bis = new ByteArrayInputStream(byteArray);
 		return getKeyStore(pin, bis);
 	}
@@ -259,7 +260,7 @@ try{
 	private KeyStore getKeyStore(char[] pin, ByteArrayInputStream bis)
 			throws KeyStoreException, NoSuchProviderException, IOException,
 			NoSuchAlgorithmException, CertificateException {
-		KeyStore keystore = KeyStore.getInstance("PKCS12", "BC");
+		KeyStore keystore = KeyStore.getInstance("PKCS12");
 		keystore.load(bis, pin);
 		return keystore;
 	}
@@ -275,7 +276,7 @@ try{
 
 		while (ale.hasMoreElements()) {
 			String alias = (String) ale.nextElement();
-			if (Configuration.DEBUG){
+			if (PropertyFileConfiguration.DEBUG){
 				log.info("Alias is found : " + alias);
 			}
 			addKeysofAlias(keystore, alias);

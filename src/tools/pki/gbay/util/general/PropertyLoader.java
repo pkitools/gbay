@@ -1,5 +1,7 @@
 package tools.pki.gbay.util.general;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -8,6 +10,8 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.io.Files;
 
 import tools.pki.gbay.crypto.keys.validation.IssuerPropertyFile;
 
@@ -50,7 +54,7 @@ public abstract class PropertyLoader {
 	 *             true
 	 */
 	public static Properties loadProperties(String name, ClassLoader loader) {
-		if (name == null)
+		if (name == null )
 			throw new IllegalArgumentException("null input: name");
 
 		if (name.startsWith("/"))
@@ -62,7 +66,24 @@ public abstract class PropertyLoader {
 		Properties result = null;
 
 		InputStream in = null;
+		File propFile = new File(name);
+
 		try {
+			if (propFile.exists()){
+				in = new FileInputStream(propFile);
+			// load a properties file
+			result = new Properties();
+				result.load(in);
+			if (saveInSystem) {
+				Iterator iterator = result.keySet().iterator();
+				while (iterator.hasNext()) {
+					String key = (String) iterator.next();
+					String value = result.getProperty(key);
+					System.getProperties().setProperty(key, value);
+				}
+			}
+			}
+			else{
 			if (loader == null)
 				loader = ClassLoaderResolver.getClassLoader();
 
@@ -104,6 +125,7 @@ public abstract class PropertyLoader {
 					}
 				}
 			}
+			}
 		} catch (Exception e) {
 			result = null;
 		} finally {
@@ -133,19 +155,28 @@ public abstract class PropertyLoader {
 	public static Properties loadProperties(final String name) {
 		return loadProperties(name, ClassLoaderResolver.getClassLoader());
 	}
+	
+	/**
+	 * A convenience overload of {@link #loadProperties(String)}
+	 * that uses the file address. {@link #propertyFileAddress}
+	 */
+	public static Properties loadProperties() {
+		return loadProperties(propertyFileAddress);
+	}
+
 
 	/**
 	 * Get the Property From Server.properties. This is used when we want to
 	 * read property from file each and every time
 	 *
-	 * @param propertyFile
+	 * @param propertyFileAddress
 	 *            file name to load value from
 	 * @param key
 	 * @return
 	 */
 	public static final String getPropertyString(String key) {
 		Properties props = new Properties();
-		props = loadProperties(propertyFile);
+		props = loadProperties(propertyFileAddress);
 		return props.getProperty(key);
 	}
 
@@ -261,7 +292,7 @@ public abstract class PropertyLoader {
 	 * @return Address of property file
 	 */
 	public static String getPropertyFile() {
-		return propertyFile;
+		return propertyFileAddress;
 	}
 
 	public static boolean isThrowOnLoadFailure() {
@@ -289,12 +320,12 @@ public abstract class PropertyLoader {
 		PropertyLoader.saveInSystem = saveInSystem;
 	}
 
-	public static String getPropertyfile() {
-		return propertyFile;
+	public static String getPropertyFileAddress() {
+		return propertyFileAddress;
 	}
 
 	public static void initiate(String propertyAddress, boolean saveInSystem) {
-		propertyFile = propertyAddress;
+		propertyFileAddress = propertyAddress;
 		PropertyLoader.saveInSystem = saveInSystem;
 
 	}
@@ -306,7 +337,7 @@ public abstract class PropertyLoader {
 	// private: ...............................................................
 	static Logger log = Logger.getLogger(IssuerPropertyFile.class);
 
-	private static String propertyFile = "config.properties";
+	private static String propertyFileAddress = "config.properties";
 
 	private PropertyLoader() {
 	} // this class is not extentible

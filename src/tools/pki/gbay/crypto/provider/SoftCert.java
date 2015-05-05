@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
@@ -15,11 +16,14 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
-import tools.pki.gbay.configuration.Configuration;
+import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.configuration.SecurityConcepts;
+import tools.pki.gbay.configuration.DefualtSignatureSetting;
 import tools.pki.gbay.crypto.keys.CertificateInterface;
 import tools.pki.gbay.crypto.keys.CertificateValiditor;
 import tools.pki.gbay.crypto.keys.KeyStorage;
@@ -37,6 +41,12 @@ import tools.pki.gbay.errors.GbayCryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -45,76 +55,64 @@ import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSTypedData;
+import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
+import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.Store;
 
+import com.google.inject.Inject;
+
 public class SoftCert implements CryptoServiceProvider {
 
 	static {
 		SecurityConcepts.addProvider();
 	}
-	CertificateIssuer caCert;
+	Set<CertificateIssuer> caCert;
 	X509CRL crl;
 
 	private X509Certificate currentCert;
 
 	private String filePath;
 
-	private CaFinderInterface issuerCaller;
 
-	private boolean isAttached;
-
-	private IssuerPropertyFile issuerPropertyFile;
-
-	private CrlFinderInterface getCrlCaller;
 
 	private tools.pki.gbay.crypto.keys.KeyStorage keyStorage;
 	Logger log = Logger.getLogger(SoftCert.class);
 
-	/**
-	 * 
-	 * @param privateKey
-	 * @param certificate
-	 * @param data
-	 * @param encapsulate
-	 *            if true it will add the original data into the signed text
-	 * @return
-	 */
-	private KeySelectionInterface selectKeyFunction;
+
 	private CMSSignedData signedData;
 	private CoupleKey twinceKey;
 
+	@Inject
+	private SignatureSettingInterface settings;
+	
+	
 	private final Type type = Type.softCert;
 
 	public SoftCert() {
+		super();
 		SecurityConcepts.addProvider();
 	}
 
 	public SoftCert(KeyStorage keyStorage) {
-		super();
+		this();
 		this.keyStorage = keyStorage;
 	}
 
-	public SoftCert(KeyStorage keyStorage,
-			java.util.Properties issuerPropertiesFile) {
-		super();
-		this.keyStorage = keyStorage;
 
-	}
-
-	public SoftCert(CaFinderInterface issuerfinder, KeyStorage keyStorage,
-			KeySelectionInterface selectKeyFunction) {
-		super();
-		this.issuerCaller = issuerfinder;
-		this.keyStorage = keyStorage;
-		this.selectKeyFunction = selectKeyFunction;
+	public SoftCert( KeyStorage keyStorage,
+		 SignatureSettingInterface settings) {
+		this(keyStorage);
+		this.settings = settings;
 	}
 
 
@@ -123,20 +121,12 @@ public class SoftCert implements CryptoServiceProvider {
 	 * @throws GbayCryptoException
 	 * @throws IOException
 	 */
-	public CertificateIssuer getCaCert() throws GbayCryptoException {
+	public Set<CertificateIssuer> getCaCert() throws GbayCryptoException {
 		if (caCert == null) {
-			log.debug("CA Cert is null...");
-			if (issuerCaller == null) {
-				log.debug("Issuer finder interface is null we constract using our own Issuer Property file");
-				try {
-					issuerCaller = new ScanCaFinder(null);
-				} catch (IOException e) {
-					log.debug("Issuer property file could not be read");
-					throw new GbayCryptoException(GlobalErrorCode.FILE_IO_ERROR);
-				}
-			}
+		
 			log.info("Getting ca cert...");
-			caCert = issuerCaller.getIssuer(this.currentCert);
+		//	if (settings.get!=null)
+			caCert = settings.getIssuer(this.currentCert);
 		}
 		return caCert;
 	}
@@ -145,6 +135,11 @@ public class SoftCert implements CryptoServiceProvider {
 	 * @return the crl
 	 */
 	public X509CRL getCrl() {
+	
+		if (crl == null){
+			log.info("Getting Crl...");
+			crl = settings.getCrl(currentCert);
+		}
 		return crl;
 	}
 
@@ -188,17 +183,6 @@ public class SoftCert implements CryptoServiceProvider {
 		return type;
 	}
 
-	@Override
-	public void includeOriginalText(boolean isAttached) {
-		this.isAttached = isAttached;
-	}
-
-	/**
-	 * @return the isAttached
-	 */
-	public boolean isAttached() {
-		return isAttached;
-	}
 
 	/**
 	 * Check if text is signed by specific user and is verified and validated
@@ -215,19 +199,13 @@ public class SoftCert implements CryptoServiceProvider {
 		return verificationResult.getCertificates().equals(userCert);
 	}
 
-	/**
-	 * @param isAttached
-	 *            the isAttached to set
-	 */
-	public void setAttached(boolean isAttached) {
-		this.isAttached = isAttached;
-	}
+
 
 	/**
 	 * @param caCert
 	 *            the caCert to set
 	 */
-	public void setCaCert(CertificateIssuer caCert) {
+	public void setCaCert(Set<CertificateIssuer> caCert) {
 		this.caCert = caCert;
 	}
 
@@ -313,19 +291,55 @@ public class SoftCert implements CryptoServiceProvider {
 	 * @return byte array of signed value
 	 * @throws GbayCryptoException 
 	 */
-	public byte[] sign(java.security.PrivateKey privateKey,
-			List<X509Certificate> certificate, byte[] data, boolean encapsulate) throws GbayCryptoException {
+	private byte[] sign(java.security.PrivateKey privateKey,
+			List<X509Certificate> certificate, byte[] data) throws GbayCryptoException {
 		byte[] signedValue = null;
 		try {
 			SecurityConcepts.addProvider();
 
-			// New BC
 
-			// CMSTypedData msg = new
-			// CMSProcessableByteArray("Hello world!".getBytes());
+			CMSTypedData msg = new CMSProcessableByteArray(data);
+//			certList.add(cert);
+			Store certs = new JcaCertStore(certificate);
+			
+			final ASN1EncodableVector signedAttributes = new ASN1EncodableVector();
+			if (settings.getTimeInjectionSetiion().isIncludeTime()){
+				final Attribute signingAttribute = new Attribute(CMSAttributes.signingTime, new DERSet(new DERUTCTime(settings.getTimeInjectionSetiion().getTimeSetter().GetCurrentTime()))); 
+				signedAttributes.add(signingAttribute);
+			}
+			// Create the signing table
+			final AttributeTable signedAttributesTable = new AttributeTable(signedAttributes);
+			final DefaultSignedAttributeTableGenerator signedAttributeGenerator = new DefaultSignedAttributeTableGenerator(signedAttributesTable);
+			final JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder().setProvider(SecurityConcepts.getProviderName());
+			builder.setSignedAttributeGenerator(signedAttributeGenerator); 
+			
 
-			// Sign
 
+			
+			CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+
+			for (int i = 0; i < certificate.size(); i++) {
+				final SignerInfoGenerator signerGenerator = builder.build(settings.getHashingAlgorythm(), privateKey, certificate.get(i));
+
+				gen.addSignerInfoGenerator(signerGenerator);
+				gen.addCertificates(certs);
+
+//				gen.addSignerInfoGenerator(new CMSSignedDataGenerator().build(settings.getHashingAlgorythm(), privateKey,certificate.get(i)));
+	//			gen.addCertificates(certs);
+			}
+
+			
+
+			// CMSSignedData sigData = gen.generate(msg, false);
+			// this is attached
+/*			CMSSignedData sigData = gen.generate(msg, true);
+
+
+			byte[] signedContent = Base64.encode((byte[]) sigData
+					.getSignedContent().getContent());
+
+			
+			
 			Signature signature = Signature.getInstance("SHA1WithRSA", "BC");
 			signature.initSign(privateKey);
 			signature.update(data);
@@ -348,26 +362,9 @@ public class SoftCert implements CryptoServiceProvider {
 						certificate.get(i)));
 				gen.addCertificates(certs);
 			}
-			signedData = gen.generate(msg, encapsulate);
-
-			// CMSSignedData signedData2 = gen.generate(msg, false );
-
-			/*
-			 * SCEJ CMSSignedDataGenerator generator = new
-			 * CMSSignedDataGenerator();
-			 * 
-			 * generator.addSigner(privateKey, certificate,
-			 * CMSSignedDataGenerator.DIGEST_SHA1); ArrayList<Certificate> list
-			 * = new ArrayList<Certificate>(); list.add(certificate); CertStore
-			 * certStore = CertStore.getInstance("Collection", new
-			 * CollectionCertStoreParameters(list), "BC");
-			 * generator.addCertificatesAndCRLs(certStore); CMSProcessable
-			 * content = new CMSProcessableByteArray(data);
-			 * 
-			 * CMSSignedData signedData = generator.generate(content, false);
-			 */
+			*/
+			signedData = gen.generate(msg, settings.isEncapsulate());
 			signedValue = signedData.getEncoded();
-			// byte[] signedValue2 = signedData.getEncoded();
 
 			certificate.clear();
 			certs = null;
@@ -385,33 +382,20 @@ public class SoftCert implements CryptoServiceProvider {
 				}
 			}
 		} catch (IOException e ) {
-		
-		//	e.printStackTrace();
+			throw new GbayCryptoException(GlobalErrorCode.FILE_IO_ERROR);
 		} catch (CertificateEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			throw new GbayCryptoException(GlobalErrorCode.CERT_INVALID_FORMAT);
 		} catch (OperatorCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchProviderException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SignatureException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CMSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new GbayCryptoException(GlobalErrorCode.TXN_FAIL,e.getMessage());
 		}
-		if (Configuration.DEBUG) {
+		catch (CMSException e) {
+			throw new GbayCryptoException(GlobalErrorCode.SIG_INVALID,e.getMessage());
+
+		}
+		if (PropertyFileConfiguration.DEBUG) {
 			log.info("Value to be signed: " + new String(data)
-					+ Configuration.newLine + " Signing Result : "
+					+ PropertyFileConfiguration.newLine + " Signing Result : "
 					+ new Base64(signedValue));
 		}
 		return signedValue;
@@ -429,15 +413,15 @@ public class SoftCert implements CryptoServiceProvider {
 	 * @throws GbayCryptoException 
 	 */
 	public byte[] sign(java.security.PrivateKey key,
-			X509Certificate certificate, byte[] data, boolean encapsulate) throws GbayCryptoException {
+			X509Certificate certificate, byte[] data) throws GbayCryptoException {
 		List<X509Certificate> cert = new ArrayList<X509Certificate>();
 		cert.add(certificate);
-		return sign(key, cert, data, encapsulate);
+		return sign(key, cert, data);
 	}
 
 	@Override
 	public SignedText sign(PlainText text) throws GbayCryptoException {
-		return (SignedText) sign(text, selectKeyFunction);
+		return (SignedText) sign(text,null);
 	}
 
 	/**
@@ -453,7 +437,7 @@ public class SoftCert implements CryptoServiceProvider {
 			KeySelectionInterface selectingFunction) throws GbayCryptoException {
 		twinceKey = keyStorage.getCoupleKey(selectingFunction);
 		byte[] signedPlayLoad = sign(twinceKey.getPrivateKey(),
-				twinceKey.getPublicKey().getCertificate(), text.toByte(), false);
+				twinceKey.getPublicKey().getCertificate(), text.toByte());
 		List<CertificateInterface> signersList = new ArrayList<CertificateInterface>();
 		signersList.add(twinceKey.getPublicKey());
 		SignedTextInterface st = new SignedText(text.toString(),
@@ -461,6 +445,26 @@ public class SoftCert implements CryptoServiceProvider {
 		return st;
 	}
 
+	/**
+     * Checks whether given X.509 certificate is self-signed.
+	 * @throws NoSuchProviderException 
+     */
+    public static boolean isSelfSigned(X509Certificate cert)
+            throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
+        try {
+            // Try to verify certificate signature with its own public key
+            PublicKey key = cert.getPublicKey();
+            cert.verify(key);
+            return true;
+        } catch (SignatureException sigEx) {
+            // Invalid signature --> not self-signed
+            return false;
+        } catch (InvalidKeyException keyEx) {
+            // Invalid key --> not self-signed
+            return false;
+        }
+    }
+	
 	/***
 	 * Verifies a signed text, if the signedText has it's own crl will verifies
 	 * over it, if not it verifies over the CRL of SoftCert Object As for
@@ -511,7 +515,7 @@ public class SoftCert implements CryptoServiceProvider {
 			SecurityConcepts.addProvider();
 
 			CMSSignedData cms = null;
-			if (isAttached) {
+			if (settings.isEncapsulate()) {
 				cms = new CMSSignedData(signedText.getSignedVal());
 			} else {
 				log.info("Encapsulated, constract with original text : "
@@ -539,6 +543,13 @@ public class SoftCert implements CryptoServiceProvider {
 						SecurityConcepts.getProviderName()).getCertificate(
 						certHolder);
 				log.debug("Current cert is extracted");
+				try {
+					if (isSelfSigned(currentCert))
+						throw new GbayCryptoException(GlobalErrorCode.CERT_IS_SELF_SIGNED);
+				} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+					throw new GbayCryptoException(GlobalErrorCode.CERT_INVALID_FORMAT,e.getMessage());
+				}
+				
 				caCert = getCaCert();
 				if (caCert == null){
 					throw new GbayCryptoException(GlobalErrorCode.CERT_ISSUER_NOT_SET);
@@ -547,13 +558,13 @@ public class SoftCert implements CryptoServiceProvider {
 				log.info("Checking for revokation...");
 				obj.setRevoked(isRevoked());
 				log.info("Extracting public key for verification...");
-				CertificateValiditor mykey = new CertificateValiditor(currentCert, caCert, crl);
+				CertificateValiditor mykey = new CertificateValiditor(currentCert);
 				containedkeys.add(mykey);
 				if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder()
 						.setProvider(SecurityConcepts.getProviderName()).build(
 								currentCert))) {
 
-					log.info(Configuration.newLine + "Verified");
+					log.info(PropertyFileConfiguration.newLine + "Verified");
 					obj.getCertificates().add(mykey);
 
 					if (!mykey.isValidated()) {
@@ -601,11 +612,7 @@ public class SoftCert implements CryptoServiceProvider {
 	 * @throws GbayCryptoException 
 	 */
 	public boolean isRevoked() throws  GbayCryptoException {
-		if (crl == null) {
-			if (getCrlCaller != null) {
-				crl = getCrlCaller.getCrl(currentCert);
-			}
-		}
+		getCrl();
 		if (crl != null) {
 			log.info("We got CRL for"
 					+ new String(crl.getIssuerDN().toString()));
@@ -626,57 +633,7 @@ public class SoftCert implements CryptoServiceProvider {
 		return null;
 	}
 
-	/**
-	 * @return the getIssuerCaller
-	 */
-	public CaFinderInterface getIssuerFinder() {
-		return issuerCaller;
-	}
 
-	/**
-	 * @param getIssuerCaller
-	 *            the getIssuerCaller to set
-	 */
-	public void setGetIssuerCaller(CaFinderInterface getIssuerCaller) {
-		this.issuerCaller = getIssuerCaller;
-	}
 
-	/**
-	 * @return the selectKeyFunction
-	 */
-	public KeySelectionInterface getSelectKeyFunction() {
-		return selectKeyFunction;
-	}
-
-	/**
-	 * @param selectKeyFunction
-	 *            the selectKeyFunction to set
-	 */
-	public void setSelectKeyFunction(KeySelectionInterface selectKeyFunction) {
-		this.selectKeyFunction = selectKeyFunction;
-	}
-
-	/**
-	 * @param getCrlCaller
-	 *            the getCrlCaller to set
-	 */
-	public void setGetCrlCaller(CrlFinderInterface getCrlCaller) {
-		this.getCrlCaller = getCrlCaller;
-	}
-
-	/**
-	 * @return the issuerPropertyFile
-	 */
-	public IssuerPropertyFile getIssuerPropertyFile() {
-		return issuerPropertyFile;
-	}
-
-	/**
-	 * @param issuerPropertyFile
-	 *            the issuerPropertyFile to set
-	 */
-	public void setIssuerPropertyFile(IssuerPropertyFile issuerPropertyFile) {
-		this.issuerPropertyFile = issuerPropertyFile;
-	}
 
 }

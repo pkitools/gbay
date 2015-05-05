@@ -12,7 +12,8 @@
 ### Stuff used to make this:
 
  * [Legion of The Bouncy Castle](https://www.bouncycastle.org/) Main engine underlying
- * [IAIK PKCS#11 Wrapper API](https://jce.iaik.tugraz.at/sic/Products/Core-Crypto-Toolkits/PKCS_11_Wrapper) for the smartcard and token integration
+ * [IAIK PKCS#11 Wrapper API](https://jce.iaik.tugraz.at/sic/Products/Core-Crypto-Toolkits/PKCS_11_Wrapper) "This product includes software developed by IAIK of Graz University of
+Technology for the smartcard and token integration 
  * [Apache log4j](logging.apache.org/) for logging
  * [IBM OpenCard API](http://www.openscdp.org/ocf/api/com/ibm/opencard/terminal/pcsc10/package-frame.html) for pcsc cards support
 

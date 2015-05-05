@@ -8,10 +8,13 @@ import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.Set;
 
-import tools.pki.gbay.configuration.Configuration;
+import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.configuration.IssuerPropertyHelper;
+import tools.pki.gbay.crypto.keys.StandardCertificate;
 import tools.pki.gbay.crypto.provider.CaFinderInterface;
+import tools.pki.gbay.crypto.provider.SoftCert;
 import tools.pki.gbay.errors.GbayCryptoException;
 
 import org.apache.log4j.Logger;
@@ -42,7 +45,7 @@ public class IssuerPropertyFile  implements CaFinderInterface {
 		}
 		else{
 			Properties prop = new Properties(); 
-			InputStream input = new FileInputStream(Configuration.getDefualtCaListFile());
+			InputStream input = new FileInputStream(PropertyFileConfiguration.getDefualtCaListFile());
 			prop.load(input);
 			return  prop;
 		}
@@ -100,15 +103,23 @@ public class IssuerPropertyFile  implements CaFinderInterface {
 			return null;
 		return new File(caFile);
 	}
-	@Override
-	public CertificateIssuer getIssuer(X509Certificate cert) throws GbayCryptoException{
+	public Set<CertificateIssuer> getIssuer(X509Certificate cert) throws GbayCryptoException{
+		Set<CertificateIssuer> issuers = (Set<CertificateIssuer>) new HashMap();
 		log.debug("Getting issuer for " + cert.getSubjectDN());
 		File caRootCert = getCARootCert(cert);
 		if (caRootCert == null){
 			return null;
 		}
-		else
-		return new CertificateIssuer(cert.getSubjectDN().toString(),caRootCert);
+		else{
+		  CertificateIssuer firstIssuer = new	CertificateIssuer(cert.getSubjectDN().toString(),caRootCert);
+			issuers.add(firstIssuer);
+		caRootCert = getCARootCert(firstIssuer.getCertificate());
+		  while (caRootCert!=null & firstIssuer.getIssuerDN()!=firstIssuer.getSubjectDN()& !firstIssuer.getIssuerDN().isEmpty()){
+			  firstIssuer =  new	CertificateIssuer(firstIssuer.getSubjectDN().toString(),caRootCert);
+			  issuers.add(firstIssuer);
+		  }
+		}
+		return issuers;
 	}
 
 	private String getSettingIssuerDn(String issuerDn) {
