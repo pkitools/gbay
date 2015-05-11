@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2014, Araz
- * All rights reserved.
+ * GBAy Crypto API
+ * Copyright (c) 2014, PKI.Tools All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -43,34 +43,28 @@ import tools.pki.gbay.crypto.times.TimeInterface;
 import tools.pki.gbay.errors.GbayCryptoException;
 import tools.pki.gbay.util.general.PropertyLoader;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PropertyFileConfiguration.
+ */
 @Singleton
 public class PropertyFileConfiguration extends SecurityConcepts implements SignatureSettingInterface
 {
 
-  public static boolean DEBUG = true;
-  public static String newLine = System.getProperty("line.separator");
-  public static final String DEFUALTISSUERFILE = "trust.conf"; 
-  private static final String CONFIG_FILE = "config.properties";
+  /** The debug. */
+  
   private static final boolean SAVE_SETTINGS = true;
-  private static final String SIG_ATTACHED = "signature.settings.attached";
-  private static final String SIG_ALGO =	 "signature.setting.hashing.algo";
-  private static final String	SIG_TIME_INCLUDE =	  "signature.settings.time.include";
+  	private static final String SIG_ATTACHED = "signature.settings.attached";
+  	private static final String SIG_ALGO =	 "signature.setting.hashing.algo";
+  	private static final String	SIG_TIME_INCLUDE =	  "signature.settings.time.include";
 	private static final String	SIG_TIME_PROVIDER =	  "signature.settings.time.provider";
 	private static final String	SIG_TIME_OID =	  "signature.settings.time.oid";
 	private static final String	SIG_ISSUER_CALLER =	  "signature.settings.issuer.caller";
 	private static final String	SIG_CRL_CALLER =	  "signature.settings.crl.caller";
 	
   
-  public static String getDefualtCaListFile(){
-  return DEFUALTISSUERFILE;
-  }
-  public static String StarLine = newLine+"*****************************************************************************************************"+newLine;
-  public static void debug(Object text){
-	  if (PropertyFileConfiguration.DEBUG){
-		  System.out.println(text);
-	  }
-  }
 
+  
    public PropertyFileConfiguration() {
 
 	  PropertyLoader.initiate(CONFIG_FILE, SAVE_SETTINGS);
@@ -81,6 +75,9 @@ public class PropertyFileConfiguration extends SecurityConcepts implements Signa
 
 
 
+/* (non-Javadoc)
+ * @see tools.pki.gbay.crypto.provider.CaFinderInterface#getIssuer(java.security.cert.X509Certificate)
+ */
 @Override
 public Set<CertificateIssuer> getIssuer(X509Certificate currentCert)
 		throws GbayCryptoException {
@@ -103,6 +100,9 @@ public Set<CertificateIssuer> getIssuer(X509Certificate currentCert)
 
 
 
+/* (non-Javadoc)
+ * @see tools.pki.gbay.crypto.provider.CrlFinderInterface#getCrl(java.security.cert.X509Certificate)
+ */
 @Override
 public X509CRL getCrl(X509Certificate cert) {
 	Class<?> b;
@@ -111,7 +111,6 @@ public X509CRL getCrl(X509Certificate cert) {
 		 CrlFinderInterface crlCaller = (CrlFinderInterface) b.newInstance();
 		 return crlCaller.getCrl(cert);
 	} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
 	return null;
@@ -120,6 +119,9 @@ public X509CRL getCrl(X509Certificate cert) {
 
 
 
+/* (non-Javadoc)
+ * @see tools.pki.gbay.crypto.provider.KeySelectionInterface#selectKey(java.util.List)
+ */
 @Override
 public Integer selectKey(List<CoupleKey> keyCouples) {
 	// TODO Auto-generated method stub
@@ -128,6 +130,9 @@ public Integer selectKey(List<CoupleKey> keyCouples) {
 
 
 
+/* (non-Javadoc)
+ * @see tools.pki.gbay.crypto.provider.SignatureSettingInterface#getTimeInjectionSetiion()
+ */
 @Override
 public SignatureTime getTimeInjectionSetiion() {
 	try {
@@ -153,10 +158,8 @@ return st;
 	} catch (ClassNotFoundException e) {
 		return null;
 	} catch (InstantiationException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	} catch (IllegalAccessException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
 	return null;
@@ -164,6 +167,9 @@ return st;
 
 
 
+/* (non-Javadoc)
+ * @see tools.pki.gbay.crypto.provider.SignatureSettingInterface#isEncapsulate()
+ */
 @Override
 public boolean isEncapsulate() {
 	return PropertyLoader.getBoolean(SIG_ATTACHED);
@@ -171,6 +177,9 @@ public boolean isEncapsulate() {
 
 
 
+/* (non-Javadoc)
+ * @see tools.pki.gbay.crypto.provider.SignatureSettingInterface#getHashingAlgorythm()
+ */
 @Override
 public String getHashingAlgorythm() {
 	return PropertyLoader.getSystemString(SIG_ALGO);

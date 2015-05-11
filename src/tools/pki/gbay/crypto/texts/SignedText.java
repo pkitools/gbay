@@ -28,6 +28,7 @@ import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.util.Store;
 
 /**
@@ -43,7 +44,6 @@ public class SignedText extends PlainText implements SignedTextInterface {
 	Set<CertificateIssuer> trustedIssuers;
 	CertificateRevocationList crl;
 	boolean attached;
-//	private IssuerPropertyFile issuerPropertyFile;
 	
 
 	
@@ -113,6 +113,16 @@ public class SignedText extends PlainText implements SignedTextInterface {
 		this.originalText = new PlainText(originalText);
 	}
     
+    public static boolean isAttached(byte[] signedVal) {
+    	CMSSignedData signedData = new CMSSignedData(signedVal); 
+		CMSProcessable processable = signedData.getSignedContent();
+		if (processable == null){
+			return false;
+		}
+		else{
+			return true;
+		}
+    }
     public CMSSignedData detectAttached() throws CMSException{
     	CMSSignedData signedData = new CMSSignedData(signedVal); 
 		CMSProcessable processable = signedData.getSignedContent();
@@ -127,15 +137,17 @@ public class SignedText extends PlainText implements SignedTextInterface {
 		return signedData;
     }
 
+    
+    /**
+     * Extract certificate and check if signature is attached or not
+     * @throws GbayCryptoException
+     */
     public void ExtractCertificate() throws GbayCryptoException{
     		signerPublicKey = new ArrayList<CertificateInterface>();
     	try {
 
     	
-    		CMSSignedData cms = detectAttached();
-    		
-    		//
-
+    			CMSSignedData cms = detectAttached();
     			Store store = cms.getCertificates();
     			SignerInformationStore signers = cms.getSignerInfos();
     			Collection c = signers.getSigners();

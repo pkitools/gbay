@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2014, Araz
- * All rights reserved.
+ * GBAy Crypto API
+ * Copyright (c) 2014, PKI.Tools All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,11 +30,53 @@ import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class SecurityConcepts.
+ */
 public class SecurityConcepts {
+	
+	  public static boolean DEBUG = true;
 
+
+	  /** The new line. */
+	  protected static String newLine = System.getProperty("line.separator");
+	  /** The Star line. */
+	  public static String StarLine = newLine+"*****************************************************************************************************"+newLine;
+
+	  
+	  /** The Constant DEFUALTISSUERFILE. */
+	  protected static final String CONFIG_FILE = "config.properties";
+
+	  protected static final String DEFUALTISSUERFILE = "trust.conf"; 
+
+	  /**
+	   * Debug.
+	   *
+	   * @param text the text
+	   */
+	  public static void debug(Object text){
+		  if (PropertyFileConfiguration.DEBUG){
+			  System.out.println(text);
+		  }
+	  }
+
+	   /**
+	    * The Constructor.
+	    */
+
+	/**
+	 * Adds the provider.
+	 */
 	public static void addProvider(){
 		Security.addProvider(new BouncyCastleProvider());
 	}
+	
+	/**
+	 * Gets the provider name.
+	 *
+	 * @return the provider name
+	 */
 	public static String getProviderName(){
 		return "BC";
 	}

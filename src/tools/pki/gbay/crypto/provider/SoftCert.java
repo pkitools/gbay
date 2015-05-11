@@ -78,9 +78,7 @@ public class SoftCert implements CryptoServiceProvider {
 	}
 	Set<CertificateIssuer> caCert;
 	X509CRL crl;
-
 	private X509Certificate currentCert;
-
 	private String filePath;
 
 
@@ -117,6 +115,7 @@ public class SoftCert implements CryptoServiceProvider {
 
 
 	/**
+	 * Get set of issuers
 	 * @return the caCert
 	 * @throws GbayCryptoException
 	 * @throws IOException
@@ -579,8 +578,8 @@ public class SoftCert implements CryptoServiceProvider {
 			e1.printStackTrace();
 			throw new GbayCryptoException(new CryptoError(
 					GlobalErrorCode.SIG_NOT_FOUND));
-		} catch (CertificateExpiredException e) {
 			obj.setValidated(false);
+		} catch (CertificateExpiredException e) {
 		} catch (CertificateNotYetValidException e) {
 			obj.setValidated(false);
 		} catch (OperatorCreationException e) {

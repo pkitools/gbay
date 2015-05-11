@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project  name="GBay"  default="main" xmlns:ivy="antlib:org.apache.ivy.ant">
-	<property name="output-temp" 		value="releases/temp"/>
-	<property name="output-folder" 		value="releases/dist/${version}/"/>
-	<property name="output-lib-folder" 	value="releases/lib"/>
-	<property name="src" 			value="src/"/>
-	<property name="output-filename" 	value="GBay"/>
-	<property name="dependency" 		value="lib/bcmail-jdk15on-150.jar;lib/bcpkix-jdk15on-150.jar;lib/bcprov-ext-jdk15on-150.jar;lib/bcprov-jdk15on-150.jar;lib/log4j-1.2.17.jar;lib/hessian-4.0.7.jar;lib/AGE.jar;lib/iaikPkcs11Wrapper.jar;lib/ezmorph.jar;lib/json-lib-2.2.2-jdk15.jar;lib/commons-codec-1.9.jar;lib/commons-io-2.1.jar"/>
-    <property name="target" value="1.8"/>
+<project name="GBay" default="main" xmlns:ivy="antlib:org.apache.ivy.ant">
+	<property name="output-temp" value="releases/temp" />
+	<property name="output-folder" value="releases/dist/${version}/" />
+	<property name="output-lib-folder" value="releases/lib" />
+	<property name="src" value="src/" />
+	<property name="output-filename" value="GBay" />
+	<property name="dependency"
+		value="lib/bcmail-jdk15on-150.jar;lib/bcpkix-jdk15on-150.jar;lib/bcprov-ext-jdk15on-150.jar;lib/bcprov-jdk15on-150.jar;lib/log4j-1.2.17.jar;lib/hessian-4.0.7.jar;lib/AGE.jar;lib/iaikPkcs11Wrapper.jar;lib/ezmorph.jar;lib/json-lib-2.2.2-jdk15.jar;lib/commons-codec-1.9.jar;lib/commons-io-2.1.jar" />
+	<property name="target" value="1.8" />
 
-	
-	
-	<target name="main" depends="init, compile,  copy.meta.files, package, export-dependency">
+
+
+	<target name="main"
+		depends="init, compile,  copy.meta.files, package, export-dependency">
 		<echo>
-			GBay library version ${version} built. 
+			GBay library version ${version} built.
 		</echo>
 		<copy file="${output-folder}/${output-filename}.jar" tofile="releases/dist/${version}/${output-filename}.jar" />
 	</target>
-	
+
 	<target name="init">
 		<echo>
 			Initializing distribution environment
@@ -27,54 +29,49 @@
 		<mkdir dir="${output-temp}" />
 		<mkdir dir="${output-lib-folder}" />
 	</target>
-	
+
 	<target name="compile">
 		<echo>
 			Compiling source code
 		</echo>
-		
-    
 
-		<javac 	fork="yes" 
-				srcdir="${src}" 
-				destdir="${output-temp}" 
-				debug="false"
-				classpath="${dependency}"
-				target="${target}">
+
+
+		<javac fork="yes" srcdir="${src}" destdir="${output-temp}"
+			debug="false" classpath="${dependency}" target="${target}">
 		</javac>
 		<copy file="version.txt" tofile="${output-temp}/ver.${version}-jdk1.7" />
 	</target>
-	
+
 	<patternset id="meta.files">
-			<include name="**/*.xml" />
-			<include name="**/*.properties" />
-		</patternset>
-		
-		<target name="copy.meta.files">
-			<copy todir="${output-temp}">
-				<fileset dir="${src}">
-					<patternset refid="meta.files" />
-				</fileset>
-			</copy>
+		<include name="**/*.xml" />
+		<include name="**/*.properties" />
+	</patternset>
+
+	<target name="copy.meta.files">
+		<copy todir="${output-temp}">
+			<fileset dir="${src}">
+				<patternset refid="meta.files" />
+			</fileset>
+		</copy>
 	</target>
-		
+
 	<target name="package">
 		<echo>
 			Packaging the source code into jar
 		</echo>
-		<jar destfile="${output-folder}${output-filename}.jar" 
-			 basedir="${output-temp}" >
-			 
-			 <manifest>
-			 	<attribute name="Author" value="pki.tools" />
-			 	<section name="Identification">
-			 		<attribute name="ID" value="GBay" />
-			 		<attribute name="Vendor" value="pki.tools" />
-			 		<attribute name="Contact" value="nilnull" />
-			 		<attribute name="Copyright" value="(C) pki.tools 2014-2020" />
-			 	</section>
-			 </manifest>
-			 
+		<jar destfile="${output-folder}${output-filename}.jar" basedir="${output-temp}">
+
+			<manifest>
+				<attribute name="Author" value="pki.tools" />
+				<section name="Identification">
+					<attribute name="ID" value="GBay" />
+					<attribute name="Vendor" value="pki.tools" />
+					<attribute name="Contact" value="nilnull" />
+					<attribute name="Copyright" value="(C) pki.tools 2014-2020" />
+				</section>
+			</manifest>
+
 		</jar>
 
 	</target>
@@ -83,9 +80,8 @@
 		<echo>
 			Signing the with JCE
 		</echo>
-		<signjar jar="${output-folder}${output-filename}.jar" 
-				 alias="gbay" 
-				 keystore="CodeSigning\\keystore.ks" storepass="${storepass}" />
+		<signjar jar="${output-folder}${output-filename}.jar" alias="gbay"
+			keystore="CodeSigning\\keystore.ks" storepass="${storepass}" />
 	</target>
 
 
@@ -95,12 +91,12 @@
 		</echo>
 		<copy todir="${output-lib-folder}">
 			<fileset dir="lib">
-				<filename name="**/*.java"/>
-				<filename name="**/*.properties"/>
-			</fileset>			
+				<filename name="**/*.java" />
+				<filename name="**/*.properties" />
+			</fileset>
 		</copy>
 	</target>
-	
+
 	<target name="clean">
 		<delete dir="${output-folder}" />
 		<delete dir="${output-temp}" />

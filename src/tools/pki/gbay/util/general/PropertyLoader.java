@@ -335,7 +335,7 @@ public abstract class PropertyLoader {
 	// package: ...............................................................
 
 	// private: ...............................................................
-	static Logger log = Logger.getLogger(IssuerPropertyFile.class);
+	static Logger log = Logger.getLogger(PropertyLoader.class);
 
 	private static String propertyFileAddress = "config.properties";
 
