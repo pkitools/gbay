@@ -1,33 +1,49 @@
+/*
+ * GBAy Crypto API
+ * Copyright (c) 2014, PKI.Tools All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 package tools.pki.gbay.crypto.keys.validation;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
 import java.security.cert.CertPathBuilderException;
-import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.PKIXCertPathBuilderResult;
 import java.security.cert.PKIXCertPathValidatorResult;
-import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -44,100 +60,185 @@ import org.apache.log4j.Logger;
 
 
 
+
+
+import com.google.inject.Inject;
+
 import tools.pki.gbay.configuration.SecurityConcepts;
-import tools.pki.gbay.crypto.provider.SoftCert;
+import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CertificateValidator.
+ */
 public class CertificateValidator {
+	
+	/**
+	 * The Enum ValidationMethod.
+	 */
 	enum ValidationMethod {
-		CHECK_CRL, CHECK_EXPIRATION_DATE, CHECK_ROOT
+		
+		/** The check crl. */
+		CHECK_CRL, 
+ /** The check expiration date. */
+ CHECK_EXPIRATION_DATE, 
+ /** The check root. */
+ CHECK_ROOT
 	}
 
 	/** The Constant log. */
 	static final Logger log = Logger.getLogger(CertificateValidator.class);
 
 //	/** Revocation list's address. */
-//	private String[] _CRLaddress = null;
+//	private String[] CRLaddress = null;
 
 	/** The result. {@link CertificateValidationResult} of the used functions */
 	private CertificateValidationResult result = new CertificateValidationResult();
 
 	/** List of {@link CertificateIssuer}s. */
-	private Set<CertificateIssuer> _trustedissuers;
+	private CertificateChain trustedissuers;
 
 	/** X509Certificate�that we want to validate it. */
-	private X509Certificate _cert;
+	private X509Certificate cert;
 
 	/** Allowed certificate issuers. */
-//	private String _trustedrootsdir;
+//	private String trustedrootsdir;
 
 	private X509CRL crl;
 
 	/**
 	 * Generate a validator object.
-	 * 
-	 * @param _cert
-	 *            the X509certificate object which we want to validate it
-	 * @param _trustedroots
-	 *            List of {@link CertificateIssuer}s<br>
+	 *
+	 * @param cert            the X509certificate object which we want to validate it
+	 * @param trustedroots            List of {@link CertificateIssuer}s<br>
 	 *            The addresses should be absolute path.
 	 *            <p>
 	 *            certificate that are issued by these issuers can be trusted.
 	 *            </p>
+	 * @param crl the crl
 	 */
-	public CertificateValidator(X509Certificate _cert,	Set<CertificateIssuer> _trustedroots, X509CRL crl) {
+	public CertificateValidator(X509Certificate cert,	CertificateChain trustedroots, X509CRL crl) {
 		super();
-		this._cert = _cert;
-		this._trustedissuers = _trustedroots;
+		log.debug("Generating validator for " + cert.getSubjectDN());
+		this.cert = cert;
+		this.trustedissuers = trustedroots;
 		this.crl = crl;
 	}
 
-	public CertificateValidator(X509Certificate _cert,CertificateIssuer _trustedroot, X509CRL crl) throws GbayCryptoException {
+	/**
+	 * The Constructor.
+	 *
+	 * @param cert the cert
+	 * @param trustedroot the trustedroot
+	 * @param crl the crl
+	 * @throws CryptoException the gbay crypto exception
+	 */
+	public CertificateValidator(X509Certificate cert,CertificateIssuer trustedroot, X509CRL crl) throws CryptoException {
 		super();
-		this._cert = _cert;
+		this.cert = cert;
 		log.debug("Setting cert issuers");
-		if (_trustedroot !=null){
-			this._trustedissuers = new HashSet<CertificateIssuer>();
-			this._trustedissuers.add(_trustedroot);
+		if (trustedroot !=null){
+			this.trustedissuers = new CertificateChain();
+		    trustedissuers.getRootIssuers().add(trustedroot);
 		}
 		else{
-			log.error("_trusted roots are null");
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_ISSUER_NOT_SET));			
+			log.error("trusted roots are null");
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_ISSUER_NOT_SET));			
 		}
 		log.debug("setting cert CRL");
 		if (crl!=null)
 			this.crl = crl;
 		else{
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_CRL_NOT_SET));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_CRL_NOT_SET));
 		}
 	}
 
+	//@Inject
+	SignatureSettingInterface settings;
+	
+	@Inject
+	public CertificateValidator(SignatureSettingInterface setting, X509Certificate certificate) {
+		super();
+		settings = setting;
+		try {
+			if (settings == null){
+				log.error("Injecting done but Empty settings ");
+			}
+			trustedissuers =  settings.getIssuer(certificate);
+		} catch (CryptoException e) {
+			
+			log.error(e);
+		}
+		crl = settings.getCrl(certificate);
+		cert = certificate;
+	}
+@Inject
+	
+	public CertificateValidator(X509Certificate certificate) {
+		super();
+		
+		try {
+			if (settings == null){
+				log.error("Empty settings ");
+			}
+			trustedissuers =  settings.getIssuer(certificate);
+		} catch (CryptoException e) {
+			
+			log.error(e);
+		}
+		crl = settings.getCrl(certificate);
+		cert = certificate;	
+}
+
+	/**
+	 * Checks if is valid.
+	 *
+	 * @return true, if checks if is valid
+	 */
 	public boolean isValid() {
 		return isValid();
 	}
 
-	public CertificateValidationResult validate() throws GbayCryptoException {
+	/**
+	 * Validate.
+	 *
+	 * @return the certificate validation result
+	 * @throws CryptoException the gbay crypto exception
+	 */
+	public CertificateValidationResult validate() throws CryptoException {
 		CertificateValidationResult cvr = new CertificateValidationResult();
-		if (crl != null)
+		if (crl != null){
 			cvr.revoked = validateRevocation();
+			}
+		else{
+			log.info("CRL is null");
+		}
 		cvr.expired = isExpired();
 		cvr.notStarted = !isStarted();
-		if (_trustedissuers != null && _trustedissuers.size()>0){
+		if (trustedissuers != null && trustedissuers.size()>0){
 		try{
-			log.info("Number of issuers : "+ _trustedissuers.size());
+			log.info("Number of issuers : "+ trustedissuers.size());
 			cvr.setInvalidCA(validateRoot());
 		}
-		catch (GbayCryptoException e){
-			throw new GbayCryptoException(e);
+		catch (CryptoException e){
+			throw new CryptoException(e);
 		}
 		}
 		return cvr;
 	}
 
+	/**
+	 * Gets the result.
+	 *
+	 * @param validationtypes the validationtypes
+	 * @return the result
+	 * @throws CryptoException the gbay crypto exception
+	 */
 	public CertificateValidationResult getResult(
-			Set<ValidationMethod> validationtypes) throws GbayCryptoException {
+			Set<ValidationMethod> validationtypes) throws CryptoException {
 		CertificateValidationResult cvr = new CertificateValidationResult();
 		if (validationtypes.contains(ValidationMethod.CHECK_CRL) && crl!=null) {
 			cvr.revoked = validateRevocation();
@@ -157,32 +258,23 @@ public class CertificateValidator {
 	 * It can verify over list of issuer names , list of root cert addresses or
 	 * a folder containing root certs regarding to the way that object is
 	 * constructed</br>
-	 * 
+	 *
 	 * @return true, if successful
-	 * @throws CertificateException
-	 *             the certificate exception
-	 * @throws InvalidAlgorithmParameterException
-	 *             the invalid algorithm parameter exception
-	 * @throws NoSuchAlgorithmException
-	 *             the no such algorithm exception
-	 * @throws CertPathValidatorException
-	 *             the cert path validator exception
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
+	 * @throws CryptoException the gbay crypto exception
 	 */
-	public boolean validateRoot() throws GbayCryptoException {
+	public boolean validateRoot() throws CryptoException {
 
 		log.debug("Validating root certs");
-		_cert.getPublicKey();
+		cert.getPublicKey();
 		boolean trusted = true;
 
-		if (_trustedissuers == null || _trustedissuers.size() < 1) {
+		if (trustedissuers == null || trustedissuers.size() < 1) {
 			log.error("No trusted issuer is in the system. ");
 			
-			throw new GbayCryptoException(new CryptoError(
+			throw new CryptoException(new CryptoError(
 					GlobalErrorCode.CERT_ISSUER_NOT_FOUND));
 		} else {
-			trusted = checkIssuer(_trustedissuers);
+			trusted = validateIssuers();
 		}
 		return trusted;
 
@@ -195,79 +287,29 @@ public class CertificateValidator {
 	 * @param caPath
 	 *            the address of certificate authority's cer file
 	 * @return True if chain is verified, false if chain can't be verified
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 */
-	private boolean checkIssuer(Set<CertificateIssuer> issuer) throws GbayCryptoException {
+	private boolean validateIssuers() throws CryptoException {
 		{
-			Set<X509Certificate> rootCerts = new HashSet<X509Certificate>() ;
-			Set<X509Certificate> intermedateCerts = new HashSet<X509Certificate>();
 		Set<String> caNames = new HashSet<String>();
 			log.debug("Check the issuer");
-			for (CertificateIssuer certificateIssuer : issuer) {
-				if (certificateIssuer.getCertificate()!=null){
-			
-					if (certificateIssuer.getName()!=null)
-						caNames.add(certificateIssuer.getName());
-					X509Certificate additionalCert = certificateIssuer.getCertificate();
-					try {
-						if (SoftCert.isSelfSigned(additionalCert)) {
-						        rootCerts.add(additionalCert);
-						    } else {
-						        intermedateCerts.add(additionalCert);
-						    }
-					} catch (CertificateException | NoSuchAlgorithmException
-							| NoSuchProviderException e) {
-					log.error("Error in parsing issuer "+e.getMessage());
-					}
-				}
-			}
-			if (issuer != null) {
+		
+			if (trustedissuers != null) {
 				try {
-//					Certificate trust = issuer.getCertificate();
-
-	//				log.debug("Root Certificate: " + trust);
-
 					/**
 					 * Put cert extracted from signature to ByteArrayInputStream
 					 * and generate cert from there
 					 */
 
-					if (rootCerts.size() >0 ) {
-						CertificateFactory cf = CertificateFactory
-								.getInstance("X.509");
-				//		ByteArrayInputStream bis = new ByteArrayInputStream(
-				//				_cert.getEncoded());
-				//		List<X509Certificate> certList = new ArrayList<X509Certificate>();
-
-					//	certList.add(issuer.getCertificate());
-
-					//	CertPath cp = cf.generateCertPath(certList);
-
-//						TrustAnchor anchor = new TrustAnchor(
-	//							(X509Certificate) trust, null);
-
-		//				PKIXParameters params;
-
-			//			params = new PKIXParameters(
-				//				Collections.singleton(anchor));
-
-					//	params.setRevocationEnabled(false);
-				//		CertPathValidator cpv;
-						//cpv.validate(certPath, params)
-					//	cpv = CertPathValidator.getInstance("PKIX");
-
-						
+					if (trustedissuers.size() >0 ) {
 						PKIXCertPathValidatorResult result;
 						try {
-							result = verifyCertificate(_cert, rootCerts, intermedateCerts);
+							result = verifyCertificate(cert, trustedissuers);
 							log.debug(result.toString());
 						} catch (NoSuchProviderException
 								| CertPathBuilderException e) {
 							return false;
 						}
-//								(PKIXCertPathValidatorResult) cpv
-			//					.validate(cp, params);
-					
 						return true;
 					}
 
@@ -275,8 +317,8 @@ public class CertificateValidator {
 					{
 						for (String string : caNames) {
 							if (string != null){
-								log.debug("Issuer did not contain root cert but just the name:"+ string + tools.pki.gbay.configuration.PropertyFileConfiguration.StarLine + "Cert issuer:"+_cert.getIssuerDN().getName().toString());
-								if (_cert.getIssuerDN().getName().toString().contains(string))
+								log.debug("Issuer did not contain root cert but just the name:"+ string + tools.pki.gbay.configuration.PropertyFileConfiguration.StarLine + "Cert issuer:"+cert.getIssuerDN().getName().toString());
+								if (cert.getIssuerDN().getName().toString().contains(string))
 									return true;
 
 							}
@@ -284,12 +326,7 @@ public class CertificateValidator {
 					}
 				} catch (InvalidAlgorithmParameterException e) {
 					log.error(e.getMessage());
-					// result.set_pathisinvalid(true);
 					return false;
-				} catch (CertificateException e) {
-					log.error(e.getMessage());
-					return false;
-
 				} catch (NoSuchAlgorithmException e) {
 					log.error(e.getMessage());
 					return false;
@@ -297,7 +334,7 @@ public class CertificateValidator {
 
 			} else {
 				log.error("You haven't send any issuer to validate..");
-				throw new GbayCryptoException(new CryptoError(
+				throw new CryptoException(new CryptoError(
 						GlobalErrorCode.CERT_ISSUER_NOT_SET));
 			}
 		}
@@ -320,17 +357,17 @@ public class CertificateValidator {
      *      (e.g. certification path cannot be built or some certificate in the
      *      chain is expired)
      */
-    private static PKIXCertPathBuilderResult verifyCertificate(X509Certificate cert, Set<X509Certificate> trustedRootCerts,
-            Set<X509Certificate> intermediateCerts) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CertPathBuilderException  {
+    private static PKIXCertPathBuilderResult verifyCertificate(X509Certificate cert,CertificateChain chain) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, CertPathBuilderException  {
          
         // Create the selector that specifies the starting certificate
         X509CertSelector selector = new X509CertSelector(); 
         selector.setCertificate(cert);
-         
+        Set<X509Certificate> interMediateCerts = new HashSet<X509Certificate>(); 
         // Create the trust anchors (set of root CA certificates)
         Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
-        for (X509Certificate trustedRootCert : trustedRootCerts) {
-            trustAnchors.add(new TrustAnchor(trustedRootCert, null));
+        for (CertificateIssuer trustedRootCert : chain.rootIssuers) {
+        	if (trustedRootCert.getCertificate()!=null)
+            trustAnchors.add(new TrustAnchor(trustedRootCert.getCertificate(), null));
         }
          
         // Configure the PKIX certificate builder algorithm parameters
@@ -340,11 +377,15 @@ public class CertificateValidator {
         // Disable CRL checks (this is done manually as additional step)
         pkixParams.setRevocationEnabled(false);
      
+        for (CertificateIssuer issuer : chain.intermediateIssuers) {
+        	if (issuer.getCertificate()!=null)		
+        		interMediateCerts.add(issuer.getCertificate());
+        }
         // Specify a list of intermediate certificates
         CertStore intermediateCertStore = CertStore.getInstance("Collection",
-            new CollectionCertStoreParameters(intermediateCerts), SecurityConcepts.getProviderName());
+            new CollectionCertStoreParameters(interMediateCerts), SecurityConcepts.getProviderName());
         pkixParams.addCertStore(intermediateCertStore);
-     
+     pkixParams.setRevocationEnabled(false);
         // Build and verify the certification chain
         CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
         PKIXCertPathBuilderResult result = 
@@ -352,6 +393,11 @@ public class CertificateValidator {
         return result;
     }
 	
+	/**
+	 * Validate period.
+	 *
+	 * @return true, if validate period
+	 */
 	public boolean validatePeriod() {
 		return isExpired() && isStarted();
 	}
@@ -362,8 +408,9 @@ public class CertificateValidator {
 	 * @return true if certificate is expired
 	 */
 	public boolean isExpired() {
+	
 		boolean expired = false;
-		Date notAfter = _cert.getNotAfter();
+		Date notAfter = cert.getNotAfter();
 		long currentTime = System.currentTimeMillis();
 		long expiryTime = notAfter.getTime();
 		log.debug(expiryTime + " Current time: " + currentTime);
@@ -379,7 +426,7 @@ public class CertificateValidator {
 	 */
 	public boolean isStarted() {
 		boolean started = false;
-		Date notBefore = _cert.getNotBefore();
+		Date notBefore = cert.getNotBefore();
 		long currentTime = System.currentTimeMillis();
 		long startTime = notBefore.getTime();
 		log.debug(startTime + " Current time: " + currentTime);
@@ -389,12 +436,18 @@ public class CertificateValidator {
 		return started;
 	}
 
-	public boolean validateRevocation() throws GbayCryptoException {
+	/**
+	 * Validate revocation.
+	 *
+	 * @return true, if validate revocation
+	 * @throws CryptoException the gbay crypto exception
+	 */
+	public boolean validateRevocation() throws CryptoException {
 		if (crl == null) {
 			log.debug("crl in certificate validatore is null");
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_CRL_NOT_FOUND));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_CRL_NOT_FOUND));
 		}
-		return crl.isRevoked(_cert);
+		return crl.isRevoked(cert);
 	}
 
 }

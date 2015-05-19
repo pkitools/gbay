@@ -36,20 +36,20 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Set;
 
+import tools.pki.gbay.crypto.keys.validation.CertificateChain;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.keys.validation.CertificateValidationResult;
 import tools.pki.gbay.crypto.keys.validation.CertificateValidator;
-import tools.pki.gbay.crypto.provider.CaFinderInterface;
 import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 import tools.pki.gbay.util.general.CryptoFile;
+import tools.pki.gbay.util.general.FileUtil;
 
 import org.apache.log4j.Logger;
 
@@ -60,24 +60,8 @@ import com.google.inject.Inject;
 public class CertificateValiditor extends StandardCertificate {
 
 	
-	@Inject
-	SignatureSettingInterface settings;
 	Logger log = Logger.getLogger(CertificateValiditor.class);
 	
-	/*
-	 * Read a certificate from the specified filepath.
-	 */	
-	public static X509Certificate getCertFromFile(File path) throws CertificateException, FileNotFoundException {
-		return GetCert(new FileInputStream(path));
-	}
-	
-	public static X509Certificate GetCert(InputStream is) throws CertificateException{
-		X509Certificate cert = null;
-		CertificateFactory cf = CertificateFactory.getInstance("X509");
-	
-		cert = (X509Certificate) cf.generateCertificate(is);
-	return cert;
-	}
 
 /**
  * Read cert from byte array
@@ -87,78 +71,98 @@ public class CertificateValiditor extends StandardCertificate {
  * @throws FileNotFoundException
  */
 	public static X509Certificate getCertFromContent(byte[] content) throws CertificateException, FileNotFoundException {
-		return GetCert(new ByteArrayInputStream(content));
+		return FileUtil.GetCert(new ByteArrayInputStream(content));
 	}
 
 	
 	protected File fileAddress;
-	Set<CertificateIssuer> issuer;
+	CertificateChain issuer;
 	private boolean validated;
 	private CertificateValidationResult validationResult;
 	
+	@Inject
 	protected CertificateValiditor() {
 	}
 
-	public CertificateValiditor(File certificateFileAddress) throws GbayCryptoException{
+	public CertificateValiditor(File certificateFileAddress) throws CryptoException{
 		this(fileToStream(certificateFileAddress));
 			this.fileAddress = certificateFileAddress;
 	}
 	
 	
-	private static FileInputStream fileToStream(File file) throws GbayCryptoException{
+	private static FileInputStream fileToStream(File file) throws CryptoException{
 		System.err.println(file);
 		FileInputStream fs =null;
 		try {
 			fs =	new FileInputStream(file);
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found" + file.getAbsolutePath());
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND));
 		}
 		return fs;
 	}
-	public CertificateValiditor(byte[] decode) throws GbayCryptoException {
+	public CertificateValiditor(byte[] decode) throws CryptoException {
 	this(new ByteArrayInputStream(decode));
 	}
-	protected CertificateValiditor(InputStream is) throws GbayCryptoException{
+	protected CertificateValiditor(InputStream is) throws CryptoException{
 		initiate(is); 
 	}
 
-	private void initiate(InputStream is) throws GbayCryptoException {
+	private void initiate(InputStream is) throws CryptoException {
 		try {
 			log.debug("Initiating cert...");
-			extractCertDetail(GetCert(is));
+			extractCertDetail(FileUtil.GetCert(is));
 			log.debug("Cert detail is extracted");
 		} catch (CertificateException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 		}
 	}
 
 	
-	public CertificateValiditor(CryptoFile file) throws GbayCryptoException {
+	public CertificateValiditor(CryptoFile file) throws CryptoException {
 		this(file.getContent().toByte());
 		if (file.getFile() != null)
 		this.fileAddress = file.getFile();
 	}
 
 
-
 	
 	/**
 	 * Initiate a public key with an attached interface that will be run to get the issuer
 	 * @param certificate
+	 * @param setting 
 	 * @param getIssuerFromCert
 	 * @param crl
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 */
-	public CertificateValiditor(X509Certificate certificate) throws GbayCryptoException {
-		extractCertDetail(certificate);
-		try {
+	@Inject
+	public CertificateValiditor(SignatureSettingInterface setting, X509Certificate certificate) throws CryptoException {
+	this.settings = setting;
+		log.debug("Generating certificate validator...");
+
+	extractCertDetail(certificate);
+	log.debug("Certificate detail is extracted");
+	
 			this.validationResult = validate();
-		} catch (Exception e) {
-				throw new GbayCryptoException(e);
-		}
 	}
 	
+	/**
+	 * Initiate a public key with an attached interface that will be run to get the issuer
+	 * @param certificate
+	 * @param setting 
+	 * @param getIssuerFromCert
+	 * @param crl
+	 * @throws CryptoException
+	 */
+	
+	public CertificateValiditor(X509Certificate certificate) throws CryptoException {
+		log.debug("Generating certificate validator...");
+
+	extractCertDetail(certificate);
+	log.debug("Certificate detail is extracted");
+	
+			this.validationResult = validate();
+	}
 	
 
 
@@ -167,8 +171,6 @@ public class CertificateValiditor extends StandardCertificate {
 		 if (this == other) return true;
 		 if (other instanceof X509Certificate)
 			 return (X509Certificate)other== certificate;
-//		 if (other instanceof java.security.PublicKey)
-	//		 (java.security.PublicKey)other.equals(obj)
 		    if (other == null) return false;
 			return false;
 	}
@@ -191,12 +193,7 @@ public class CertificateValiditor extends StandardCertificate {
 		return fileAddress;
 	}
 
-	/**
-	 * @return the issuer
-	 */
-	public Set<CertificateIssuer> getIssuer() {
-		return issuer;
-	}
+
 
 	/**
 	 * @return the validationResult
@@ -213,7 +210,7 @@ public class CertificateValiditor extends StandardCertificate {
 
     public boolean isSelfSigned()
 
-            throws GbayCryptoException {
+            throws CryptoException {
 
         try {
 
@@ -231,11 +228,11 @@ public class CertificateValiditor extends StandardCertificate {
             return false;
 
         } catch (CertificateException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 		} catch (NoSuchAlgorithmException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
 		} catch (NoSuchProviderException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
 		}
 
     }
@@ -261,14 +258,14 @@ public class CertificateValiditor extends StandardCertificate {
 	 * 
 	 * @param fileAddress
 	 *            the fileAddress to set
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException 
 	 */
-	public void setFileAddress(File fileAddress) throws GbayCryptoException {
+	public void setFileAddress(File fileAddress) throws CryptoException {
 		this.fileAddress = fileAddress;
 		try {
 			initiate(new FileInputStream(fileAddress));
 		} catch (FileNotFoundException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND));
 		}
 	}
 
@@ -278,7 +275,7 @@ public class CertificateValiditor extends StandardCertificate {
 	 * @param issuer
 	 *            the issuer to set
 	 */
-	public void setIssuer(Set<CertificateIssuer> issuer) {
+	public void setIssuer(CertificateChain issuer) {
 		this.issuer = issuer;
 	}
 	
@@ -299,16 +296,17 @@ public class CertificateValiditor extends StandardCertificate {
 		this.validationResult = validationResult;
 	}
 	
-	public CertificateValidationResult  validate(CertificateIssuer issuer) throws GbayCryptoException {
+	public CertificateValidationResult  validate(CertificateIssuer issuer) throws CryptoException {
 		this.validated = true;	
 		CertificateValidator cv = new CertificateValidator(certificate, issuer , crl);
 		return cv.validate();		
 	}
 
 
-	public CertificateValidationResult validate() throws GbayCryptoException {
-		this.validated = true;	
-		CertificateValidator cv = new CertificateValidator(certificate, settings.getIssuer(certificate), settings.getCrl(certificate));
+	public CertificateValidationResult validate() throws CryptoException {
+		this.validated = true;
+			log.info("Validating... " + settings.isEncapsulate());
+		CertificateValidator cv = new CertificateValidator(settings, certificate);
 			return cv.validate();
 	}
 	

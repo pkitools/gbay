@@ -1,9 +1,9 @@
 package tools.pki.gbay.hardware.pkcs11;
 
-import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
+import iaik.pkcs.pkcs11.wrapper.PKCS11Exception;
 
 /**
  * To convert Cryptoki error codes to GBay Standard codes 
@@ -155,17 +155,17 @@ public class PKCS11Errors {
 
     //TODO : map all pkcs11 errors with aegis exception
     
-    static public GbayCryptoException getCryptoError(PKCS11Exception errorCode)
+    static public CryptoException getCryptoError(PKCS11Exception errorCode)
     {
     	
             switch ((int)errorCode.getErrorCode())
             {
-            case CKR_OK:                                return new GbayCryptoException(new CryptoError(GlobalErrorCode.TXN_SUCCESS));
-            case CKR_CANCEL:                            return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_OPERATION_CANCEL));
-            case CKR_SLOT_ID_INVALID:                   return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SLOT));
-            case CKR_GENERAL_ERROR:                     return new GbayCryptoException(new CryptoError(GlobalErrorCode.TXN_FAIL));
+            case CKR_OK:                                return new CryptoException(new CryptoError(GlobalErrorCode.TXN_SUCCESS));
+            case CKR_CANCEL:                            return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_OPERATION_CANCEL));
+            case CKR_SLOT_ID_INVALID:                   return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SLOT));
+            case CKR_GENERAL_ERROR:                     return new CryptoException(new CryptoError(GlobalErrorCode.TXN_FAIL));
         //    case CKR_FUNCTION_FAILED:                   return "CKR_FUNCTION_FAILED";
-            case CKR_ARGUMENTS_BAD:                     return new GbayCryptoException(new CryptoError(GlobalErrorCode.REQ_PARAMETER_FAILED));
+            case CKR_ARGUMENTS_BAD:                     return new CryptoException(new CryptoError(GlobalErrorCode.REQ_PARAMETER_FAILED));
 //            case CKR_NO_EVENT:                          return "CKR_NO_EVENT";
   //          case CKR_NEED_TO_CREATE_THREADS:            return "CKR_NEED_TO_CREATE_THREADS";
    //         case CKR_CANT_LOCK:                         return "CKR_CANT_LOCK";
@@ -174,10 +174,10 @@ public class PKCS11Errors {
       //      case CKR_ATTRIBUTE_TYPE_INVALID:            return "CKR_ATTRIBUTE_TYPE_INVALID";
        //     case CKR_ATTRIBUTE_VALUE_INVALID:           return "CKR_ATTRIBUTE_VALUE_INVALID";
        //     case CKR_DATA_INVALID:                      return "CKR_DATA_INVALID";
-           case CKR_DATA_LEN_RANGE:                    return new GbayCryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
-            case CKR_DEVICE_ERROR:                    return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_ERR_LOAD_LIBRARY));
+           case CKR_DATA_LEN_RANGE:                    return new CryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
+            case CKR_DEVICE_ERROR:                    return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_ERR_LOAD_LIBRARY));
  //           case CKR_DEVICE_MEMORY:                     return "CKR_DEVICE_MEMORY";
-            case CKR_DEVICE_REMOVED:                    return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_DETECTED));
+            case CKR_DEVICE_REMOVED:                    return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_DETECTED));
   //          case CKR_ENCRYPTED_DATA_INVALID:            return "CKR_ENCRYPTED_DATA_INVALID";
    //         case CKR_ENCRYPTED_DATA_LEN_RANGE:          return "CKR_ENCRYPTED_DATA_LEN_RANGE";
     //        case CKR_FUNCTION_CANCELED:                 return "CKR_FUNCTION_CANCELED";
@@ -194,37 +194,37 @@ public class PKCS11Errors {
             case CKR_KEY_NOT_WRAPPABLE:                 return "CKR_KEY_NOT_WRAPPABLE";
             case CKR_KEY_UNEXTRACTABLE:                 return "CKR_KEY_UNEXTRACTABLE";
             */
-            case CKR_MECHANISM_INVALID:                 new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_GET_ATTRIBUTE_FAIL));
+            case CKR_MECHANISM_INVALID:                 new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_GET_ATTRIBUTE_FAIL));
   //          case CKR_MECHANISM_PARAM_INVALID:           return "CKR_MECHANISM_PARAM_INVALID";
     //        case CKR_OBJECT_HANDLE_INVALID:             return "CKR_OBJECT_HANDLE_INVALID";
      //       case CKR_OPERATION_ACTIVE:                  return "CKR_OPERATION_ACTIVE";
       //      case CKR_OPERATION_NOT_INITIALIZED:         return "CKR_OPERATION_NOT_INITIALIZED";
-            case CKR_PIN_INCORRECT:                     return new GbayCryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));
-            case CKR_PIN_INVALID:                       return new GbayCryptoException(new CryptoError(GlobalErrorCode.PIN_INVALID_FORMAT));
-            case CKR_PIN_LEN_RANGE:                     return new GbayCryptoException(new CryptoError(GlobalErrorCode.PIN_INVALID_LENGTH));
-            case CKR_PIN_EXPIRED:                       return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_LOGIN_TYPE));
-            case CKR_PIN_LOCKED:                        return new GbayCryptoException(new CryptoError(GlobalErrorCode.PIN_LOCKED));
-            case CKR_SESSION_CLOSED:                    return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
-            case CKR_SESSION_COUNT:                     return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
-            case CKR_SESSION_HANDLE_INVALID:            return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
-            case CKR_SESSION_PARALLEL_NOT_SUPPORTED:    return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
-            case CKR_SESSION_READ_ONLY:                 return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
-            case CKR_SESSION_EXISTS:                    return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
-            case CKR_SESSION_READ_ONLY_EXISTS:          return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
-            case CKR_SESSION_READ_WRITE_SO_EXISTS:      return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
-            case CKR_SIGNATURE_INVALID:                 return new GbayCryptoException(new CryptoError(GlobalErrorCode.SIG_INVALID));
-            case CKR_SIGNATURE_LEN_RANGE:               return new GbayCryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
+            case CKR_PIN_INCORRECT:                     return new CryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));
+            case CKR_PIN_INVALID:                       return new CryptoException(new CryptoError(GlobalErrorCode.PIN_INVALID_FORMAT));
+            case CKR_PIN_LEN_RANGE:                     return new CryptoException(new CryptoError(GlobalErrorCode.PIN_INVALID_LENGTH));
+            case CKR_PIN_EXPIRED:                       return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_LOGIN_TYPE));
+            case CKR_PIN_LOCKED:                        return new CryptoException(new CryptoError(GlobalErrorCode.PIN_LOCKED));
+            case CKR_SESSION_CLOSED:                    return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
+            case CKR_SESSION_COUNT:                     return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
+            case CKR_SESSION_HANDLE_INVALID:            return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
+            case CKR_SESSION_PARALLEL_NOT_SUPPORTED:    return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
+            case CKR_SESSION_READ_ONLY:                 return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
+            case CKR_SESSION_EXISTS:                    return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
+            case CKR_SESSION_READ_ONLY_EXISTS:          return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
+            case CKR_SESSION_READ_WRITE_SO_EXISTS:      return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_INVALID_SESSION_ID));
+            case CKR_SIGNATURE_INVALID:                 return new CryptoException(new CryptoError(GlobalErrorCode.SIG_INVALID));
+            case CKR_SIGNATURE_LEN_RANGE:               return new CryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
 //            case CKR_TEMPLATE_INCOMPLETE:               return "CKR_TEMPLATE_INCOMPLETE";
  //           case CKR_TEMPLATE_INCONSISTENT:             return "CKR_TEMPLATE_INCONSISTENT";
-            case CKR_TOKEN_NOT_PRESENT:                 return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_INSIDE));
-            case CKR_TOKEN_NOT_RECOGNIZED:              return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_DETECTED));
+            case CKR_TOKEN_NOT_PRESENT:                 return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_INSIDE));
+            case CKR_TOKEN_NOT_RECOGNIZED:              return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_DETECTED));
 //            case CKR_TOKEN_WRITE_PROTECTED:             return "CKR_TOKEN_WRITE_PROTECTED";
   //          case CKR_UNWRAPPING_KEY_HANDLE_INVALID:     return "CKR_UNWRAPPING_KEY_HANDLE_INVALID";
    //         case CKR_UNWRAPPING_KEY_SIZE_RANGE:         return "CKR_UNWRAPPING_KEY_SIZE_RANGE";
     //        case CKR_UNWRAPPING_KEY_TYPE_INCONSISTENT:  return "CKR_UNWRAPPING_KEY_TYPE_INCONSISTENT";
-            case CKR_USER_ALREADY_LOGGED_IN:            return new GbayCryptoException(new CryptoError(GlobalErrorCode.REQ_ALREADY_LOGED_IN));
-            case CKR_USER_NOT_LOGGED_IN:                return new GbayCryptoException(new CryptoError(GlobalErrorCode.REQ_LOGIN_NEEDED));
-            case CKR_USER_PIN_NOT_INITIALIZED:          return new GbayCryptoException(new CryptoError(GlobalErrorCode.PIN_NEEDED));
+            case CKR_USER_ALREADY_LOGGED_IN:            return new CryptoException(new CryptoError(GlobalErrorCode.REQ_ALREADY_LOGED_IN));
+            case CKR_USER_NOT_LOGGED_IN:                return new CryptoException(new CryptoError(GlobalErrorCode.REQ_LOGIN_NEEDED));
+            case CKR_USER_PIN_NOT_INITIALIZED:          return new CryptoException(new CryptoError(GlobalErrorCode.PIN_NEEDED));
           /*  case CKR_USER_TYPE_INVALID:                 return "CKR_USER_TYPE_INVALID";
             case CKR_USER_ANOTHER_ALREADY_LOGGED_IN:    return "CKR_USER_ANOTHER_ALREADY_LOGGED_IN";
             case CKR_USER_TOO_MANY_TYPES:               return "CKR_USER_TOO_MANY_TYPES";
@@ -240,12 +240,12 @@ public class PKCS11Errors {
             case CKR_SAVED_STATE_INVALID:               return "CKR_SAVED_STATE_INVALID";
             case CKR_INFORMATION_SENSITIVE:             return "CKR_INFORMATION_SENSITIVE";
             case CKR_STATE_UNSAVEABLE:                  return "CKR_STATE_UNSAVEABLE";*/
-            case CKR_CRYPTOKI_NOT_INITIALIZED:          return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_PKI_NOTINITIALISE));
-            case CKR_CRYPTOKI_ALREADY_INITIALIZED:      return new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_PKI_NOTINITIALISE));
+            case CKR_CRYPTOKI_NOT_INITIALIZED:          return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_PKI_NOTINITIALISE));
+            case CKR_CRYPTOKI_ALREADY_INITIALIZED:      return new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_PKI_NOTINITIALISE));
 //            case CKR_MUTEX_BAD:                         return "CKR_MUTEX_BAD";
  //           case CKR_MUTEX_NOT_LOCKED:                  return "CKR_MUTEX_NOT_LOCKED";
   //          case CKR_FUNCTION_REJECTED:                 return "CKR_FUNCTION_REJECTED";*/
-            default:                                    return new GbayCryptoException(GlobalErrorCode.TXN_FAIL);
+            default:                                    return new CryptoException(GlobalErrorCode.TXN_FAIL);
             
             }
     } 

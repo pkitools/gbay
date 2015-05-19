@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.StringTokenizer;
 
-import  tools.pki.gbay.errors.CryptoError;
-import  tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoError;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
 /**
@@ -135,9 +135,9 @@ public class OID implements Cloneable, Comparable, java.io.Serializable
    * @param derIn The DER input stream.
    * @param len   The number of bytes in the encoded form.
    * @throws IOException If an error occurs reading the OID.
- * @throws GbayCryptoException 
+ * @throws CryptoException 
    */
-  public OID(InputStream derIn, int len) throws IOException, GbayCryptoException
+  public OID(InputStream derIn, int len) throws IOException, CryptoException
   {
     this(derIn, len, false);
   }
@@ -152,9 +152,9 @@ public class OID implements Cloneable, Comparable, java.io.Serializable
    * @param len   The number of bytes in the encoded form.
    * @param relative The relative flag.
    * @throws IOException If an error occurs reading the OID.
- * @throws GbayCryptoException 
+ * @throws CryptoException 
    */
-  public OID(InputStream derIn, int len, boolean relative) throws IOException, GbayCryptoException
+  public OID(InputStream derIn, int len, boolean relative) throws IOException, CryptoException
   {
     der = new byte[len];
     derIn.read(der);
@@ -167,7 +167,7 @@ public class OID implements Cloneable, Comparable, java.io.Serializable
       {
         aioobe.printStackTrace();
         throw aioobe;
-      } catch (GbayCryptoException e) {
+      } catch (CryptoException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 		throw e;
@@ -179,9 +179,9 @@ public class OID implements Cloneable, Comparable, java.io.Serializable
    *
    * @param encoded The DER encoded OID.
    * @throws IOException If an error occurs reading the OID.
- * @throws GbayCryptoException 
+ * @throws CryptoException 
    */
-  public OID(byte[] encoded) throws IOException, GbayCryptoException
+  public OID(byte[] encoded) throws IOException, CryptoException
   {
     this(encoded, false);
   }
@@ -191,9 +191,9 @@ public class OID implements Cloneable, Comparable, java.io.Serializable
    *
    * @param encoded The encoded relative OID.
    * @param relative The relative flag.
- * @throws GbayCryptoException 
+ * @throws CryptoException 
    */
-  public OID(byte[] encoded, boolean relative) throws IOException, GbayCryptoException
+  public OID(byte[] encoded, boolean relative) throws IOException, CryptoException
   {
     der = (byte[]) encoded.clone();
     this.relative = relative;
@@ -205,7 +205,7 @@ public class OID implements Cloneable, Comparable, java.io.Serializable
       {
         aioobe.printStackTrace();
         throw aioobe;
-      } catch (GbayCryptoException e) {
+      } catch (CryptoException e) {
 		// TODO Auto-generated catch block
 		throw e;
 	}
@@ -407,7 +407,7 @@ public class OID implements Cloneable, Comparable, java.io.Serializable
   // ------------------------------------------------------------------------
 
   private static int[] fromDER(byte[] der, boolean relative)
-    throws GbayCryptoException
+    throws CryptoException
   {
     // cannot be longer than this.
     int[] components = new int[der.length + 1];
@@ -433,7 +433,7 @@ public class OID implements Cloneable, Comparable, java.io.Serializable
             components[count] <<= 7;
             components[count]  |= j & 0x7F;
             if (i >= der.length && (j & 0x80) != 0)
-              throw new GbayCryptoException(new CryptoError(GlobalErrorCode.ENTITY_INCORRECT_FORMAT));
+              throw new CryptoException(new CryptoError(GlobalErrorCode.ENTITY_INCORRECT_FORMAT));
           }
         while ((j & 0x80) != 0);
         count++;

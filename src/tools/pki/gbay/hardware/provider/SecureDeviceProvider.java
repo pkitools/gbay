@@ -11,7 +11,7 @@ import tools.pki.gbay.crypto.texts.PlainText;
 import tools.pki.gbay.crypto.texts.SignedText;
 import tools.pki.gbay.crypto.texts.VerifiedText;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 import tools.pki.gbay.hardware.pkcs11.TokenFinderInterFace;
 
@@ -41,31 +41,31 @@ public class SecureDeviceProvider extends PKCS11Supplier implements CryptoServic
 
 	@Override
 	public VerifiedText verify(SignedText text, PlainText originalText)
-			throws GbayCryptoException {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.REQ_METHOD_NOT_ALLOWED));
+			throws CryptoException {
+			throw new CryptoException(new CryptoError(GlobalErrorCode.REQ_METHOD_NOT_ALLOWED));
 	}
 
 	
 
 	@Override
-	public CMSSignedData getSignedData() throws GbayCryptoException {
+	public CMSSignedData getSignedData() throws CryptoException {
 		if (variables.signingResult != null)
 		return variables.signingResult;
 		else{
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.REQ_PARAMETER_FAILED));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.REQ_PARAMETER_FAILED));
 		}
 	}
 
 	@Override
-	public SignedText sign(PlainText text) throws GbayCryptoException {
+	public SignedText sign(PlainText text) throws CryptoException {
 		variables.plainText = text.toString();
 		try{
 		signText();
 		if (variables.signingResult != null)
 			return (new SignedText(variables.plainText, variables.signingResult.getEncoded(), variables.getCerts()));
 		} catch (IOException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
-		} catch (GbayCryptoException e) {
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+		} catch (CryptoException e) {
 			throw e;
 		}
 		/*
@@ -81,7 +81,7 @@ public class SecureDeviceProvider extends PKCS11Supplier implements CryptoServic
 	}
 
 	@Override
-	public EncryptedText encrypt(PlainText text) throws GbayCryptoException {
+	public EncryptedText encrypt(PlainText text) throws CryptoException {
 		// TODO Auto-generated method stub
 		return null;
 	}

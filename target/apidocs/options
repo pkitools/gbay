@@ -1,0 +1,24 @@
+-classpath
+'C:/Users/farhang/.m2/repository/org/bouncycastle/bcprov-ext-jdk15on/1.50/bcprov-ext-jdk15on-1.50.jar;C:/Users/farhang/.m2/repository/org/bouncycastle/bcmail-jdk15on/1.50/bcmail-jdk15on-1.50.jar;C:/Users/farhang/.m2/repository/org/bouncycastle/bcpkix-jdk15on/1.50/bcpkix-jdk15on-1.50.jar;C:/Users/farhang/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar;C:/Users/farhang/.m2/repository/com/google/inject/guice/3.0/guice-3.0.jar;C:/Users/farhang/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.50/bcprov-jdk15on-1.50.jar;C:/Users/farhang/.m2/repository/commons-io/commons-io/2.1/commons-io-2.1.jar;C:/Users/farhang/.m2/repository/commons-codec/commons-codec/1.10/commons-codec-1.10.jar;C:/Users/farhang/.m2/repository/com/itextpdf/itextpdf/5.1.3/itextpdf-5.1.3.jar;C:/Users/farhang/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar;C:/Users/farhang/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar;C:/Users/farhang/.m2/repository/com/google/guava/guava/18.0/guava-18.0.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'F:/AEGIS/Workspace/PkiTools/src'
+-author
+-bottom
+'Copyright &#169; 2015 <a href="http://www.pki.tools">PKI Tools</a>. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'F:/AEGIS/Workspace/PkiTools/target/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'GBay Simple Crypto 0.0.1-SNAPSHOT API'
+-linkoffline
+'http://docs.oracle.com/javase/6/docs/api' 'F:/AEGIS/Workspace/PkiTools/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'GBay Simple Crypto 0.0.1-SNAPSHOT API'

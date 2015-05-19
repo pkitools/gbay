@@ -13,11 +13,11 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
-import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
-import tools.pki.gbay.errors.GlobalErrorCode;
-
 import org.apache.log4j.Logger;
+
+import tools.pki.gbay.errors.CryptoError;
+import tools.pki.gbay.errors.CryptoException;
+import tools.pki.gbay.errors.GlobalErrorCode;
 
 public class Connection {
 	static Logger log = Logger.getLogger(Connection.class);
@@ -51,7 +51,7 @@ public class Connection {
 	 * @return The selected token or null, if no token is available or the user
 	 *         canceled the action.
 	 * @throws TokenException
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 * @throws Exception
 	 * @preconditions (pkcs11Module <> null) and (output <> null) and (input <>
 	 *                null)
@@ -60,7 +60,7 @@ public class Connection {
 
 	public static Token selectToken(Module pkcs11Module,
 			TokenFinderInterFace tokenDetectionListener, long mechanism)
-			throws TokenException, GbayCryptoException {
+			throws TokenException, CryptoException {
 		// Hashtable tokenList = null;
 
 		if (pkcs11Module == null) {
@@ -89,7 +89,7 @@ public class Connection {
 		Token token = null;
 		Long selectedTokenID = null;
 		if (tokens.length == 0) {
-			throw new GbayCryptoException(new CryptoError(
+			throw new CryptoException(new CryptoError(
 					GlobalErrorCode.TOKEN_NOT_DETECTED));
 		} else if (tokens.length == 1) {
 			selectedTokenID = new Long(tokens[0].getTokenID());
@@ -105,7 +105,7 @@ public class Connection {
 						selectedTokenID = tokenDetectionListener
 								.selectToken(tokens);
 					} catch (Exception e) {
-						throw new GbayCryptoException(new CryptoError(
+						throw new CryptoException(new CryptoError(
 								GlobalErrorCode.ENTITY_INCORRECT_FORMAT));
 
 					}

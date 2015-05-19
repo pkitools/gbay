@@ -1,7 +1,7 @@
 
 /*
- * Copyright (c) 2014, Araz
- * All rights reserved.
+ * GBAy Crypto API
+ * Copyright (c) 2014, PKI.Tools All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -48,8 +48,9 @@ import javax.security.auth.x500.X500Principal;
 import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.keys.validation.CertificateRevocationList;
+import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 import tools.pki.gbay.util.general.Convertors;
 
@@ -70,11 +71,24 @@ import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 
+import com.google.inject.Inject;
+
+// TODO: Auto-generated Javadoc
+/**
+ * The Class StandardCertificate.
+ */
 public class StandardCertificate implements CertificateInterface {
+
+	@Inject
+	SignatureSettingInterface settings;
+
 	/** The Constant log. */
 	static final Logger log = Logger.getLogger(StandardCertificate.class);
 
+	/** The certificate. */
 	protected java.security.cert.X509Certificate certificate;
+	
+	/** The crl. */
 	protected X509CRL crl;
 	private byte[] digest;
 	private Date endDate;
@@ -90,23 +104,55 @@ public class StandardCertificate implements CertificateInterface {
 	private String userCommonName;
 	private byte[] value;
 	private X500Name x500name;
+	
+	/** The issuer. */
 	CertificateIssuer issuer;
+	
+	/**
+	 * The Enum KeyUsage.
+	 */
 	enum KeyUsage{
-	           digitalSignature(0),
-	           nonRepudiation(1),
+	           
+           	/** The digital signature. */
+           	digitalSignature(0),
+	           
+           	/** The non repudiation. */
+           	nonRepudiation(1),
 	           //-- recent editions of X.509 have -- renamed this bit to contentCommitment
-	           keyEncipherment(2),
-	           dataEncipherment        (3),
-	           keyAgreement            (4),
-	           keyCertSign             (5),
-	           cRLSign                 (6),
-	           encipherOnly            (7),
-	           decipherOnly            (8);
-	           public final int id;
+	           /** The key encipherment. */
+           	keyEncipherment(2),
+	           
+           	/** The data encipherment. */
+           	dataEncipherment        (3),
+	           
+           	/** The key agreement. */
+           	keyAgreement            (4),
+	           
+           	/** The key cert sign. */
+           	keyCertSign             (5),
+	           
+           	/** The c rl sign. */
+           	cRLSign                 (6),
+	           
+           	/** The encipher only. */
+           	encipherOnly            (7),
+	           
+           	/** The decipher only. */
+           	decipherOnly            (8);
+	           
+           	/** The id. */
+           	public final int id;
 	        private KeyUsage(int i) {
 	        	this.id = i;
 			}   
-	   		public static KeyUsage GetUsage(int _id) {
+	   		
+		   	/**
+		   	 * Gets the usage.
+		   	 *
+		   	 * @param _id the _id
+		   	 * @return the key usage
+		   	 */
+		   	public static KeyUsage GetUsage(int _id) {
 				KeyUsage[] As = KeyUsage.values();
 				for (int i = 0; i < As.length; i++) {
 					if (As[i].Compare(_id))
@@ -118,16 +164,31 @@ public class StandardCertificate implements CertificateInterface {
 			private boolean Compare(int _id) {
 				return id == _id;
 			}
+			
+			/**
+			 * Gets the id.
+			 *
+			 * @return the id
+			 */
 			public  long getID(){
 				return id;
 			}
 			
 
 	}
+	
+	/**
+	 * The Constructor.
+	 */
 	public StandardCertificate() {
 		super();
 	}
 
+	/**
+	 * Extract cert detail.
+	 *
+	 * @param certificate the certificate
+	 */
 	protected void extractCertDetail(X509Certificate certificate) {
 			this.certificate = certificate;
 			this.startDate = certificate.getNotBefore();
@@ -175,7 +236,13 @@ public class StandardCertificate implements CertificateInterface {
 	
 		}
 
-	public List<CertificateRevocationList> extractCRL() throws GbayCryptoException {
+	/**
+	 * Extract crl.
+	 *
+	 * @return the list< certificate revocation list>
+	 * @throws CryptoException the gbay crypto exception
+	 */
+	public List<CertificateRevocationList> extractCRL() throws CryptoException {
 		List<CertificateRevocationList> list = new ArrayList<CertificateRevocationList>();
 	
 		try {
@@ -186,20 +253,20 @@ public class StandardCertificate implements CertificateInterface {
 				list.add(crl);
 			}
 		} catch (CertificateParsingException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 		} catch (CertificateException e) {
 			
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 		} catch (CRLException e) {
 			if (PropertyFileConfiguration.DEBUG){
 				e.printStackTrace();
 			}
 			log.error("CRL Exception happened, CERT's CRL had invalid format");
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.ENTITY_INCORRECT_FORMAT,"Cert CRL has invalid format"));	
+			throw new CryptoException(new CryptoError(GlobalErrorCode.ENTITY_INCORRECT_FORMAT,"Cert CRL has invalid format"));	
 		} catch (IOException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
 		} catch (NamingException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_SIGNATURE));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_SIGNATURE));
 		}
 		return list;
 	
@@ -250,20 +317,41 @@ public class StandardCertificate implements CertificateInterface {
 				return crlUrls;
 			}
 
+	/**
+	 * Gets the crl distrubiution point.
+	 *
+	 * @return the CRL distrubiution point
+	 * @throws IOException the IO exception
+	 */
 	protected String getCRLDistrubiutionPoint() throws IOException {
 		return getExtensionValue("2.5.29.31");
 	}
 
+	/**
+	 * Gets the digest.
+	 *
+	 * @return the digest
+	 */
 	public byte[] getDigest() {
 		return digest;
 	}
 
 	
+	/* (non-Javadoc)
+	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#getEndDate()
+	 */
 	@Override
 	public Date getEndDate() {
 		return endDate;
 	}
 
+	/**
+	 * Gets the extension value.
+	 *
+	 * @param oid the oid
+	 * @return the extension value
+	 * @throws IOException the IO exception
+	 */
 	public String getExtensionValue(String oid) throws IOException {
 		return getExtensionValue(certificate, oid);
 	}
@@ -289,18 +377,38 @@ public class StandardCertificate implements CertificateInterface {
 				return decoded;
 			}
 
+	/**
+	 * Gets the finger print.
+	 *
+	 * @return the finger print
+	 */
 	public byte[] getFingerPrint() {
 		return fingerPrint;
 	}
 
+	/**
+	 * Gets the issuer dn.
+	 *
+	 * @return the issuer dn
+	 */
 	public String getIssuerDN() {
 		return certificate.getIssuerDN().toString();
 	}
 
+	/**
+	 * Gets the label.
+	 *
+	 * @return the label
+	 */
 	public String getLabel() {
 		return label;
 	}
 
+	/**
+	 * Gets the public exponent.
+	 *
+	 * @return the public exponent
+	 */
 	public BigInteger getPublicExponent() {
 		return PublicExponent;
 	}
@@ -309,6 +417,11 @@ public class StandardCertificate implements CertificateInterface {
 	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#getSerialNumber()
 	 */
 	
+	/**
+	 * Gets the serial number.
+	 *
+	 * @return the serial number
+	 */
 	@Override
 	public String getSerialNumber() {
 		return serialNumber;
@@ -330,31 +443,59 @@ public class StandardCertificate implements CertificateInterface {
 		return subjectDN;
 	}
 
+	/**
+	 * Gets the subject key identifier.
+	 *
+	 * @return the subject key identifier
+	 */
 	public byte[] getSubjectKeyIdentifier() {
 		return subjectKeyIdentifier;
 	}
 
+	/**
+	 * Gets the user common name.
+	 *
+	 * @return the user common name
+	 */
 	public String getUserCommonName() {
 		return userCommonName;
 	}
 
+	/**
+	 * Gets the value.
+	 *
+	 * @return the value
+	 */
 	public byte[] getValue() {
 		return value;
 	}
 
+	/**
+	 * Gets the x500name.
+	 *
+	 * @return the x500name
+	 */
 	public X500Name getX500name() {
 		return x500name;
 	}
 
-	public boolean isRevoked(X509CRL crl) throws GbayCryptoException {
+	/**
+	 * Checks if is revoked.
+	 *
+	 * @param crl the crl
+	 * @return true, if checks if is revoked
+	 * @throws CryptoException the gbay crypto exception
+	 */
+	public boolean isRevoked(X509CRL crl) throws CryptoException {
 		if (crl==null)
 			crl = extractCRL().get(0).getCrl();
 		return crl.isRevoked(certificate);
 	}
 
 	/**
-	 * @param value
-	 *            the value to set
+	 * Sets the value.
+	 *
+	 * @param value            the value to set
 	 */
 	public void setValue(byte[] value) {
 		this.value = value;
@@ -380,29 +521,46 @@ public class StandardCertificate implements CertificateInterface {
 		return this.issuer.getName();
 	}
 
+	/* (non-Javadoc)
+	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#setEndDate(java.util.Date)
+	 */
 	@Override
 	public void setEndDate(Date end) {
 		this.endDate = end;
 		
 	}
 
-	@Override
+	/**
+	 * Sets the serial number.
+	 *
+	 * @param SerialNumber the serial number
+	 */
 	public void setSerialNumber(String SerialNumber) {
 		this.serialNumber = SerialNumber;
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#setStartDate(java.util.Date)
+	 */
 	@Override
 	public void setStartDate(Date start) {
 		this.startDate = start;
 		
 	}
 
-	@Override
+	/**
+	 * Sets the subject dn.
+	 *
+	 * @param sdn the subject dn
+	 */
 	public void setSubjectDN(String sdn) {
 this.subjectDN = sdn;
 	}
 
+	/* (non-Javadoc)
+	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#setIssuerName(java.lang.String)
+	 */
 	@Override
 	public void setIssuerName(String IssuerName) {
 		this.issuer.setName(IssuerName);

@@ -3,7 +3,7 @@ package tools.pki.gbay.crypto.texts;
 
 import java.io.File;
 
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.util.general.CryptoFile;
 import tools.pki.gbay.util.general.FileInterface;
 
@@ -55,9 +55,9 @@ public abstract class BasicText {
 	/**
 	 * Generate text from file
 	 * @param container file
-	 * @throws GbayCryptoException if file not found our couldn't be read
+	 * @throws CryptoException if file not found our couldn't be read
 	 */
-	public BasicText(File container) throws GbayCryptoException {
+	public BasicText(File container) throws CryptoException {
 		FileInterface af = new CryptoFile(container.getAbsolutePath());
 		byteRep = af.toByte();
 	}

@@ -9,7 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import tools.pki.gbay.errors.CryptoError;
-import  tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 import tools.pki.gbay.util.general.CryptoFile;
 import tools.pki.gbay.util.general.FileInterface;
@@ -105,7 +105,7 @@ public class Base64 implements EncodedTextInterface {
 	 * To encode a plain inputStream
 	 * @param plainInputStream
 	 */
-	public Base64(InputStream plainInputStream) throws GbayCryptoException {
+	public Base64(InputStream plainInputStream) throws CryptoException {
 		log.info("Reading input stream");
     	try {
 			byte[] bytes = IOUtils.toByteArray(plainInputStream);
@@ -113,7 +113,7 @@ public class Base64 implements EncodedTextInterface {
     		log.debug("InputStream Encoded");
 
     	} catch (IOException e1) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
 		}
     	
 
@@ -122,9 +122,9 @@ public class Base64 implements EncodedTextInterface {
 	/**
 	 * Load a file into base64 format
 	 * @param fileAddress
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 */
-	public Base64(File fileAddress) throws GbayCryptoException{
+	public Base64(File fileAddress) throws CryptoException{
 		FileInterface af = new CryptoFile(fileAddress.getAbsolutePath());
 		this.encodedText =org.bouncycastle.util.encoders.Base64.encode(af.toByte());
 	}

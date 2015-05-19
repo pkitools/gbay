@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import  tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 
 public class X500DistinguishedName implements Principal
 {
@@ -113,13 +113,13 @@ public X500DistinguishedName()
       }
   }
 
-  public X500DistinguishedName(byte[] encoded) throws IOException, GbayCryptoException
+  public X500DistinguishedName(byte[] encoded) throws IOException, CryptoException
   {
     this();
     parseDer(new DERReader(encoded));
   }
 
-  public X500DistinguishedName(InputStream encoded) throws IOException, GbayCryptoException
+  public X500DistinguishedName(InputStream encoded) throws IOException, CryptoException
   {
     this();
     parseDer(new DERReader(encoded));
@@ -341,7 +341,7 @@ public String toString()
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-public byte[] getDer() throws GbayCryptoException
+public byte[] getDer() throws CryptoException
   {
     if (fixed && encoded != null)
       return (byte[]) encoded.clone();
@@ -513,7 +513,7 @@ public byte[] getDer() throws GbayCryptoException
       }
   }
 
-  private void parseDer(DERReader der) throws IOException, GbayCryptoException
+  private void parseDer(DERReader der) throws IOException, CryptoException
   {
     DERValue name = der.read();
     if (!name.isConstructed())

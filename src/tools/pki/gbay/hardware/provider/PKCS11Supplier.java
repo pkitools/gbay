@@ -51,7 +51,7 @@ import tools.pki.gbay.configuration.DefualtSignatureSetting;
 import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.texts.BasicText;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 import tools.pki.gbay.hardware.cms.ManualCMSGenerator;
 import tools.pki.gbay.hardware.cms.ManualSignerInfoGenerator;
@@ -118,9 +118,9 @@ public class PKCS11Supplier {
 	 * require no arguments; the message to sign is the fixed word "CIAO".
 	 * 
 	 * @param args
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException 
 	 */
-	public static void main(String[] args) throws GbayCryptoException {
+	public static void main(String[] args) throws CryptoException {
 		// Security.insertProviderAt(new MyPKCS11Provider(), 2);
 
 		
@@ -264,10 +264,10 @@ for(int i =0 ;i<1 ; i++){
 	 * @return true if a token with corresponding candidate cryptoki was
 	 *         detected.
 	 * @throws IOException
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 *             NO_TOKEN_DETECTED if can't find any smart card
 	 */
-	public List<CardInfo> detectCardAndCriptoki(HashSet<String> candidateCards) throws GbayCryptoException {
+	public List<CardInfo> detectCardAndCriptoki(HashSet<String> candidateCards) throws CryptoException {
 		CardInfo ci = null;
 
 //		while (candidateCards.)
@@ -310,7 +310,7 @@ for(int i =0 ;i<1 ; i++){
 				setCryptokiLib(ci.getProperty("lib"));
 			} else{
 				log.info("Sorry, no card detected!");
-				throw new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_INSIDE));
+				throw new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_INSIDE));
 			}
 		} else 
 			log.info("\n\nFor signing we are forcing use of cryptoki: '"
@@ -328,10 +328,10 @@ for(int i =0 ;i<1 ; i++){
 	 * @return true if a token with corresponding candidate cryptoki was
 	 *         detected.
 	 * @throws IOException
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 *             NO_TOKEN_DETECTED if can't find any smart card
 	 */
-	private boolean detectCardAndCriptoki() throws GbayCryptoException {
+	private boolean detectCardAndCriptoki() throws CryptoException {
 		CardInfo ci = null;
 
 		boolean cardPresent = false;
@@ -366,7 +366,7 @@ for(int i =0 ;i<1 ; i++){
 				setCryptokiLib(ci.getProperty("lib"));
 			} else{
 				log.info("Sorry, no card detected!");
-				throw new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_DETECTED));
+				throw new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_DETECTED));
 			}
 		} else 
 			log.info("\n\nFor signing we are forcing use of cryptoki: '"
@@ -452,11 +452,11 @@ for(int i =0 ;i<1 ; i++){
 	 *            the list which the signer certificate is to be added to.
 	 * @return the <code>ManualSignerInfoGenerator</code> containing all signer
 	 *         informations.
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException 
 	 */
 	ManualSignerInfoGenerator getSignerInfoGenerator(CMSProcessable msg,
 			String digestAlg, String encryptionAlg, boolean digestOnToken,
-			ArrayList<X509Certificate> certList) throws GbayCryptoException {
+			ArrayList<X509Certificate> certList) throws CryptoException {
 
 		ManualSignerInfoGenerator signerGenerator = new ManualSignerInfoGenerator(
 				digestAlg, encryptionAlg);
@@ -589,7 +589,7 @@ for(int i =0 ;i<1 ; i++){
 
 					signAgent.libFinalize();
 					log.info("Criptoki library finalized.");
-					throw new GbayCryptoException(new CryptoError(
+					throw new CryptoException(new CryptoError(
 							GlobalErrorCode.KEY_NOT_FOUND));
 					}
 				}// suitable token found
@@ -637,27 +637,27 @@ for(int i =0 ;i<1 ; i++){
 				}catch (NoSuchAlgorithmException e1) {
 					log.error("Signer info generation failed , We couldn't make CMS"+e1);
 					
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
 				} catch (NoSuchPaddingException e1) {
 					log.error("Signer info generation failed , We couldn't make CMS"+e1);
 
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_PADDING));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_PADDING));
 				} catch (InvalidKeyException e2) {
 					log.error("Signer info generation failed , We couldn't make CMS"+e2);
 
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID));
 				} catch (IllegalStateException e) {
 					log.error("Signer info generation failed , We couldn't make CMS"+e);
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 				} catch (IllegalBlockSizeException e) {
 					log.error("Signer info generation failed , We couldn't make CMS"+e);
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 				} catch (BadPaddingException e) {
 					log.error("Signer info generation failed , We couldn't make CMS"+e);
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_PADDING));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_PADDING));
 				} catch (NoSuchProviderException e) {
 					log.error("Signer info generation failed , We couldn't make CMS"+e);
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
 				}
 
 				signerGenerator.setCertificate(javaCert);
@@ -667,7 +667,7 @@ for(int i =0 ;i<1 ; i++){
 
 			} else
 				signerGenerator = null;
-		}catch(GbayCryptoException e){
+		}catch(CryptoException e){
 			throw e;
 		}
 		catch (TokenException e) {
@@ -682,17 +682,17 @@ for(int i =0 ;i<1 ; i++){
 			if (e instanceof TokenException){
 				System.err.println("Token Exception");
 				System.out.println(((TokenException)e).getMessage());
-				 throw new GbayCryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));				
+				 throw new CryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));				
 			}
 			else{
 				
-				 throw new GbayCryptoException(e);				
+				 throw new CryptoException(e);				
 					
 			}
 		} catch (Throwable e) {
 			
 			log.error(e);
-			 throw new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_ERR_LOAD_LIBRARY));
+			 throw new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_ERR_LOAD_LIBRARY));
 				
 		}
 
@@ -798,10 +798,10 @@ for(int i =0 ;i<1 ; i++){
 	 * Sign (possibly multiple) digital signatures using PKCS#11 tokens. After
 	 * correct verification of all signatures, the CMS signed message is saved
 	 * on the filesystem under the users's home directory.
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException 
 	 * 
 	 */
-	public void signText() throws GbayCryptoException {
+	public void signText() throws CryptoException {
 
 		if (variables.plainText != null){
 
@@ -925,32 +925,32 @@ for(int i =0 ;i<1 ; i++){
 				log.info("Sigining was done successfully");
 			}
 		}
-		catch(GbayCryptoException e){
+		catch(CryptoException e){
 			throw e;
 		
 		} catch (IOException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND,variables.filePath));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND,variables.filePath));
 		} catch (InvalidAlgorithmParameterException e) {
 			log.error(e);
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
 		} catch (NoSuchAlgorithmException e) {
 			log.error(e);
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
 		} catch (NoSuchProviderException e) {
 			log.error(e);
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
 		} catch (CertStoreException e) {
 			log.error(e);
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID));
 		} catch (CMSException e) {
 			log.error(e);
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.ENTITY_INCORRECT_FORMAT));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.ENTITY_INCORRECT_FORMAT));
 		}
 		
 		}
 		else  {
 			log.error("You hav not provide original text");
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.REQ_PARAMETER_FAILED));	
+			throw new CryptoException(new CryptoError(GlobalErrorCode.REQ_PARAMETER_FAILED));	
 		}
 	}
 

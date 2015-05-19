@@ -6,7 +6,10 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>GBay Simple Crypto</name>
 	<url>http://pki.tools</url>
-
+	<issueManagement>
+		<url>https://github.com/pkitools/gbay/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
 
 	<description>Easy to use cryptography library </description>
 
@@ -15,6 +18,7 @@
 		<junit.version>4.11</junit.version>
 		<log4j.version>1.2.17</log4j.version>
 		<bc.version>1.50</bc.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 	</properties>
 
@@ -125,58 +129,142 @@
 		<finalName>gbay</finalName>
 		<plugins>
 
-			<!-- download source code in Eclipse, best practice -->
+
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>downloads-maven-plugin</artifactId>
+				<version>0.6</version>
+				<configuration>
+					<description>Official ${project.name} build of the
+						${project.version} release</description>
+					<override>true</override>
+					<includeAttached>true</includeAttached>
+					<server>github</server>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>upload</goal>
+						</goals>
+						<phase>install</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.7</version>
+				<configuration>
+					<message>Building site for ${project.version}</message>
+					<server>github</server>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>site</phase>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.9</version>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.0</version>
 				<configuration>
-					<downloadSources>true</downloadSources>
-					<downloadJavadocs>false</downloadJavadocs>
+					<reportPlugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-project-info-reports-plugin</artifactId>
+							<version>2.2</version>
+							<configuration>
+								<dependencyDetailsEnabled>true</dependencyDetailsEnabled>
+								<dependencyLocationsEnabled>true</dependencyLocationsEnabled>
+							</configuration>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<version>2.7</version>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-report-plugin</artifactId>
+							<version>2.6</version>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-checkstyle-plugin</artifactId>
+							<version>2.6</version>
+						</plugin>
+					</reportPlugins>
 				</configuration>
 			</plugin>
-
-			<!-- Set a JDK compiler level -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
+					<source>1.6</source>
+					<target>1.6</target>
 				</configuration>
 			</plugin>
-
-			<!-- Make this jar executable -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
-					<!-- DO NOT include log4j.properties file in your Jar -->
-					<excludes>
-						<exclude>**/log4j.properties</exclude>
-					</excludes>
-
 					<archive>
 						<manifest>
-							<!-- Jar file entry point -->
-							<mainClass>tools.pki.gbay.crypto.Startup</mainClass>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 						</manifest>
 					</archive>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+						<configuration>
+				<!-- DO NOT include log4j.properties file in your Jar -->
+				<excludes>
+					<exclude>**/log4j.properties</exclude>
+				</excludes>
 
+				<archive>
+					<manifest>
+						<!-- Jar file entry point -->
+						<mainClass>tools.pki.gbay.crypto.Startup</mainClass>
+					</manifest>
+				</archive>
+			</configuration>
+				
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+	
 		</plugins>
 	</build>
 	<organization>
 		<name>PKI Tools</name>
 		<url>http://www.pki.tools</url>
 	</organization>
-	<issueManagement>
-		<url>https://github.com/pkitools/gbay/issues</url>
-		<system>GitHub Issues</system>
-	</issueManagement>
+	
 
 	<licenses>
 		<license>
@@ -189,16 +277,15 @@
 	<scm>
 		<url>https://github.com/pkitools/gbay</url>
 		<connection>scm:git:git://github.com/pkitools/gbay.git</connection>
-		<developerConnection>scm:git:nilnull@github.com:pkitools/gbay.git</developerConnection>
+		<developerConnection>scm:git:git@github.com:pkitools/gbay.git</developerConnection>
 	</scm>
 
 	<developers>
 		<developer>
 			<email>a.farhang.d@gmail.com</email>
 			<name>A Farhang</name>
-			<url>https://github.com/nilnull</url>
+			<url>https://github.com/pkitools</url>
 			<id>nilnull</id>
 		</developer>
 	</developers>
-
 </project>

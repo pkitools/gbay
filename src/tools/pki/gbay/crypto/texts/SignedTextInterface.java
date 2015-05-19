@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.Set;
 
 import tools.pki.gbay.crypto.keys.CertificateInterface;
+import tools.pki.gbay.crypto.keys.validation.CertificateChain;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.keys.validation.CertificateRevocationList;
 import tools.pki.gbay.crypto.provider.CryptoServiceProvider;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 
 public interface SignedTextInterface {
 
@@ -35,17 +36,17 @@ public interface SignedTextInterface {
 	public abstract void setOriginalText(PlainText originalText);
 
 	public abstract VerificationInterface verify(CryptoServiceProvider csp)
-			throws GbayCryptoException;
+			throws CryptoException;
 
 	/**
 	 * @return the caCert
 	 */
-	public abstract Set<CertificateIssuer> getTrustedIssuers();
+	public abstract CertificateChain getTrustedIssuers();
 
 	/**
 	 * @param caCert the caCert to set
 	 */
-	public abstract void setTrustedIssuers(Set<CertificateIssuer> trustedIssuers);
+	public abstract void setTrustedIssuers(CertificateChain trustedIssuers);
 
 	/**
 	 * @return the crl

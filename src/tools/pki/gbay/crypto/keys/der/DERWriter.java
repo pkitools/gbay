@@ -38,8 +38,6 @@ exception statement from your version. */
 
 package tools.pki.gbay.crypto.keys.der;
 
-import  tools.pki.gbay.errors.GbayCryptoException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,6 +48,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+
+import tools.pki.gbay.errors.CryptoException;
 
 /**
  * Methods that allow various Java types to be written as a DER
@@ -80,7 +80,7 @@ public class DERWriter implements DER
 
   @SuppressWarnings("rawtypes")
 public static int write(OutputStream out, DERValue object)
-    throws IOException, GbayCryptoException
+    throws IOException, CryptoException
   {
     if (DER.CONSTRUCTED_VALUE.equals (object.getValue ()))
       {
@@ -127,7 +127,7 @@ public static int write(OutputStream out, DERValue object)
         return buf.length;
       }
     else
-      throw new GbayCryptoException("cannot encode " + value.getClass().getName());
+      throw new CryptoException("cannot encode " + value.getClass().getName());
   }
 
   public static int definiteEncodingSize(int length)
@@ -181,7 +181,7 @@ public static int write(OutputStream out, DERValue object)
 
   @SuppressWarnings("rawtypes")
 private static int writeSequence(OutputStream out, List sequence)
-    throws IOException, GbayCryptoException
+    throws IOException, CryptoException
   {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     for (Iterator i = sequence.iterator(); i.hasNext(); )
@@ -196,7 +196,7 @@ private static int writeSequence(OutputStream out, List sequence)
 
   @SuppressWarnings("rawtypes")
 private static int writeSet(OutputStream out, Set set)
-    throws IOException, GbayCryptoException
+    throws IOException, CryptoException
   {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     for (Iterator i = set.iterator(); i.hasNext(); )

@@ -27,11 +27,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
-import tools.pki.gbay.errors.GlobalErrorCode;
-
 import org.apache.log4j.Logger;
+
+import tools.pki.gbay.errors.CryptoError;
+import tools.pki.gbay.errors.CryptoException;
+import tools.pki.gbay.errors.GlobalErrorCode;
 
 /**
  * This class uses the PKCS#11 Java api provieded by <a
@@ -136,11 +136,11 @@ public class PKCS11Manager {
 	 * Get the PKCS11 device manager
 	 * @param cryptokiLib PKCS11 driver library address
 	 * @return
-	 * @throws GbayCryptoException PKCS11 Exceptions
+	 * @throws CryptoException PKCS11 Exceptions
 	 * @throws IOException
 	 * @throws TokenException
 	 */
-    public static PKCS11Manager getInstance(String cryptokiLib) throws GbayCryptoException, IOException, TokenException {
+    public static PKCS11Manager getInstance(String cryptokiLib) throws CryptoException, IOException, TokenException {
 
     	if(instance == null) {
 	         return new PKCS11Manager(cryptokiLib);
@@ -171,7 +171,7 @@ public class PKCS11Manager {
 	
     @SuppressWarnings("unused")
 	private PKCS11Manager(String cryptokiLib, long mechanism,
-            java.io.PrintStream out) throws IOException, TokenException, GbayCryptoException, PrivilegedActionException {
+            java.io.PrintStream out) throws IOException, TokenException, CryptoException, PrivilegedActionException {
 
         this(cryptokiLib);
         initializeTokenAndMechanism(mechanism);
@@ -253,7 +253,7 @@ try{
     
 
     public PKCS11Manager(String cryptokiLib)
-            throws IOException, TokenException, GbayCryptoException {
+            throws IOException, TokenException, CryptoException {
         super();
 
         cryptokiLibrary = cryptokiLib;
@@ -272,9 +272,9 @@ try{
      * Initializes cryptoki library operations.
      * 
      * @throws PKCS11Exception
-     * @throws GbayCryptoException 
+     * @throws CryptoException 
      */
-    private void initializeLibrary() throws  GbayCryptoException {
+    private void initializeLibrary() throws  CryptoException {
         log.info("\ninitializing module ... ");
         try{
         	pkcs11Module.C_Initialize(null,false);
@@ -289,14 +289,14 @@ try{
 		} else {
 			log.error("Pkcs11 error: " + ex.getMessage());
 			isInitialized = false;
-			throw new GbayCryptoException(ex);
+			throw new CryptoException(ex);
 		}
         }
     
     }
 
     private void initializeTokenAndMechanism(long mechanism)
-            throws PKCS11Exception, GbayCryptoException {
+            throws PKCS11Exception, CryptoException {
         tokenHandle = getTokenSupportingMechanism(mechanism);
 
         if (tokenHandle >= 0) {
@@ -532,11 +532,11 @@ try{
      * @param data
      *            the data to sign.
      * @return a byte[] containing signed data.
-     * @throws GbayCryptoException 
+     * @throws CryptoException 
      * @throws IOException
      * @throws PKCS11Exception
      */
-    public byte[] signDataSinglePart(long signatureKeyHandle, byte[] data) throws GbayCryptoException
+    public byte[] signDataSinglePart(long signatureKeyHandle, byte[] data) throws CryptoException
             {
 
         byte[] signature = null;
@@ -558,7 +558,7 @@ try{
         } catch (PKCS11Exception e) {
 			
 			e.printStackTrace();
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));
 		}
         return signature;
 
@@ -610,7 +610,7 @@ try{
 
     // look for a RSA key and encrypt ...
     public byte[] encryptDigest(String label, byte[] digest)
-            throws PKCS11Exception, GbayCryptoException {
+            throws PKCS11Exception, CryptoException {
 
         byte[] encryptedDigest = null;
 
@@ -1207,9 +1207,9 @@ try{
      * Lists currently inserted tokens and relative infos.
      * 
      * @throws PKCS11Exception
-     * @throws GbayCryptoException 
+     * @throws CryptoException 
      */
-    public long[] getTokenList() throws PKCS11Exception, GbayCryptoException {
+    public long[] getTokenList() throws PKCS11Exception, CryptoException {
         log.info("\ngetting token list");
         long[] tokenIDs = null;
         //get only slots with a token present
@@ -1222,7 +1222,7 @@ try{
             tokenInfo.put(tokenIDs[i], currentToken) ;
         }
         if (tokenIDs.length == 0){
-        	throw new GbayCryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_DETECTED));
+        	throw new CryptoException(new CryptoError(GlobalErrorCode.TOKEN_NOT_DETECTED));
         }
 
         return tokenIDs;
@@ -1234,9 +1234,9 @@ try{
      * Gets informations on cryptographic operations supported by the tokens.
      * 
      * @throws PKCS11Exception
-     * @throws GbayCryptoException 
+     * @throws CryptoException 
      */
-    public void getMechanismInfo() throws PKCS11Exception, GbayCryptoException {
+    public void getMechanismInfo() throws PKCS11Exception, CryptoException {
         CK_MECHANISM_INFO mechanismInfo;
 
         log.info("\ngetting mechanism list...");
@@ -1258,7 +1258,7 @@ try{
     }
 
     
-    public long findSuitableToken(long mechanismCode) throws PKCS11Exception, GbayCryptoException {
+    public long findSuitableToken(long mechanismCode) throws PKCS11Exception, CryptoException {
         long token = -1L;
 
         ArrayList<Long> tokenList = findTokensSupportingMechanism(mechanismCode);
@@ -1290,7 +1290,7 @@ try{
     }
 
     public ArrayList<Long> findTokensSupportingMechanism(long mechanismCode)
-            throws PKCS11Exception, GbayCryptoException {
+            throws PKCS11Exception, CryptoException {
 
         ArrayList<Long> tokenList = null;
 
@@ -1317,10 +1317,10 @@ try{
      * @return the handle if the token supporting the given mechanism, -1
      *         otherwise.
      * @throws PKCS11Exception
-     * @throws GbayCryptoException 
+     * @throws CryptoException 
      */
     public long getTokenSupportingMechanism(long mechanismCode)
-            throws PKCS11Exception, GbayCryptoException {
+            throws PKCS11Exception, CryptoException {
 
         long token = -1L;
 
@@ -1424,7 +1424,7 @@ try{
     }
     
     
-    public void changePin(String password, String newPin, long tokenHandler) throws GbayCryptoException {
+    public void changePin(String password, String newPin, long tokenHandler) throws CryptoException {
     	try {
 
 			openSession(password.toCharArray(),true);
@@ -1437,13 +1437,13 @@ try{
 			System.err.println(e.getMessage());
     		if (e.getErrorCode() == CKR_PIN_INCORRECT){
 				log.info("User used an invalid pin, plz check your pin");
-				throw new GbayCryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));
+				throw new CryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));
 			} 
     		else if (e.getErrorCode() == CKR_PIN_LEN_RANGE){
-    			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.PIN_INVALID_LENGTH));
+    			throw new CryptoException(new CryptoError(GlobalErrorCode.PIN_INVALID_LENGTH));
     		}
     		else
-    			throw new GbayCryptoException(e);
+    			throw new CryptoException(e);
 		} catch (TokenException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1495,14 +1495,14 @@ try{
 	 * It will show you the information about the slot with the specified token
 	 * <b>Note: </b> You need to call getSlotList() before this 
 	 * @return the slotInfo
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException 
 	 * @see PKCS11Manager#getSlotList() 
 	 */
-	public HashMap<Long, CK_SLOT_INFO> getSlotInfo() throws GbayCryptoException {
+	public HashMap<Long, CK_SLOT_INFO> getSlotInfo() throws CryptoException {
 		try {
 			getSlotList();
 		} catch (PKCS11Exception e) {
-			throw new GbayCryptoException(e);
+			throw new CryptoException(e);
 		}
 		return slotInfo;
 	}
@@ -1513,11 +1513,11 @@ try{
 	 * @return the tokenInfo
 	 * @see PKCS11Manager#getTokenList();
 	 */
-	public HashMap<Long,CK_TOKEN_INFO> getTokenInfo() throws GbayCryptoException {
+	public HashMap<Long,CK_TOKEN_INFO> getTokenInfo() throws CryptoException {
 		try {
 			getTokenList();
 		} catch (PKCS11Exception e) {
-			throw new GbayCryptoException(e);	
+			throw new CryptoException(e);	
 		}
 		return tokenInfo;
 		

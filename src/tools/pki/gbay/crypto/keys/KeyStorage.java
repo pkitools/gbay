@@ -42,12 +42,15 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.google.inject.Inject;
+
 import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.crypto.provider.KeySelectionInterface;
+import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.texts.EncodedTextInterface;
 import tools.pki.gbay.crypto.texts.PlainText;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 import tools.pki.gbay.util.general.CryptoFile;
 
@@ -119,13 +122,50 @@ public class KeyStorage {
 		
 	}
 	
+SignatureSettingInterface setting;
+	
+	/**
+	 * Generate a keystore from a string
+	 * @param pin Pin number of store
+	 * @param storeContent string representror of keystrore
+	 * @throws CryptoException @see tools.pki.gbay.errors.GlobalErrorCode#PROVIDER_NOT_FOUND or @see tools.pki.gbay.errors.GlobalErrorCode#INVALID_ALGORITHM or @see tools.pki.gbay.errors.GlobalErrorCode#CERT_INVALID_FORMAT or @see tools.pki.gbay.errors.GlobalErrorCode#FILE_IO_ERROR or @link {@link KeyStoreException}
+	 */
+	@Inject
+	public KeyStorage(SignatureSettingInterface settings, char[] pin, PlainText storeContent) throws CryptoException  {
+		this.setting = settings;
+		this.pin = pin;
+		
+		try {
+			log.info("Key Store Content : \n" + storeContent.toHexadecimalString());
+			this.keyStore = getKeyStore(pin, storeContent.toByte());
+			getKeyAlias(keyStore);
+
+		} catch (KeyStoreException e) {
+			throw new CryptoException(e);
+		} catch (NoSuchProviderException e) {
+			throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_NOT_FOUND));
+		} catch (NoSuchAlgorithmException e) {
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+		} catch (CertificateException e) {
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+
+		}
+		
+	}
+
+
+	
+	
 /**
  * Generate a keystore from a string
  * @param pin Pin number of store
  * @param storeContent string representror of keystrore
- * @throws GbayCryptoException @see tools.pki.gbay.errors.GlobalErrorCode#PROVIDER_NOT_FOUND or @see tools.pki.gbay.errors.GlobalErrorCode#INVALID_ALGORITHM or @see tools.pki.gbay.errors.GlobalErrorCode#CERT_INVALID_FORMAT or @see tools.pki.gbay.errors.GlobalErrorCode#FILE_IO_ERROR or @link {@link KeyStoreException}
+ * @throws CryptoException @see tools.pki.gbay.errors.GlobalErrorCode#PROVIDER_NOT_FOUND or @see tools.pki.gbay.errors.GlobalErrorCode#INVALID_ALGORITHM or @see tools.pki.gbay.errors.GlobalErrorCode#CERT_INVALID_FORMAT or @see tools.pki.gbay.errors.GlobalErrorCode#FILE_IO_ERROR or @link {@link KeyStoreException}
  */
-	public KeyStorage(char[] pin, PlainText storeContent) throws GbayCryptoException  {
+	public KeyStorage(char[] pin, PlainText storeContent) throws CryptoException  {
 		this.pin = pin;
 		try {
 			log.info("Key Store Content : \n" + storeContent.toHexadecimalString());
@@ -133,16 +173,16 @@ public class KeyStorage {
 			getKeyAlias(keyStore);
 
 		} catch (KeyStoreException e) {
-			throw new GbayCryptoException(e);
+			throw new CryptoException(e);
 		} catch (NoSuchProviderException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_NOT_FOUND));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_NOT_FOUND));
 		} catch (NoSuchAlgorithmException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
 		} catch (CertificateException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 		} catch (IOException e) {
 			e.printStackTrace();
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
 
 		}
 }
@@ -164,22 +204,22 @@ public class KeyStorage {
 	 * @see tools.pki.gbay.util.general.CryptoFile#AegisFile(java.io.File, String) 
 	 * 
 	 * @param file p12 file. <i>Later on we may need to have other key stores supported</i> but now, just pfx
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 */
-	public KeyStorage(CryptoFile file) throws GbayCryptoException  {
+	public KeyStorage(CryptoFile file) throws CryptoException  {
 		this(file.getPin(), file.toPlainText());
 	}
 	
-	private void getKeyAlias(KeyStore keyStore2) throws  GbayCryptoException {
+	private void getKeyAlias(KeyStore keyStore2) throws  CryptoException {
 	try{
 		getKeyAlias(keyStore2, null);
 	} catch (KeyStoreException e) {
-		throw new GbayCryptoException(e);
+		throw new CryptoException(e);
 	} catch (NoSuchAlgorithmException e) {
-		throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+		throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
 	
 	} catch (UnrecoverableKeyException e) {
-		throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID));
+		throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID));
 	}
 	}
 
@@ -187,23 +227,23 @@ public class KeyStorage {
 	 * Generate KeyStore from a base64 string
 	 * @param pin pin of key
 	 * @param storeContent base64 representative of key store
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 */
-	public KeyStorage(char[] pin, EncodedTextInterface storeContent) throws GbayCryptoException  {
+	public KeyStorage(char[] pin, EncodedTextInterface storeContent) throws CryptoException  {
 try{
 		this.pin = pin;
 		this.keyStore = getKeyStore(pin, storeContent);
 		getKeyAlias(keyStore);
 } catch (KeyStoreException e) {
-	throw new GbayCryptoException(e);
+	throw new CryptoException(e);
 } catch (NoSuchProviderException e) {
-	throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
+	throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
 } catch (NoSuchAlgorithmException e) {
-	throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+	throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
 } catch (CertificateException e) {
-	throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+	throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 } catch (IOException e) {
-	throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+	throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
 
 }
 	}
@@ -213,9 +253,9 @@ try{
 	 * @param pin
 	 * @param byteArray
 	 * @param alias
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 */
-	public KeyStorage(char[] pin, PlainText storeContent, String alias) throws GbayCryptoException 
+	public KeyStorage(char[] pin, PlainText storeContent, String alias) throws CryptoException 
 			 {
 		try{
 		this.pin = pin;
@@ -224,18 +264,18 @@ try{
 		getKeyAlias(keyStore , alias);
 		
 				} catch (KeyStoreException e) {
-					throw new GbayCryptoException(e);
+					throw new CryptoException(e);
 				} catch (NoSuchProviderException e) {
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_PROVIDER_NOT_FOUND));
 				} catch (NoSuchAlgorithmException e) {
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
 				} catch (CertificateException e) {
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 				} catch (IOException e) {
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
 
 				} catch (UnrecoverableKeyException e) {
-					throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID));
+					throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID));
 				}
 	}
 
@@ -268,7 +308,7 @@ try{
 
 	@SuppressWarnings("rawtypes")
 	private void getKeyAlias(KeyStore keystore , String selectedAlias ) throws KeyStoreException,
-			NoSuchAlgorithmException, UnrecoverableKeyException, GbayCryptoException {
+			NoSuchAlgorithmException, UnrecoverableKeyException, CryptoException {
 		if (selectedAlias == null){
 		Enumeration ale = keystore.aliases();
 		this.publicKeys = new ArrayList<CertificateValiditor>();
@@ -288,17 +328,22 @@ try{
 		}
 	}
 	
-	private void addKeysofAlias(KeyStore keystore, String alias) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, GbayCryptoException{
+	private void addKeysofAlias(KeyStore keystore, String alias) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CryptoException{
 		this.aliases.add(alias);
+		log.info("Alias added");
+		CertificateValiditor cv ;
 		if (keystore.isKeyEntry(alias)) {
 			keyAlias.add(alias);
-			keyCouples.add(new CoupleKey(getPrivateKey(keystore, alias,pin), new CertificateValiditor(getPublicKey(keystore, alias)), alias,pin));
+			setting.isEncapsulate();
+			log.debug("Generating certificate validator...");
+			cv =	new CertificateValiditor(setting, getPublicKey(keystore, alias));
+			keyCouples.add(new CoupleKey(getPrivateKey(keystore, alias,pin),cv , alias,pin));
 		}
 		else{
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID,"Invalid alias detected"));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.KEY_INVALID,"Invalid alias detected"));
 		}
 
-		publicKeys.add(new CertificateValiditor(getPublicKey(keystore, alias)));
+		publicKeys.add(cv);
 
 	}
 	
@@ -316,6 +361,7 @@ try{
 			log.error("can't find a private key!");
 			System.exit(0);
 		}
+		log.debug("Getting private keys...");
 		return (java.security.PrivateKey) keystore.getKey(alias, pin);
 	}
 
@@ -336,14 +382,14 @@ try{
  * Get key couples (public and private twins)	
  * @param selectingFunction if there is more than a couple of Keys this function can be used to set which pair be 
  * @return
- * @throws GbayCryptoException
+ * @throws CryptoException
  * 
  */
 	public CoupleKey getCoupleKey(KeySelectionInterface selectingFunction)
-			throws GbayCryptoException {
+			throws CryptoException {
 		Integer selectedNo = 0;
 		if (keyCouples.size() <= 0)
-			throw new GbayCryptoException(new CryptoError(
+			throw new CryptoException(new CryptoError(
 					tools.pki.gbay.errors.GlobalErrorCode.KEY_NOT_FOUND));
 		else if (keyCouples.size() != 1 && selectingFunction != null) {
 			try {
@@ -361,19 +407,19 @@ try{
 		return keyStore;
 	}
 	
-	public void save(CryptoFile outputFile, char[] pass) throws GbayCryptoException{
+	public void save(CryptoFile outputFile, char[] pass) throws CryptoException{
 		
 		try {
 			keyStore.store(outputFile.getOutPutStream(), pass);
 		} catch (KeyStoreException e) {
-			throw new GbayCryptoException(e);
+			throw new CryptoException(e);
 		} catch (NoSuchAlgorithmException e) {
-		throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
+		throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_ALGORITHM));
 		} catch (CertificateException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 		} catch (IOException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
-		} catch (GbayCryptoException e) {
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+		} catch (CryptoException e) {
 			throw e;
 		}
 	}

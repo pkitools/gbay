@@ -29,21 +29,13 @@ import java.util.Date;
 
 public interface CertificateInterface {
 
-	//
-	/**
-	 * Get expiration date of certificate
-	 * @return
-	 */
 	public abstract Date getEndDate();
-	public abstract String getSerialNumber();
 	public abstract Date getStartDate();
 	public abstract String getSubjectDN();
 	public abstract String getIssuerName();
-
 	public abstract void setEndDate(Date end);
-	public abstract void setSerialNumber(String SerialNumber);
 	public abstract void setStartDate(Date start);
-	public abstract void setSubjectDN(String sdn);
 	public abstract void setIssuerName(String IssuerName);
+	String getSerialNumber();
 
 }

@@ -31,14 +31,16 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.inject.Inject;
+
 import tools.pki.gbay.crypto.keys.KeyStorage.CoupleKey;
+import tools.pki.gbay.crypto.keys.validation.CertificateChain;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.provider.CaFinderInterface;
 import tools.pki.gbay.crypto.provider.CrlFinderInterface;
 import tools.pki.gbay.crypto.provider.KeySelectionInterface;
 import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.provider.SignatureTime;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -149,8 +151,8 @@ public class DefualtSignatureSetting implements SignatureSettingInterface {
 	 * @see tools.pki.gbay.crypto.provider.CaFinderInterface#getIssuer(java.security.cert.X509Certificate)
 	 */
 	@Override
-	public Set<CertificateIssuer> getIssuer(X509Certificate currentCert)
-			throws GbayCryptoException {
+	public CertificateChain getIssuer(X509Certificate currentCert)
+			throws CryptoException {
 		return null;
 	}
 

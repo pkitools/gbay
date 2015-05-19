@@ -34,21 +34,23 @@ import java.util.Set;
 import com.google.inject.Singleton;
 
 import tools.pki.gbay.crypto.keys.KeyStorage.CoupleKey;
+import tools.pki.gbay.crypto.keys.validation.CertificateChain;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.provider.CaFinderInterface;
 import tools.pki.gbay.crypto.provider.CrlFinderInterface;
+import tools.pki.gbay.crypto.provider.KeySelectionInterface;
 import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.provider.SignatureTime;
 import tools.pki.gbay.crypto.times.TimeInterface;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.util.general.PropertyLoader;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class PropertyFileConfiguration.
  */
-@Singleton
-public class PropertyFileConfiguration extends SecurityConcepts implements SignatureSettingInterface
+//@Singleton
+public class PropertyFileConfiguration extends SecurityConcepts implements SignatureSettingInterface , ErrorsSettingInterface
 {
 
   /** The debug. */
@@ -61,6 +63,8 @@ public class PropertyFileConfiguration extends SecurityConcepts implements Signa
 	private static final String	SIG_TIME_OID =	  "signature.settings.time.oid";
 	private static final String	SIG_ISSUER_CALLER =	  "signature.settings.issuer.caller";
 	private static final String	SIG_CRL_CALLER =	  "signature.settings.crl.caller";
+	private static final String SIG_KEY_SELECTOR =  "signature.settings.key.caller";
+	private static final String ERRORS_MESSAGE_FILE =  "errors.settings.messafes.file";
 	
   
 
@@ -79,8 +83,8 @@ public class PropertyFileConfiguration extends SecurityConcepts implements Signa
  * @see tools.pki.gbay.crypto.provider.CaFinderInterface#getIssuer(java.security.cert.X509Certificate)
  */
 @Override
-public Set<CertificateIssuer> getIssuer(X509Certificate currentCert)
-		throws GbayCryptoException {
+public CertificateChain getIssuer(X509Certificate currentCert)
+		throws CryptoException {
 	
 	 Class<?> c;
 	try {
@@ -91,7 +95,6 @@ public Set<CertificateIssuer> getIssuer(X509Certificate currentCert)
 		 
 		 
 	} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
 	 return null;
@@ -124,8 +127,16 @@ public X509CRL getCrl(X509Certificate cert) {
  */
 @Override
 public Integer selectKey(List<CoupleKey> keyCouples) {
-	// TODO Auto-generated method stub
+	Class<?> b;
+	try {
+		b = Class.forName(PropertyLoader.getString(SIG_KEY_SELECTOR));
+		 KeySelectionInterface keyCaller = (KeySelectionInterface) b.newInstance();
+		 return keyCaller.selectKey(keyCouples);
+	} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		e.printStackTrace();
+	}
 	return null;
+
 }
 
 
@@ -152,7 +163,7 @@ public SignatureTime getTimeInjectionSetiion() {
 	
 	}
 	 else{
-		st =null;
+		st.setIncludeTime(false);
 	}
 return st;
 	} catch (ClassNotFoundException e) {

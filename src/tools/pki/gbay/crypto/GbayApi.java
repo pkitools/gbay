@@ -27,6 +27,7 @@ package tools.pki.gbay.crypto;
 
 import org.apache.log4j.Logger;
 
+import tools.pki.gbay.configuration.AppInjector;
 import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.configuration.SecurityConcepts;
 import tools.pki.gbay.crypto.keys.CertificateValiditor;
@@ -37,43 +38,56 @@ import tools.pki.gbay.crypto.texts.Base64;
 import tools.pki.gbay.crypto.texts.PlainText;
 import tools.pki.gbay.crypto.texts.SignedText;
 import tools.pki.gbay.crypto.texts.VerifiedText;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.util.general.CryptoFile;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-@Singleton
 public class GbayApi  {
 	private static final Logger logger = Logger.getLogger(GbayApi.class);
 
 	private static GbayApi instance;
 
-	@Inject
-	private SignatureSettingInterface settings;
-	 //setter method injector
+	private final SignatureSettingInterface settings;
+
+	//setter method injector
     
-	protected GbayApi() {
-		
-		 new PropertyFileConfiguration();
+
+	@Inject protected GbayApi(SignatureSettingInterface sig) {
+		settings = sig;
+//		
+	//	 new PropertyFileConfiguration();
 	//	SecurityConcepts.addProvider();
 	}
 
-	public SignedText sign(byte[]pfx,String pin,String messageToSign) throws GbayCryptoException{
+//	@Inject
+	public SignedText sign(byte[]pfx,String pin,String messageToSign) throws CryptoException{
 
-		SoftCert sc = new SoftCert(new KeyStorage(pin.toCharArray(),new PlainText(pfx)));
+		if (settings == null){
+		logger.error("Settings are null..." + SecurityConcepts.StarLine+SecurityConcepts.newLine);
+		}
+		KeyStorage ks = new KeyStorage(settings, pin.toCharArray(),new PlainText(pfx));
+
+		logger.debug("Generating soft cert");
+		
+		SoftCert sc = new SoftCert(settings, ks);
 		SignedText st =	sc.sign(new PlainText(messageToSign));
 	//	st.toBase64()
 		return st;
 	}
 	
-	public VerifiedText verify(String originalText,byte[] signedtext) throws GbayCryptoException{
+	public VerifiedText verify(String originalText,byte[] signedtext) throws CryptoException{
+		if (settings == null){
+		logger.error("Settings are null..." + SecurityConcepts.StarLine+SecurityConcepts.newLine);
+		}
 		
 		logger.info("Verify function is called from API...");
 		logger.debug("Original Text : "+ originalText + "   SignedText:" + new String(signedtext) );
+
 		SignedText st = new SignedText(originalText, signedtext);
 		logger.debug("Signed Text Object Generated" + SecurityConcepts.StarLine);
-		SoftCert sc = new SoftCert();
+		SoftCert sc = new SoftCert(settings);
 		logger.debug("SoftCert Object Generated" + SecurityConcepts.StarLine);
 		
 		return	(VerifiedText) st.verify(sc);
@@ -83,29 +97,43 @@ public class GbayApi  {
 	
 	public  class P12Files extends KeyStorage {
 
-		public P12Files(CryptoFile file) throws GbayCryptoException {
+		public P12Files(CryptoFile file) throws CryptoException {
 			super(file);
 		}
 
-		public P12Files(Base64 fileContent, char[] pin) throws GbayCryptoException {
+		public P12Files(Base64 fileContent, char[] pin) throws CryptoException {
 			super(pin, fileContent);
 		}
 
 	}
 
 	public class CertFile extends CertificateValiditor {
-		public CertFile(CryptoFile file) throws GbayCryptoException {
+		public CertFile(CryptoFile file) throws CryptoException {
 			super(file);
 		}
 		
-		public CertFile(Base64 fileContent) throws GbayCryptoException{
+		public CertFile(Base64 fileContent) throws CryptoException{
 			super(fileContent.decode());
 		}
 	}
 
-	public static GbayApi getInstance() {
-		if (instance == null)
-			instance = new GbayApi();
-		return instance;
+//	public static GbayApi getInstance() {
+	//	if (instance == null)
+		//	instance = new GbayApi();
+	//	return instance;
+	//}
+
+	/**
+	 * @return the settings
+	 */
+	public SignatureSettingInterface getSettings() {
+		return settings;
 	}
+
+	/**
+	 * @param settings the settings to set
+	 */
+	//public void setSettings(SignatureSettingInterface settings) {
+		//this.settings = settings;
+	//}
 }

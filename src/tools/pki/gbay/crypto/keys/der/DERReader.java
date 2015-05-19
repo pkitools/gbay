@@ -1,9 +1,5 @@
 package tools.pki.gbay.crypto.keys.der;
 
-import  tools.pki.gbay.errors.CryptoError;
-import  tools.pki.gbay.errors.GbayCryptoException;
-import tools.pki.gbay.errors.GlobalErrorCode;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,6 +10,10 @@ import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+
+import tools.pki.gbay.errors.CryptoError;
+import tools.pki.gbay.errors.CryptoException;
+import tools.pki.gbay.errors.GlobalErrorCode;
 
 /**
  * This class decodes DER sequences into Java objects. The methods of
@@ -76,9 +76,9 @@ public class DERReader implements DER
    * @param encoded The encoded bytes.
    * @throws IOException If the bytes do not represent an encoded
    * object.
- * @throws GbayCryptoException 
+ * @throws CryptoException 
    */
-  public static DERValue read(byte[] encoded) throws IOException, GbayCryptoException
+  public static DERValue read(byte[] encoded) throws IOException, CryptoException
   {
     return new DERReader(encoded).read();
   }
@@ -102,10 +102,10 @@ public class DERReader implements DER
    * @return The parsed DER structure.
    * @throws IOException If an error occurs reading from the input
    * stream.
-   * @throws GbayCryptoException If the input does not represent a
+   * @throws CryptoException If the input does not represent a
    * valid DER stream.
    */
-  public DERValue read() throws IOException, GbayCryptoException
+  public DERValue read() throws IOException, CryptoException
   {
     int tag = in.read();
     if (tag == -1)
@@ -141,14 +141,14 @@ public class DERReader implements DER
         case APPLICATION:
           // This should not be reached, since (I think) APPLICATION is
           // always constructed.
-          throw new GbayCryptoException("non-constructed APPLICATION data");
+          throw new CryptoException("non-constructed APPLICATION data");
         default:
-          throw new GbayCryptoException("PRIVATE class not supported");
+          throw new CryptoException("PRIVATE class not supported");
       }
     return value;
   }
 
-  protected int readLength() throws IOException, GbayCryptoException
+  protected int readLength() throws IOException, CryptoException
   {
     int i = in.read();
     if (i == -1)
@@ -165,13 +165,13 @@ public class DERReader implements DER
         encBuf.write(octets);
         return new BigInteger(1, octets).intValue();
       }
-    throw new GbayCryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
+    throw new CryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
   }
 
   // Own methods.
   // ------------------------------------------------------------------------
 
-  private Object readUniversal(int tag, int len) throws IOException, GbayCryptoException
+  private Object readUniversal(int tag, int len) throws IOException, CryptoException
   {
     byte[] value = new byte[len];
     in.read(value);
@@ -180,11 +180,11 @@ public class DERReader implements DER
       {
         case BOOLEAN:
           if (value.length != 1)
-            throw new GbayCryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
+            throw new CryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
           return Boolean.valueOf(value[0] != 0);
         case NULL:
           if (len != 0)
-              throw new GbayCryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
+              throw new CryptoException(new CryptoError(GlobalErrorCode.ENTITY_INVALID_LENGTH));
           return null;
         case INTEGER:
         case ENUMERATED:
@@ -215,12 +215,12 @@ public class DERReader implements DER
         case RELATIVE_OID:
           return new OID(value, true);
         default:
-          throw new GbayCryptoException("unknown tag " + tag);
+          throw new CryptoException("unknown tag " + tag);
       }
   }
 
   private static String makeString(int tag, byte[] value)
-    throws IOException, GbayCryptoException
+    throws IOException, CryptoException
   {
     switch (tag & 0x1F)
       {
@@ -245,7 +245,7 @@ public class DERReader implements DER
           return fromUtf8(value);
 
         default:
-          throw new GbayCryptoException("unknown string tag");
+          throw new CryptoException("unknown string tag");
       }
   }
 
@@ -309,7 +309,7 @@ public class DERReader implements DER
     return str.toString();
   }
 
-  private Date makeTime(int tag, byte[] value) throws IOException, GbayCryptoException
+  private Date makeTime(int tag, byte[] value) throws IOException, CryptoException
   {
     Calendar calendar = Calendar.getInstance();
     String str = makeString(PRINTABLE_STRING, value);
@@ -340,7 +340,7 @@ public class DERReader implements DER
     if ((tag & 0x1F) == UTC_TIME)
       {
         if (date.length() < 10)  // must be at least 10 chars long
-          throw new GbayCryptoException("cannot parse date");
+          throw new CryptoException("cannot parse date");
         // UTCTime is of the form "yyMMddHHmm[ss](Z|(+|-)hhmm)"
         try
           {
@@ -360,13 +360,13 @@ public class DERReader implements DER
           }
         catch (NumberFormatException nfe)
           {
-            throw new GbayCryptoException("cannot parse date");
+            throw new CryptoException("cannot parse date");
           }
       }
     else
       {
         if (date.length() < 10)  // must be at least 10 chars long
-          throw new GbayCryptoException("cannot parse date");
+          throw new CryptoException("cannot parse date");
         // GeneralTime is of the form "yyyyMMddHH[mm[ss[(.|,)SSSS]]]"
         // followed by "Z" or "(+|-)hh[mm]"
         try
@@ -394,7 +394,7 @@ public class DERReader implements DER
           }
         catch (NumberFormatException nfe)
           {
-            throw new GbayCryptoException("cannot parse date");
+            throw new CryptoException("cannot parse date");
           }
       }
     return calendar.getTime();

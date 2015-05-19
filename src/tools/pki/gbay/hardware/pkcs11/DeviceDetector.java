@@ -7,7 +7,8 @@ import org.apache.log4j.Logger;
 
 
 
-import tools.pki.gbay.errors.GbayCryptoException;
+
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 import tools.pki.gbay.hardware.pcsc.CardInfo;
 import tools.pki.gbay.hardware.pcsc.PCSCHelper;
@@ -25,7 +26,7 @@ public class DeviceDetector {
 	List<CardInfo> conectedCardsList = new ArrayList<CardInfo>();
 	int cardsNo;
 
-	public static List<CardInfo> detectCardAndCriptoki(List<CardInfo> candidates) throws GbayCryptoException {
+	public static List<CardInfo> detectCardAndCriptoki(List<CardInfo> candidates) throws CryptoException {
 		 List<CardInfo> cards = new ArrayList<CardInfo>();
 		
 		for (CardInfo ci : candidates){
@@ -41,11 +42,11 @@ public class DeviceDetector {
 				}
 				manager.libFinalize();
 					
-			} catch (GbayCryptoException | IOException | TokenException e) {
+			} catch (CryptoException | IOException | TokenException e) {
 					
-					if (e instanceof GbayCryptoException){
-						if (((GbayCryptoException) e).getErrorCode() == GlobalErrorCode.TOKEN_NOT_DETECTED)
-							System.out.println(((GbayCryptoException) e).getErrorCode());
+					if (e instanceof CryptoException){
+						if (((CryptoException) e).getErrorCode() == GlobalErrorCode.TOKEN_NOT_DETECTED.id)
+							System.out.println(((CryptoException) e).getErrorCode());
 					}
 					e.printStackTrace();
 			} catch (Throwable e) {

@@ -41,7 +41,7 @@ public class AppInjector extends AbstractModule {
 	 */
 	@Override
 	protected void configure() {
-	    bind(SignatureSettingInterface.class).to(PropertyFileConfiguration.class).in(Singleton.class);
+	    bind(PropertyFileConfiguration.class).asEagerSingleton();
 	}
 
 }

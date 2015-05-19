@@ -5,11 +5,15 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 import tools.pki.gbay.util.general.FileUtil;
 
@@ -31,6 +35,22 @@ public class FileUtil {
 
 	}
 
+	/*
+	 * Read a certificate from the specified filepath.
+	 */	
+	public static X509Certificate getCertFromFile(File path) throws CertificateException, FileNotFoundException {
+		return GetCert(new FileInputStream(path));
+	}
+	
+	public static X509Certificate GetCert(InputStream is) throws CertificateException{
+		X509Certificate cert = null;
+		CertificateFactory cf = CertificateFactory.getInstance("X509");
+	
+		cert = (X509Certificate) cf.generateCertificate(is);
+	return cert;
+	}
+
+	
 	public static String loadText(String resource) {
 
 		StringBuffer strBuffer = new StringBuffer();

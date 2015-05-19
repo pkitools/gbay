@@ -10,7 +10,7 @@ import java.util.List;
 import tools.pki.gbay.crypto.keys.CertificateInterface;
 import tools.pki.gbay.crypto.keys.CertificateValiditor;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -47,9 +47,9 @@ public class PKCS11SupplierData {
 
 	/**
 	 * @return the certs
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException 
 	 */
-	public List<CertificateInterface> getCerts() throws  GbayCryptoException {
+	public List<CertificateInterface> getCerts() throws  CryptoException {
 
 		 Store                   certStore = signingResult.getCertificates();
 		  SignerInformationStore  signers = signingResult.getSignerInfos();
@@ -69,7 +69,7 @@ public class PKCS11SupplierData {
 						.next());
 				 certs.add(new CertificateValiditor(includedCert));
 			} catch (CertificateException e) {
-			throw new GbayCryptoException(GlobalErrorCode.CERT_INVALID_FORMAT);
+			throw new CryptoException(GlobalErrorCode.CERT_INVALID_FORMAT);
 			}
 		 
 		  }

@@ -36,7 +36,7 @@ import java.io.OutputStream;
 
 import tools.pki.gbay.crypto.texts.PlainText;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
 import org.apache.log4j.Logger;
@@ -57,6 +57,8 @@ Logger log = Logger.getLogger(CryptoFile.class);
 		read,write,both;
 	}
 	
+	
+	
 	public enum FileLocation{
 		PROJECT_FOLDER,
 		RELATIVE_PATH,
@@ -65,29 +67,29 @@ Logger log = Logger.getLogger(CryptoFile.class);
 		ABSOLOUT_PATH;
 	}
 	
-	protected void setContentFromFile() throws GbayCryptoException{
+	protected void setContentFromFile() throws CryptoException{
 		  try {
 			  log.debug("Reading file: " + path);
 	  			this.content = new PlainText(FileUtil.getDataFromFile(path)) ;
 	  			log.info(path + " was read successfully.");
 	  		} catch (IOException e) {
 	  			log.error(path + ", could not be oppened");
-	  			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));			
+	  			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));			
 	  		}
 	}
 	
 	
-	protected void setContentFromResource() throws GbayCryptoException{
+	protected void setContentFromResource() throws CryptoException{
 		this.content = new PlainText(FileUtil.loadText(path)) ;
 	}
 	
-	public CryptoFile(File file) throws GbayCryptoException {
+	public CryptoFile(File file) throws CryptoException {
 //		this.file = file;
 		this.path = file.getAbsolutePath();
 		  setContentFromFile();
 		  setMode(OpenMode.read);
 	}
-	public CryptoFile(File file, String pin) throws GbayCryptoException {
+	public CryptoFile(File file, String pin) throws CryptoException {
 		this(file);
 		this.pin = pin.toCharArray();
 	}
@@ -97,7 +99,7 @@ Logger log = Logger.getLogger(CryptoFile.class);
 		this.pin = pin.toCharArray();
 	}
 	
-    public CryptoFile(byte[] content, String outputAddress, OpenMode mode) throws GbayCryptoException{
+    public CryptoFile(byte[] content, String outputAddress, OpenMode mode) throws CryptoException{
     	setMode(mode);
     	this.path = outputAddress;
 //    	file = new File(outputAddress);
@@ -107,18 +109,18 @@ Logger log = Logger.getLogger(CryptoFile.class);
     	try {
 			write();
 		} catch (IOException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
 		}
     	}
     }
 
-    public CryptoFile(byte[] content, String outputAddress, String pin) throws GbayCryptoException{
+    public CryptoFile(byte[] content, String outputAddress, String pin) throws CryptoException{
     	this(content,outputAddress);
     	this.pin = pin.toCharArray();
     }
     
     /**
-     * @throws GbayCryptoException 
+     * @throws CryptoException 
      * Write an inputStream to a file
      * @param inputStream
      * @param outputStream
@@ -167,11 +169,11 @@ Logger log = Logger.getLogger(CryptoFile.class);
     }
     
     
-    public CryptoFile(String fileAddress ) throws GbayCryptoException {
+    public CryptoFile(String fileAddress ) throws CryptoException {
     this(new File(fileAddress));
    }
     
-    public CryptoFile(String fileAddress,String pin , FileLocation fileAddressType ) throws GbayCryptoException {
+    public CryptoFile(String fileAddress,String pin , FileLocation fileAddressType ) throws CryptoException {
     	setMode(OpenMode.read);
     	if (fileAddressType == FileLocation.PROJECT_FOLDER){
       	path = getClass().getClassLoader().getResource(".").getPath() + fileAddress;
@@ -200,7 +202,7 @@ Logger log = Logger.getLogger(CryptoFile.class);
     	this.pin = pin.toCharArray();
     }
  
-    public CryptoFile(String fileAddress, String pin) throws GbayCryptoException {
+    public CryptoFile(String fileAddress, String pin) throws CryptoException {
     	this(fileAddress,pin,FileLocation.RELATIVE_PATH);
 	}
 
@@ -246,21 +248,21 @@ public void write() throws IOException{
         this.content =  new PlainText(data);
     }
     
-    public OutputStream getOutPutStream() throws GbayCryptoException{
+    public OutputStream getOutPutStream() throws CryptoException{
     	OutputStream fop;
     	try {
 			 fop = new FileOutputStream(new File( path));
 		} catch (FileNotFoundException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND));
 		}
     	return fop;
     }
     
-    public FileInputStream toFileInputStream() throws GbayCryptoException{
+    public FileInputStream toFileInputStream() throws CryptoException{
     	try {
 			return new FileInputStream(path);
 		} catch (FileNotFoundException e) {
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND));
+			throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_NOT_FOUND));
 
 		}
     }

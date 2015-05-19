@@ -1,3 +1,28 @@
+/*
+ * GBAy Crypto API
+ * Copyright (c) 2014, PKI.Tools All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 package tools.pki.gbay.util.general;
 
 import java.io.File;
@@ -11,10 +36,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
-import com.google.common.io.Files;
-
-import tools.pki.gbay.crypto.keys.validation.IssuerPropertyFile;
-
+// TODO: Auto-generated Javadoc
 // ----------------------------------------------------------------------------
 /**
  * A simple class for loading java.util.Properties backed by .properties files
@@ -40,18 +62,12 @@ public abstract class PropertyLoader {
 	 * /some/pkg/Resource
 	 * /some/pkg/Resource.properties
 	 * </pre>
-	 * 
-	 * @param name
-	 *            classpath resource name [may not be null]
-	 * @param loader
-	 *            classloader through which to load the resource [null is
+	 *
+	 * @param name            classpath resource name [may not be null]
+	 * @param loader            classloader through which to load the resource [null is
 	 *            equivalent to the application loader]
-	 * 
 	 * @return resource converted to java.util.Properties [may be null if the
 	 *         resource was not found and THROW_ON_LOAD_FAILURE is false]
-	 * @throws IllegalArgumentException
-	 *             if the resource was not found and THROW_ON_LOAD_FAILURE is
-	 *             true
 	 */
 	public static Properties loadProperties(String name, ClassLoader loader) {
 		if (name == null )
@@ -75,7 +91,7 @@ public abstract class PropertyLoader {
 			result = new Properties();
 				result.load(in);
 			if (saveInSystem) {
-				Iterator iterator = result.keySet().iterator();
+				Iterator<Object> iterator = result.keySet().iterator();
 				while (iterator.hasNext()) {
 					String key = (String) iterator.next();
 					String value = result.getProperty(key);
@@ -116,7 +132,7 @@ public abstract class PropertyLoader {
 					result = new Properties();
 					result.load(in); // can throw IOException
 					if (saveInSystem) {
-						Iterator iterator = result.keySet().iterator();
+						Iterator<Object> iterator = result.keySet().iterator();
 						while (iterator.hasNext()) {
 							String key = (String) iterator.next();
 							String value = result.getProperty(key);
@@ -151,6 +167,9 @@ public abstract class PropertyLoader {
 	/**
 	 * A convenience overload of {@link #loadProperties(String, ClassLoader)}
 	 * that uses gbay class loader. {@link ClassLoaderResolver#getClassLoader()}
+	 *
+	 * @param name the name
+	 * @return the properties
 	 */
 	public static Properties loadProperties(final String name) {
 		return loadProperties(name, ClassLoaderResolver.getClassLoader());
@@ -159,6 +178,8 @@ public abstract class PropertyLoader {
 	/**
 	 * A convenience overload of {@link #loadProperties(String)}
 	 * that uses the file address. {@link #propertyFileAddress}
+	 *
+	 * @return the properties
 	 */
 	public static Properties loadProperties() {
 		return loadProperties(propertyFileAddress);
@@ -169,10 +190,8 @@ public abstract class PropertyLoader {
 	 * Get the Property From Server.properties. This is used when we want to
 	 * read property from file each and every time
 	 *
-	 * @param propertyFileAddress
-	 *            file name to load value from
-	 * @param key
-	 * @return
+	 * @param key the key
+	 * @return the property string
 	 */
 	public static final String getPropertyString(String key) {
 		Properties props = new Properties();
@@ -204,10 +223,11 @@ public abstract class PropertyLoader {
 	}
 
 	/**
-	 * Sets the property and returns the previous value
+	 * Sets the property and returns the previous value.
 	 *
-	 * @param key
-	 * @param value
+	 * @param key the key
+	 * @param value the value
+	 * @return the string
 	 */
 	public static final String setSystemProperty(String key, String value) {
 		if (!saveInSystem) {
@@ -220,9 +240,9 @@ public abstract class PropertyLoader {
 
 	/**
 	 * Get string value either from System or properties file
-	 * {@link #saveInSystem}
-	 * 
-	 * @param key
+	 * {@link #saveInSystem}.
+	 *
+	 * @param key the key
 	 * @return null if not found and value if found
 	 */
 	public static final String getString(String key) {
@@ -253,13 +273,11 @@ public abstract class PropertyLoader {
 	}
 
 	/**
-	 * get a long number from properties
-	 * 
-	 * @param key
-	 *            the key to find
-	 * @param i
-	 *            defualt value
-	 * @return
+	 * get a long number from properties.
+	 *
+	 * @param key            the key to find
+	 * @param i            defualt value
+	 * @return the long
 	 */
 	public static long getLong(String key, long i) {
 		String token = getString(key);
@@ -270,13 +288,11 @@ public abstract class PropertyLoader {
 	}
 
 	/**
-	 * Get integer value from property file
-	 * 
-	 * @param key
-	 *            the key to find
-	 * @param i
-	 *            defualt value
-	 * @return
+	 * Get integer value from property file.
+	 *
+	 * @param key            the key to find
+	 * @param i            defualt value
+	 * @return the int
 	 */
 	public static int getInt(String key, int i) {
 		String token = getSystemString(key);
@@ -287,22 +303,37 @@ public abstract class PropertyLoader {
 	}
 
 	/**
-	 * Get the file that is in use for reading properties file
-	 * 
+	 * Get the file that is in use for reading properties file.
+	 *
 	 * @return Address of property file
 	 */
 	public static String getPropertyFile() {
 		return propertyFileAddress;
 	}
 
+	/**
+	 * Checks if is throw on load failure.
+	 *
+	 * @return true, if checks if is throw on load failure
+	 */
 	public static boolean isThrowOnLoadFailure() {
 		return THROW_ON_LOAD_FAILURE;
 	}
 
+	/**
+	 * Checks if is load as resource bundle.
+	 *
+	 * @return true, if checks if is load as resource bundle
+	 */
 	public static boolean isLoadAsResourceBundle() {
 		return LOAD_AS_RESOURCE_BUNDLE;
 	}
 
+	/**
+	 * Checks if is save in system.
+	 *
+	 * @return true, if checks if is save in system
+	 */
 	public static boolean isSaveInSystem() {
 		return saveInSystem;
 	}
@@ -310,20 +341,30 @@ public abstract class PropertyLoader {
 	/**
 	 * Set this true if you are sure that property file would not change in run
 	 * time, by setting this value application will save all properties in
-	 * system variables
-	 * 
-	 * @param saveInSystem
-	 *            set true to save in system and decrease the speed by bypassing
+	 * system variables.
+	 *
+	 * @param saveInSystem            set true to save in system and decrease the speed by bypassing
 	 *            referring to file, false to read values in runtime
 	 */
 	public static void setSaveInSystem(boolean saveInSystem) {
 		PropertyLoader.saveInSystem = saveInSystem;
 	}
 
+	/**
+	 * Gets the property file address.
+	 *
+	 * @return the property file address
+	 */
 	public static String getPropertyFileAddress() {
 		return propertyFileAddress;
 	}
 
+	/**
+	 * Initiate.
+	 *
+	 * @param propertyAddress the property address
+	 * @param saveInSystem the save in system
+	 */
 	public static void initiate(String propertyAddress, boolean saveInSystem) {
 		propertyFileAddress = propertyAddress;
 		PropertyLoader.saveInSystem = saveInSystem;
@@ -335,6 +376,7 @@ public abstract class PropertyLoader {
 	// package: ...............................................................
 
 	// private: ...............................................................
+	/** The log. */
 	static Logger log = Logger.getLogger(PropertyLoader.class);
 
 	private static String propertyFileAddress = "config.properties";

@@ -1,3 +1,28 @@
+/*
+ * GBAy Crypto API
+ * Copyright (c) 2014, PKI.Tools All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 package tools.pki.gbay.crypto.keys.validation;
 
@@ -5,11 +30,10 @@ import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 
 import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.crypto.keys.CertificateValiditor;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 
 import org.apache.log4j.Logger;
 
@@ -19,9 +43,11 @@ import org.apache.log4j.Logger;
  * @author farhang
  *
  */
-public class CertificateIssuer extends CertificateValiditor{
+public class CertificateIssuer extends CertificateValiditor {
 	Logger log = Logger.getLogger(CertificateIssuer.class);
 
+	/** The is intermediate. */
+	private boolean isIntermediate;
 
 	/**
 	 * generate certificate issuer
@@ -30,9 +56,9 @@ public class CertificateIssuer extends CertificateValiditor{
 	 * @param certificate {@link X509Certificate} of the issuer
 	 * @throws NoSuchAlgorithmException 
 	 * @throws CertificateEncodingException 
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException 
 	 */
-	public CertificateIssuer(String name, X509Certificate certificates) throws CertificateEncodingException, NoSuchAlgorithmException, GbayCryptoException {
+	public CertificateIssuer(String name, X509Certificate certificates) throws CertificateEncodingException, NoSuchAlgorithmException, CryptoException {
 		super(certificates);
 		log.debug("Certificate issuer is constracting " + name);
 		this.name = name;
@@ -42,9 +68,9 @@ public class CertificateIssuer extends CertificateValiditor{
 	 * Generate certificate issuers with their name and cer file
 	 * @param name  name of issuer (as appeared in DN or a part of DN)
 	 * @param fileaddress address of CA cert file
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException 
 	 */
-	public CertificateIssuer(String name, File fileaddress) throws GbayCryptoException {
+	public CertificateIssuer(String name, File fileaddress) throws CryptoException {
 		super(fileaddress);
 		log.debug(PropertyFileConfiguration.StarLine+"Issuer for "+name+" has been created from : " + fileaddress.getAbsolutePath());
 		log.debug("Root cert subjectDN : " +this.getSubjectDN()+PropertyFileConfiguration.StarLine);
@@ -83,11 +109,11 @@ public class CertificateIssuer extends CertificateValiditor{
 	/**
 	 * Get address of CA cert file
 	 * @return address of CA cert file
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException 
 	 */
 
 	@Override
-	public void setFileAddress(File fileAddress) throws GbayCryptoException {
+	public void setFileAddress(File fileAddress) throws CryptoException {
 		super.setFileAddress(fileAddress);
 		setHascert();
 	}
@@ -127,6 +153,18 @@ public class CertificateIssuer extends CertificateValiditor{
 	 */
 	private void setHascert() {
 		this.hascert = true;
+	}
+	/**
+	 * @return the isIntermediate
+	 */
+	public boolean isIntermediate() {
+		return isIntermediate;
+	}
+	/**
+	 * @param isIntermediate the isIntermediate to set
+	 */
+	public void setIntermediate(boolean isIntermediate) {
+		this.isIntermediate = isIntermediate;
 	}
 	
 

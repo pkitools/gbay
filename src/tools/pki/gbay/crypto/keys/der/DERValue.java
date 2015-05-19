@@ -3,7 +3,7 @@ package tools.pki.gbay.crypto.keys.der;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import  tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 
 public class DERValue implements DER
 {
@@ -60,7 +60,7 @@ public class DERValue implements DER
     return constructed;
   }
 
-  public int getLength() throws GbayCryptoException
+  public int getLength() throws CryptoException
   {
     if (encoded == null)
       {
@@ -85,14 +85,14 @@ public class DERValue implements DER
     return value;
   }
 
-  public Object getValueAs (final int derType) throws IOException, GbayCryptoException
+  public Object getValueAs (final int derType) throws IOException, CryptoException
   {
     byte[] encoded = getEncoded ();
     encoded[0] = (byte) derType;
     return DERReader.read (encoded).getValue ();
   }
 
-  public byte[] getEncoded() throws GbayCryptoException
+  public byte[] getEncoded() throws CryptoException
   {
     if (encoded == null)
       {
@@ -112,7 +112,7 @@ public class DERValue implements DER
     return (byte[]) encoded.clone();
   }
 
-  public int getEncodedLength() throws GbayCryptoException
+  public int getEncodedLength() throws CryptoException
   {
     if (encoded == null)
       {
@@ -145,7 +145,7 @@ public class DERValue implements DER
     if (constructed)
 		try {
 			start = start + "\n" + Util.hexDump(getEncoded(), "\t");
-		} catch (GbayCryptoException e) {
+		} catch (CryptoException e) {
 			e.printStackTrace();
 		}
 	else

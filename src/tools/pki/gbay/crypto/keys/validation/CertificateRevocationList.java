@@ -43,10 +43,6 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
-import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
-import tools.pki.gbay.errors.GlobalErrorCode;
-
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -60,6 +56,10 @@ import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
+
+import tools.pki.gbay.errors.CryptoError;
+import tools.pki.gbay.errors.CryptoException;
+import tools.pki.gbay.errors.GlobalErrorCode;
 
 
 
@@ -94,12 +94,12 @@ public final class CertificateRevocationList {
     	this.crl = crl;
     }
   
-    public CertificateRevocationList(String crlURL) throws CertificateException, CRLException, IOException, GbayCryptoException, NamingException {
+    public CertificateRevocationList(String crlURL) throws CertificateException, CRLException, IOException, CryptoException, NamingException {
 		logger.info("Getting CRL from "+ crlURL);
     	this.crl = downloadCRL(crlURL);
 	}
     
-   public CertificateRevocationList(X509Certificate certFromFile) throws GbayCryptoException{
+   public CertificateRevocationList(X509Certificate certFromFile) throws CryptoException{
 	   logger.info("Getting CertificateRevocationList from file");
 	   logger.debug(certFromFile);
 	   List<String> crlList;
@@ -114,31 +114,27 @@ public final class CertificateRevocationList {
 		}
 	}
 	} catch (CertificateParsingException e) {
-	throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
+	throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT));
 	} catch (IOException e) {
-		throw new GbayCryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
+		throw new CryptoException(new CryptoError(GlobalErrorCode.FILE_IO_ERROR));
 	} catch (CertificateException e) {
-		throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT),e);
+		throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT),e);
 	} catch (CRLException e) {
-		throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT),e);
+		throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT),e);
 
-	} catch (GbayCryptoException e) {
+	} catch (CryptoException e) {
 	throw e;
 	} catch (NamingException e) {
-		throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT),e);
-
+		throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_INVALID_FORMAT),e);
 	}
-
-//	this.crl = downloadCRL(crlURL);
-		
 
 }
 
-public boolean isRevoked(X509Certificate cert) throws GbayCryptoException{
+public boolean isRevoked(X509Certificate cert) throws CryptoException{
 	   if (cert!=null)
 	   return crl.isRevoked(cert);
 	   else {
-		   throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_NOT_FOUND));
+		   throw new CryptoException(new CryptoError(GlobalErrorCode.CERT_NOT_FOUND));
 		   }
    }
     
@@ -150,14 +146,14 @@ public boolean isRevoked(X509Certificate cert) throws GbayCryptoException{
      */
     private static X509CRL downloadCRL(String crlURL) throws IOException,
             CertificateException, CRLException,
-            GbayCryptoException, NamingException {
+            CryptoException, NamingException {
         if (crlURL.startsWith("http://") || crlURL.startsWith("https://")
                 || crlURL.startsWith("ftp://")) {
             return downloadCRLFromWeb(crlURL);
         } else if (crlURL.startsWith("ldap://")) {
             return downloadCRLFromLDAP(crlURL);
         } else {
-            throw new GbayCryptoException(
+            throw new CryptoException(
                     "Can not download CRL from certificate "
                             + "distribution point: " + crlURL);
         }
@@ -171,7 +167,7 @@ public boolean isRevoked(X509Certificate cert) throws GbayCryptoException{
     @SuppressWarnings("rawtypes")
 	private static X509CRL downloadCRLFromLDAP(String ldapURL) throws CertificateException, 
     NamingException, CRLException,
-    GbayCryptoException, IOException {
+    CryptoException, IOException {
         Map<String, String> env = new Hashtable<String, String>();
         env.put(Context.INITIAL_CONTEXT_FACTORY,
                 "com.sun.jndi.ldap.LdapCtxFactory");
@@ -182,7 +178,7 @@ public boolean isRevoked(X509Certificate cert) throws GbayCryptoException{
         Attribute aval = avals.get("certificateRevocationList;binary");
         byte[] val = (byte[]) aval.get();
         if ((val == null) || (val.length == 0)) {
-            throw new GbayCryptoException(
+            throw new CryptoException(
                     "Can not download CRL from: " + ldapURL);
         } else {
         	
@@ -313,7 +309,7 @@ public boolean isRevoked(X509Certificate cert) throws GbayCryptoException{
 		} catch (NamingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (GbayCryptoException e) {
+		} catch (CryptoException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -350,7 +346,7 @@ return crl;
 			return (X509CRL) cf.generateCRL(new ByteArrayInputStream(data));
 		}
 	}
-	   public static X509CRL  getCrlFromCert(X509Certificate certFromFile) throws IOException, CertificateException, CRLException, NamingException, GbayCryptoException {
+	   public static X509CRL  getCrlFromCert(X509Certificate certFromFile) throws IOException, CertificateException, CRLException, NamingException, CryptoException {
 		   List<String> crlList;
 			crlList = getCrlDistributionPoints(certFromFile);
 		if (crlList != null){

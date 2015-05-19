@@ -1,3 +1,28 @@
+/*
+ * GBAy Crypto API
+ * Copyright (c) 2014, PKI.Tools All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 package tools.pki.gbay.crypto.provider;
 
 import java.io.FileOutputStream;
@@ -6,7 +31,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
-import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -16,20 +40,16 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.configuration.SecurityConcepts;
-import tools.pki.gbay.configuration.DefualtSignatureSetting;
 import tools.pki.gbay.crypto.keys.CertificateInterface;
 import tools.pki.gbay.crypto.keys.CertificateValiditor;
 import tools.pki.gbay.crypto.keys.KeyStorage;
 import tools.pki.gbay.crypto.keys.KeyStorage.CoupleKey;
-import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
-import tools.pki.gbay.crypto.keys.validation.IssuerPropertyFile;
+import tools.pki.gbay.crypto.keys.validation.CertificateChain;
 import tools.pki.gbay.crypto.texts.Base64;
 import tools.pki.gbay.crypto.texts.EncryptedText;
 import tools.pki.gbay.crypto.texts.PlainText;
@@ -37,7 +57,7 @@ import tools.pki.gbay.crypto.texts.SignedText;
 import tools.pki.gbay.crypto.texts.SignedTextInterface;
 import tools.pki.gbay.crypto.texts.VerifiedText;
 import tools.pki.gbay.errors.CryptoError;
-import tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
 import org.apache.log4j.Logger;
@@ -59,83 +79,108 @@ import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.Store;
 
 import com.google.inject.Inject;
 
+/**
+ * The Class SoftCert is used for all private keys, public keys and related certificate
+ */
 public class SoftCert implements CryptoServiceProvider {
 
 	static {
 		SecurityConcepts.addProvider();
 	}
-	Set<CertificateIssuer> caCert;
+	
+	/** The ca cert. */
+	CertificateChain caCert;
+	
+	/** The crl. */
 	X509CRL crl;
 	private X509Certificate currentCert;
 	private String filePath;
 
-
-
 	private tools.pki.gbay.crypto.keys.KeyStorage keyStorage;
+	
+	/** The log. */
 	Logger log = Logger.getLogger(SoftCert.class);
-
 
 	private CMSSignedData signedData;
 	private CoupleKey twinceKey;
 
-	@Inject
-	private SignatureSettingInterface settings;
-	
-	
+	@Inject SignatureSettingInterface settings;
+
 	private final Type type = Type.softCert;
 
-	public SoftCert() {
+	
+	public  SoftCert() {
 		super();
 		SecurityConcepts.addProvider();
+		log.debug("Softcert Created");
 	}
 
-	public SoftCert(KeyStorage keyStorage) {
-		this();
+	/**
+	 * The Constructor.
+	 */
+	
+	
+	@Inject
+	public  SoftCert(SignatureSettingInterface ssi) {
+		super();
+		this.settings = ssi;
+		SecurityConcepts.addProvider();
+		log.debug("Softcert Created");
+	}
+
+	/**
+	 * The Constructor.
+	 *
+	 * @param keyStorage the key storage
+	 */
+	@Inject
+	public SoftCert(SignatureSettingInterface ssi, KeyStorage keyStorage) {
+		this(ssi);
 		this.keyStorage = keyStorage;
 	}
 
+	/**
+	 * The Constructor.
+	 *
+	 * @param keyStorage the key storage
+	 * @param settings the settings
+	 */
+	public SoftCert(KeyStorage keyStorage) {
 
-	public SoftCert( KeyStorage keyStorage,
-		 SignatureSettingInterface settings) {
-		this(keyStorage);
-		this.settings = settings;
+		this.keyStorage = keyStorage;
 	}
 
-
 	/**
-	 * Get set of issuers
+	 * Get set of issuers.
+	 *
 	 * @return the caCert
-	 * @throws GbayCryptoException
-	 * @throws IOException
+	 * @throws CryptoException the gbay crypto exception
 	 */
-	public Set<CertificateIssuer> getCaCert() throws GbayCryptoException {
+	public CertificateChain getCaCert() throws CryptoException {
 		if (caCert == null) {
-		
+
 			log.info("Getting ca cert...");
-		//	if (settings.get!=null)
+			// if (settings.get!=null)
 			caCert = settings.getIssuer(this.currentCert);
 		}
 		return caCert;
 	}
 
 	/**
+	 * Gets the crl.
+	 *
 	 * @return the crl
 	 */
 	public X509CRL getCrl() {
-	
-		if (crl == null){
+
+		if (crl == null) {
 			log.info("Getting Crl...");
 			crl = settings.getCrl(currentCert);
 		}
@@ -143,6 +188,8 @@ public class SoftCert implements CryptoServiceProvider {
 	}
 
 	/**
+	 * Gets the current cert.
+	 *
 	 * @return the currentCert
 	 */
 	public X509Certificate getCurrentCert() {
@@ -150,6 +197,8 @@ public class SoftCert implements CryptoServiceProvider {
 	}
 
 	/**
+	 * Gets the file path.
+	 *
 	 * @return the filePath
 	 */
 	public String getFilePath() {
@@ -157,18 +206,25 @@ public class SoftCert implements CryptoServiceProvider {
 	}
 
 	/**
+	 * Gets the key storage.
+	 *
 	 * @return the keyStorage
 	 */
 	public tools.pki.gbay.crypto.keys.KeyStorage getKeyStorage() {
 		return keyStorage;
 	}
 
+	/* (non-Javadoc)
+	 * @see tools.pki.gbay.crypto.provider.CryptoServiceProvider#getSignedData()
+	 */
 	@Override
 	public CMSSignedData getSignedData() {
 		return signedData;
 	}
 
 	/**
+	 * Gets the twince key.
+	 *
 	 * @return the twinceKey
 	 */
 	public CoupleKey getTwinceKey() {
@@ -176,79 +232,86 @@ public class SoftCert implements CryptoServiceProvider {
 	}
 
 	/**
+	 * Gets the type.
+	 *
 	 * @return the type
 	 */
 	public Type getType() {
 		return type;
 	}
 
-
 	/**
-	 * Check if text is signed by specific user and is verified and validated
-	 * 
-	 * @param signedText 	Base64 of SignedText
-	 * @param OriginalText
-	 * @param userCert
-	 * @param caCert
-	 * @return
-	 * @throws GbayCryptoException
+	 * Check if text is signed by specific user and is verified and validated.
+	 *
+	 * @param verificationResult the verification result
+	 * @param userCert the user cert
+	 * @return true, if checks if is signed by user
+	 * @throws CryptoException the gbay crypto exception
 	 */
 	public boolean isSignedByUser(VerifiedText verificationResult,
-			X509Certificate userCert) throws GbayCryptoException {
+			X509Certificate userCert) throws CryptoException {
 		return verificationResult.getCertificates().equals(userCert);
 	}
 
-
-
 	/**
-	 * @param caCert
-	 *            the caCert to set
+	 * Sets the ca cert.
+	 *
+	 * @param caCert            the caCert to set
 	 */
-	public void setCaCert(Set<CertificateIssuer> caCert) {
+	public void setCaCert(CertificateChain caCert) {
 		this.caCert = caCert;
 	}
 
 	/**
-	 * @param crl
-	 *            the crl to set
+	 * Sets the crl.
+	 *
+	 * @param crl            the crl to set
 	 */
 	public void setCrl(X509CRL crl) {
 		this.crl = crl;
 	}
 
 	/**
-	 * @param currentCert
-	 *            the currentCert to set
+	 * Sets the current cert.
+	 *
+	 * @param currentCert            the currentCert to set
 	 */
 	public void setCurrentCert(X509Certificate currentCert) {
 		this.currentCert = currentCert;
 	}
 
 	/**
-	 * @param filePath
-	 *            the filePath to set
+	 * Sets the file path.
+	 *
+	 * @param filePath            the filePath to set
 	 */
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
 	}
 
 	/**
-	 * @param keyStorage
-	 *            the keyStorage to set
+	 * Sets the key pair.
+	 *
+	 * @param keyStorage            the keyStorage to set
 	 */
 	public void setKeyPair(tools.pki.gbay.crypto.keys.KeyStorage keyStorage) {
 		this.keyStorage = keyStorage;
 	}
 
 	/**
-	 * @param keyStorage
-	 *            the keyStorage to set
+	 * Sets the key storage.
+	 *
+	 * @param keyStorage            the keyStorage to set
 	 */
-	public void setKeyStorage(
-			tools.pki.gbay.crypto.keys.KeyStorage keyStorage) {
+	public void setKeyStorage(tools.pki.gbay.crypto.keys.KeyStorage keyStorage) {
 		this.keyStorage = keyStorage;
 	}
 
+	/**
+	 * Sets the output file path.
+	 *
+	 * @param filePath the output file path
+	 */
 	public void setOutputFilePath(String filePath) {
 		log.debug("Setting output file address, results will be available in: "
 				+ filePath);
@@ -256,16 +319,18 @@ public class SoftCert implements CryptoServiceProvider {
 	}
 
 	/**
-	 * @param signedData
-	 *            the signedData to set
+	 * Sets the signed data.
+	 *
+	 * @param signedData            the signedData to set
 	 */
 	public void setSignedData(CMSSignedData signedData) {
 		this.signedData = signedData;
 	}
 
 	/**
-	 * @param twinceKey
-	 *            the twinceKey to set
+	 * Sets the twince key.
+	 *
+	 * @param twinceKey            the twinceKey to set
 	 */
 	public void setTwinceKey(CoupleKey twinceKey) {
 		this.twinceKey = twinceKey;
@@ -288,80 +353,82 @@ public class SoftCert implements CryptoServiceProvider {
 	 *            true if the content should be encapsulated in the signature,
 	 *            false otherwise.
 	 * @return byte array of signed value
-	 * @throws GbayCryptoException 
+	 * @throws CryptoException
 	 */
 	private byte[] sign(java.security.PrivateKey privateKey,
-			List<X509Certificate> certificate, byte[] data) throws GbayCryptoException {
+			List<X509Certificate> certificate, byte[] data)
+			throws CryptoException {
 		byte[] signedValue = null;
 		try {
 			SecurityConcepts.addProvider();
 
-
 			CMSTypedData msg = new CMSProcessableByteArray(data);
-//			certList.add(cert);
-			Store certs = new JcaCertStore(certificate);
 			
+			Store certs = new JcaCertStore(certificate);
+			log.debug("Checking to see if we need to inject time....");
 			final ASN1EncodableVector signedAttributes = new ASN1EncodableVector();
-			if (settings.getTimeInjectionSetiion().isIncludeTime()){
-				final Attribute signingAttribute = new Attribute(CMSAttributes.signingTime, new DERSet(new DERUTCTime(settings.getTimeInjectionSetiion().getTimeSetter().GetCurrentTime()))); 
+			if (settings.getTimeInjectionSetiion().isIncludeTime()) {
+				final Attribute signingAttribute = new Attribute(
+						CMSAttributes.signingTime, new DERSet(new DERUTCTime(
+								settings.getTimeInjectionSetiion()
+										.getTimeSetter().GetCurrentTime())));
 				signedAttributes.add(signingAttribute);
 			}
 			// Create the signing table
-			final AttributeTable signedAttributesTable = new AttributeTable(signedAttributes);
-			final DefaultSignedAttributeTableGenerator signedAttributeGenerator = new DefaultSignedAttributeTableGenerator(signedAttributesTable);
-			final JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder().setProvider(SecurityConcepts.getProviderName());
-			builder.setSignedAttributeGenerator(signedAttributeGenerator); 
-			
+			final AttributeTable signedAttributesTable = new AttributeTable(
+					signedAttributes);
+			final DefaultSignedAttributeTableGenerator signedAttributeGenerator = new DefaultSignedAttributeTableGenerator(
+					signedAttributesTable);
+			final JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder()
+					.setProvider(SecurityConcepts.getProviderName());
+			builder.setSignedAttributeGenerator(signedAttributeGenerator);
 
-
-			
 			CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
 			for (int i = 0; i < certificate.size(); i++) {
-				final SignerInfoGenerator signerGenerator = builder.build(settings.getHashingAlgorythm(), privateKey, certificate.get(i));
+				final SignerInfoGenerator signerGenerator = builder.build(
+						settings.getHashingAlgorythm(), privateKey,
+						certificate.get(i));
 
 				gen.addSignerInfoGenerator(signerGenerator);
 				gen.addCertificates(certs);
 
-//				gen.addSignerInfoGenerator(new CMSSignedDataGenerator().build(settings.getHashingAlgorythm(), privateKey,certificate.get(i)));
-	//			gen.addCertificates(certs);
+				// gen.addSignerInfoGenerator(new
+				// CMSSignedDataGenerator().build(settings.getHashingAlgorythm(),
+				// privateKey,certificate.get(i)));
+				// gen.addCertificates(certs);
 			}
-
-			
 
 			// CMSSignedData sigData = gen.generate(msg, false);
 			// this is attached
-/*			CMSSignedData sigData = gen.generate(msg, true);
-
-
-			byte[] signedContent = Base64.encode((byte[]) sigData
-					.getSignedContent().getContent());
-
-			
-			
-			Signature signature = Signature.getInstance("SHA1WithRSA", "BC");
-			signature.initSign(privateKey);
-			signature.update(data);
-
-			// List<X509Certificate> certList = new
-			// ArrayList<X509Certificate>();
-			CMSTypedData msg = new CMSProcessableByteArray(signature.sign());
-			// CMSTypedData msg = new CMSProcessableByteArray(data);
-			// certList.add(certificate);
-			Store certs = new JcaCertStore(certificate);
-			CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-
-			ContentSigner sha1Signer = new JcaContentSignerBuilder(
-					"SHA1withRSA").setProvider("BC").build(privateKey);
-			for (int i = 0; i < certificate.size(); i++) {
-
-				gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(
-						new JcaDigestCalculatorProviderBuilder().setProvider(
-								"BC").build()).build(sha1Signer,
-						certificate.get(i)));
-				gen.addCertificates(certs);
-			}
-			*/
+			/*
+			 * CMSSignedData sigData = gen.generate(msg, true);
+			 * 
+			 * 
+			 * byte[] signedContent = Base64.encode((byte[]) sigData
+			 * .getSignedContent().getContent());
+			 * 
+			 * 
+			 * 
+			 * Signature signature = Signature.getInstance("SHA1WithRSA", "BC");
+			 * signature.initSign(privateKey); signature.update(data);
+			 * 
+			 * // List<X509Certificate> certList = new //
+			 * ArrayList<X509Certificate>(); CMSTypedData msg = new
+			 * CMSProcessableByteArray(signature.sign()); // CMSTypedData msg =
+			 * new CMSProcessableByteArray(data); // certList.add(certificate);
+			 * Store certs = new JcaCertStore(certificate);
+			 * CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+			 * 
+			 * ContentSigner sha1Signer = new JcaContentSignerBuilder(
+			 * "SHA1withRSA").setProvider("BC").build(privateKey); for (int i =
+			 * 0; i < certificate.size(); i++) {
+			 * 
+			 * gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder( new
+			 * JcaDigestCalculatorProviderBuilder().setProvider(
+			 * "BC").build()).build(sha1Signer, certificate.get(i)));
+			 * gen.addCertificates(certs); }
+			 */
 			signedData = gen.generate(msg, settings.isEncapsulate());
 			signedValue = signedData.getEncoded();
 
@@ -375,26 +442,27 @@ public class SoftCert implements CryptoServiceProvider {
 					fos.close();
 					fos.flush();
 				} catch (IOException ex) {
-				//	ex.printStackTrace();
-					throw new GbayCryptoException(new CryptoError(
+					// ex.printStackTrace();
+					throw new CryptoException(new CryptoError(
 							GlobalErrorCode.FILE_IO_ERROR));
 				}
 			}
-		} catch (IOException e ) {
-			throw new GbayCryptoException(GlobalErrorCode.FILE_IO_ERROR);
+		} catch (IOException e) {
+			throw new CryptoException(GlobalErrorCode.FILE_IO_ERROR);
 		} catch (CertificateEncodingException e) {
-			
-			throw new GbayCryptoException(GlobalErrorCode.CERT_INVALID_FORMAT);
+
+			throw new CryptoException(GlobalErrorCode.CERT_INVALID_FORMAT);
 		} catch (OperatorCreationException e) {
-			throw new GbayCryptoException(GlobalErrorCode.TXN_FAIL,e.getMessage());
-		}
-		catch (CMSException e) {
-			throw new GbayCryptoException(GlobalErrorCode.SIG_INVALID,e.getMessage());
+			throw new CryptoException(GlobalErrorCode.TXN_FAIL,
+					e.getMessage());
+		} catch (CMSException e) {
+			throw new CryptoException(GlobalErrorCode.SIG_INVALID,
+					e.getMessage());
 
 		}
 		if (PropertyFileConfiguration.DEBUG) {
 			log.info("Value to be signed: " + new String(data)
-					+ PropertyFileConfiguration.newLine + " Signing Result : "
+					+ SecurityConcepts.newLine + " Signing Result : "
 					+ new Base64(signedValue));
 		}
 		return signedValue;
@@ -402,41 +470,44 @@ public class SoftCert implements CryptoServiceProvider {
 
 	/**
 	 * Sign using a private key and representative public keys to be added to
-	 * the signed text
-	 * 
-	 * @param key
-	 * @param certificate
-	 * @param data
-	 * @param encapsulate
-	 * @return
-	 * @throws GbayCryptoException 
+	 * the signed text.
+	 *
+	 * @param key the key
+	 * @param certificate the certificate
+	 * @param data the data
+	 * @return the byte[]
+	 * @throws CryptoException the gbay crypto exception
 	 */
 	public byte[] sign(java.security.PrivateKey key,
-			X509Certificate certificate, byte[] data) throws GbayCryptoException {
+			X509Certificate certificate, byte[] data)
+			throws CryptoException {
 		List<X509Certificate> cert = new ArrayList<X509Certificate>();
 		cert.add(certificate);
 		return sign(key, cert, data);
 	}
 
+	/* (non-Javadoc)
+	 * @see tools.pki.gbay.crypto.provider.CryptoServiceProvider#sign(tools.pki.gbay.crypto.texts.PlainText)
+	 */
 	@Override
-	public SignedText sign(PlainText text) throws GbayCryptoException {
-		return (SignedText) sign(text,null);
+	public SignedText sign(PlainText text) throws CryptoException {
+		return (SignedText) sign(text, null);
 	}
 
 	/**
 	 * Use {@link KeyStorage} to sign a text. To sign using this function you
 	 * need to set the KeyStorage First
-	 * 
-	 * @param text
-	 * @param selectingFunction
-	 * @return
-	 * @throws GbayCryptoException
+	 *
+	 * @param text the text
+	 * @param selectingFunction the selecting function
+	 * @return the signed text interface
+	 * @throws CryptoException the gbay crypto exception
 	 */
 	public SignedTextInterface sign(PlainText text,
-			KeySelectionInterface selectingFunction) throws GbayCryptoException {
+			KeySelectionInterface selectingFunction) throws CryptoException {
 		twinceKey = keyStorage.getCoupleKey(selectingFunction);
-		byte[] signedPlayLoad = sign(twinceKey.getPrivateKey(),
-				twinceKey.getPublicKey().getCertificate(), text.toByte());
+		byte[] signedPlayLoad = sign(twinceKey.getPrivateKey(), twinceKey
+				.getPublicKey().getCertificate(), text.toByte());
 		List<CertificateInterface> signersList = new ArrayList<CertificateInterface>();
 		signersList.add(twinceKey.getPublicKey());
 		SignedTextInterface st = new SignedText(text.toString(),
@@ -445,36 +516,47 @@ public class SoftCert implements CryptoServiceProvider {
 	}
 
 	/**
-     * Checks whether given X.509 certificate is self-signed.
-	 * @throws NoSuchProviderException 
-     */
-    public static boolean isSelfSigned(X509Certificate cert)
-            throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
-        try {
-            // Try to verify certificate signature with its own public key
-            PublicKey key = cert.getPublicKey();
-            cert.verify(key);
-            return true;
-        } catch (SignatureException sigEx) {
-            // Invalid signature --> not self-signed
-            return false;
-        } catch (InvalidKeyException keyEx) {
-            // Invalid key --> not self-signed
-            return false;
-        }
-    }
-	
-	/***
+	 * Checks whether given X.509 certificate is self-signed.
+	 *
+	 * @param cert the cert
+	 * @return true, if checks if is self signed
+	 * @throws CertificateException the certificate exception
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws NoSuchProviderException the no such provider exception
+	 */
+	public static boolean isSelfSigned(X509Certificate cert)
+			throws CertificateException, NoSuchAlgorithmException,
+			NoSuchProviderException {
+		try {
+			// Try to verify certificate signature with its own public key
+			PublicKey key = cert.getPublicKey();
+			cert.verify(key);
+			return true;
+		} catch (SignatureException sigEx) {
+			// Invalid signature --> not self-signed
+			return false;
+		} catch (InvalidKeyException keyEx) {
+			// Invalid key --> not self-signed
+			return false;
+		}
+	}
+
+	/**
+	 * *
 	 * Verifies a signed text, if the signedText has it's own crl will verifies
 	 * over it, if not it verifies over the CRL of SoftCert Object As for
 	 * Issuers it will verifys to all issuers inside of signedText and SoftCert,
 	 * if the text is signed with even only one trusted issuer it can be
-	 * verified
-	 * 
+	 * verified.
+	 *
+	 * @param text the text
+	 * @param originalText the original text
+	 * @return the verified text
+	 * @throws CryptoException the gbay crypto exception
 	 */
 	@Override
 	public VerifiedText verify(SignedText text, PlainText originalText)
-			throws GbayCryptoException {
+			throws CryptoException {
 		// CertificateIssuer issuer = caCert ;
 		// X509CRL crl = this.crl;
 		if (text.getTrustedIssuers() != null)
@@ -497,11 +579,12 @@ public class SoftCert implements CryptoServiceProvider {
 	 *            Base64 of SignedText
 	 * @param OriginalText
 	 * @return A text Containing Verification Result
-	 * @throws GbayCryptoException
+	 * @throws CryptoException
 	 */
 	@SuppressWarnings("rawtypes")
+	@Inject
 	private VerifiedText VerifyAndValidate(SignedText signedText,
-			PlainText OriginalText) throws GbayCryptoException {
+			PlainText OriginalText) throws CryptoException {
 		ArrayList<CertificateValiditor> containedkeys = new ArrayList<CertificateValiditor>();
 		VerifiedText obj = new VerifiedText(OriginalText.toString(), signedText);
 		if (obj.getCrl() != null)
@@ -544,20 +627,24 @@ public class SoftCert implements CryptoServiceProvider {
 				log.debug("Current cert is extracted");
 				try {
 					if (isSelfSigned(currentCert))
-						throw new GbayCryptoException(GlobalErrorCode.CERT_IS_SELF_SIGNED);
+						throw new CryptoException(
+								GlobalErrorCode.CERT_IS_SELF_SIGNED);
 				} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-					throw new GbayCryptoException(GlobalErrorCode.CERT_INVALID_FORMAT,e.getMessage());
+					throw new CryptoException(
+							GlobalErrorCode.CERT_INVALID_FORMAT, e.getMessage());
 				}
-				
+
 				caCert = getCaCert();
-				if (caCert == null){
-					throw new GbayCryptoException(GlobalErrorCode.CERT_ISSUER_NOT_SET);
+				if (caCert == null) {
+					throw new CryptoException(
+							GlobalErrorCode.CERT_ISSUER_NOT_SET);
 				}
-				log.debug("ca"+caCert);
+				log.debug("ca" + caCert);
 				log.info("Checking for revokation...");
 				obj.setRevoked(isRevoked());
 				log.info("Extracting public key for verification...");
-				CertificateValiditor mykey = new CertificateValiditor(currentCert);
+				CertificateValiditor mykey = new CertificateValiditor(settings,
+						currentCert);
 				containedkeys.add(mykey);
 				if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder()
 						.setProvider(SecurityConcepts.getProviderName()).build(
@@ -571,24 +658,30 @@ public class SoftCert implements CryptoServiceProvider {
 						log.info("verified");
 					}
 				} else {
+					log.info("Verification is done and signature is not verified");
 					isVerified = false;
 				}
 			}
 		} catch (CMSException e1) {
-			e1.printStackTrace();
-			throw new GbayCryptoException(new CryptoError(
-					GlobalErrorCode.SIG_NOT_FOUND));
 			obj.setValidated(false);
+			log.error(e1);
+			throw new CryptoException(new CryptoError(
+					GlobalErrorCode.SIG_NOT_FOUND));
 		} catch (CertificateExpiredException e) {
+			log.debug(e);
+			obj.setValidated(false);
 		} catch (CertificateNotYetValidException e) {
+			log.debug(e);
 			obj.setValidated(false);
 		} catch (OperatorCreationException e) {
-			throw new GbayCryptoException(
-					new CryptoError(GlobalErrorCode.SIG_INVALID));
+			log.error(e);
+			throw new CryptoException(new CryptoError(
+					GlobalErrorCode.SIG_INVALID));
 		} catch (CertificateException e) {
-			throw new GbayCryptoException(new CryptoError(
+			log.error(e);
+			throw new CryptoException(new CryptoError(
 					GlobalErrorCode.CERT_INVALID_FORMAT));
-		} 
+		}
 		obj.setValidated(isValidated);
 		obj.setVerified(isVerified);
 		return obj;
@@ -596,21 +689,12 @@ public class SoftCert implements CryptoServiceProvider {
 
 	/**
 	 * Check if cert is revoked, if you set certrepos URL to null and retry
-	 * counts to -1 it will use default values in configuration
-	 * 
-	 * @param certRepos
-	 *            URL address of cert Repos
-	 * @param maxRetryRepos
-	 *            Maximum retrying of getting CRL from cert repos
-	 * @param maxRetryCDP
-	 *            Maximum retrying of getting CRL from CDP in cert file
-	 * @return
-	 * @throws IOException
-	 *             CRL is not readable
-	 * @throws CertificateException
-	 * @throws GbayCryptoException 
+	 * counts to -1 it will use default values in configuration.
+	 *
+	 * @return true, if checks if is revoked
+	 * @throws CryptoException the gbay crypto exception
 	 */
-	public boolean isRevoked() throws  GbayCryptoException {
+	public boolean isRevoked() throws CryptoException {
 		getCrl();
 		if (crl != null) {
 			log.info("We got CRL for"
@@ -621,18 +705,20 @@ public class SoftCert implements CryptoServiceProvider {
 			}
 		} else {
 			log.info("We could not get any CRL to verify the cert using it");
-			throw new GbayCryptoException(new CryptoError(GlobalErrorCode.CERT_CRL_NOT_FOUND));
+			throw new CryptoException(new CryptoError(
+					GlobalErrorCode.CERT_CRL_NOT_FOUND));
 		}
 		return true;
 	}
 
+	/* 
+	 * Encrypt a text based on a plain text 
+	 * @see tools.pki.gbay.crypto.provider.CryptoServiceProvider#encrypt(tools.pki.gbay.crypto.texts.PlainText)
+	 */
 	@Override
-	public EncryptedText encrypt(PlainText text) throws GbayCryptoException {
-		// TODO Auto-generated method stub
+	public EncryptedText encrypt(PlainText text) throws CryptoException {
 		return null;
 	}
 
-
-
-
+	
 }

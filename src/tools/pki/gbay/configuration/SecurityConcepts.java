@@ -40,7 +40,7 @@ public class SecurityConcepts {
 
 
 	  /** The new line. */
-	  protected static String newLine = System.getProperty("line.separator");
+	  public static String newLine = System.getProperty("line.separator");
 	  /** The Star line. */
 	  public static String StarLine = newLine+"*****************************************************************************************************"+newLine;
 

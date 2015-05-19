@@ -29,7 +29,7 @@ package tools.pki.gbay.crypto.texts;
 import java.io.File;
 
 import tools.pki.gbay.crypto.provider.CryptoServiceProvider;
-import  tools.pki.gbay.errors.GbayCryptoException;
+import tools.pki.gbay.errors.CryptoException;
 
 /**
  *
@@ -60,7 +60,7 @@ public class PlainText extends BasicText{
 
 
 
-	public PlainText(File container) throws GbayCryptoException {
+	public PlainText(File container) throws CryptoException {
 		super(container);
 	}
 
@@ -70,11 +70,11 @@ public class PlainText extends BasicText{
 		super(text);
 	}
 	
-    public SignedText sign(CryptoServiceProvider signiner) throws GbayCryptoException{
+    public SignedText sign(CryptoServiceProvider signiner) throws CryptoException{
 		return signiner.sign(this);    	
     }
     
-    public EncryptedText encrypt(CryptoServiceProvider encryptor) throws GbayCryptoException{
+    public EncryptedText encrypt(CryptoServiceProvider encryptor) throws CryptoException{
     	return encryptor.encrypt(this);
     }
     
