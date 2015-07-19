@@ -18,11 +18,24 @@ import tools.pki.gbay.hardware.pkcs11.TokenFinderInterFace;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+/**
+ * Provide crypto operations for PKI hardware devices (PKCS#11 Smart cards and tokens)
+ * @author Android
+ *
+ */
 public class SecureDeviceProvider extends PKCS11Supplier implements CryptoServiceProvider{
 
 	Type deviceType;
 	TokenFinderInterFace finderListener;
 	PKCS11Supplier rt;
+	/**
+	 * @param cryptokiLib
+	 * @param pin
+	 * @param attach
+	 * @param multiTokenListener
+	 * @param multiDeviceListener
+	 * @param addAnotherSignatureListener
+	 */
 	public SecureDeviceProvider(String cryptokiLib, String pin, boolean attach, TokenFinderInterFace multiTokenListener, DeviceFinderInterface multiDeviceListener, RecursiveSignerInterface addAnotherSignatureListener) {
 		super(cryptokiLib, pin,multiDeviceListener,addAnotherSignatureListener );
 		this.deviceType = Type.smartCard;
@@ -47,7 +60,6 @@ public class SecureDeviceProvider extends PKCS11Supplier implements CryptoServic
 
 	
 
-	@Override
 	public CMSSignedData getSignedData() throws CryptoException {
 		if (variables.signingResult != null)
 		return variables.signingResult;

@@ -105,74 +105,15 @@ public class PKCS11Supplier {
 	@Inject
 	private SignatureSettingInterface settings;
 	
+	/**
+	 * @return settings used for signings
+	 */
 	public SignatureSettingInterface getSettings() {
 		return settings;
 	}
 
 	Logger log = Logger.getLogger(PKCS11Supplier.class);
 	private static int WRAP_AFTER = 16;
-	/**
-	 * the main method Adds BouncyCastle cryptographic provider, instantiates
-	 * the PKCS11Supplier class, and launches the signature process. The class
-	 * require no arguments; the message to sign is the fixed word "CIAO".
-	 * 
-	 * @param args
-	 * @throws CryptoException 
-	 */
-	public static void main(String[] args) throws CryptoException {
-		// Security.insertProviderAt(new MyPKCS11Provider(), 2);
-
-		
-for(int i =0 ;i<1 ; i++){
-		Security.insertProviderAt(new BouncyCastleProvider(), 3);
-
-		PKCS11Supplier rt = null;
-
-		rt = new PKCS11Supplier("ShuttleCSP11.dll", "1",  new DeviceFinderInterface() {
-			
-			@Override
-			public int selectCard(List<CardInfo> conectedCardsList) {
-				// TODO Auto-generated method stub
-				return 0;
-			}
-		}, new RecursiveSignerInterface() {
-			
-			@Override
-			public boolean addMore(int i) {
-				// TODO Auto-generated method stub
-				return false;
-			}
-		}
-				);
-		rt.setPlainText("hi");
-		rt.setOutputFilePath("a.txt");
-//		rt.setPin("12345678");
-
-		// non per SC
-		// rt.initSW();
-
-		// rt.initHW();
-
-		// test sw
-		// rt.testSHA1WithRSAEncapsulated();
-
-		// per SC
-		// rt.testMD5WithRSAEncapsulated();
-
-		// per provider SMARTCARD
-		// rt.testSCProvider();
-
-		// Firma esterna
-		rt.signText();
-		try {
-			rt.finalize();
-		} catch (Throwable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-}
-		
-	}
 	RecursiveSignerInterface addmoreSignature;
 	DeviceFinderInterface cardSelectingFunction;
 
@@ -205,6 +146,10 @@ for(int i =0 ;i<1 ; i++){
 	PKCS11SupplierData variables = new PKCS11SupplierData(null, false, null,
 			false, null, null, null);
 
+	/**
+	 * Load the provider and auto detect the connected card
+	 * @param pin
+	 */
 	public PKCS11Supplier(String pin) {
 		super();
 		initialise();
@@ -214,6 +159,9 @@ for(int i =0 ;i<1 ; i++){
 
 	/**
 	 * @param cryptokiLib
+	 * @param pin 
+	 * @param cardSelectorListener 
+	 * @param addExtraSignatureListener 
 	 */
 	public PKCS11Supplier(String cryptokiLib, String pin,DeviceFinderInterface cardSelectorListener,RecursiveSignerInterface addExtraSignatureListener) {
 		this(pin);
@@ -260,9 +208,9 @@ for(int i =0 ;i<1 ; i++){
 	 * to detect reader and token presence, trying also to provide a candidate
 	 * PKCS#11 cryptoki for it.
 	 * <b>note</b> if you set {@link PKCS11Supplier#cardSelectingFunction} it will be called upon detection of card
+	 * @param candidateCards list of cards that we are going to search in it
 	 * @return true if a token with corresponding candidate cryptoki was
 	 *         detected.
-	 * @throws IOException
 	 * @throws CryptoException
 	 *             NO_TOKEN_DETECTED if can't find any smart card
 	 */
@@ -330,7 +278,7 @@ for(int i =0 ;i<1 ; i++){
 	 * @throws CryptoException
 	 *             NO_TOKEN_DETECTED if can't find any smart card
 	 */
-	private boolean detectCardAndCriptoki() throws CryptoException {
+	public boolean detectCardAndCriptoki() throws CryptoException {
 		CardInfo ci = null;
 
 		boolean cardPresent = false;
@@ -711,6 +659,10 @@ for(int i =0 ;i<1 ; i++){
 	}
 
 
+	/**
+	 * Check if we are just checking a specific driver and do operations on that
+	 * @return true if there is Cryptoki library that we are forced to use
+	 */
 	public boolean isForcingCryptoki() {
 		return variables.forcingCryptoki;
 	}
@@ -733,8 +685,7 @@ for(int i =0 ;i<1 ; i++){
 	}
 
 	/**
-	 * @param variables
-	 *            .digestionAlgorithm the digestionAlgorithm to set
+	 * @param digestAlg  the digestionAlgorithm to set
 	 */
 	public void setDigestAlg(String digestAlg) {
 		this.variables.digestionAlgorithm = digestAlg;

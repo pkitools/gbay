@@ -20,17 +20,22 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.util.Store;
 
+/**
+ * The data needed for PKCS11Suplier
+ * @author Android
+ *
+ */
 public class PKCS11SupplierData {
-	public String cryptokiLib;
-	public boolean forcingCryptoki;
-	public CMSSignedData signingResult;
-	public String plainText;
-	public String pin;
-	public boolean makeDigestOnToken;
-	public String digestionAlgorithm;
-	public String encryptionAlgorithm;
-	public String filePath;
-	private List<CertificateInterface> certs = new ArrayList<CertificateInterface>();
+	 String cryptokiLib;
+	 boolean forcingCryptoki;
+	 CMSSignedData signingResult;
+	 String plainText;
+	 String pin;
+	 boolean makeDigestOnToken;
+	 String digestionAlgorithm;
+	 String encryptionAlgorithm;
+	 String filePath;
+	 List<CertificateInterface> certs = new ArrayList<CertificateInterface>();
 
 	public PKCS11SupplierData(String cryptokiLib, boolean forcingCryptoki,
 			CMSSignedData signingResult, boolean makeDigestOnToken,

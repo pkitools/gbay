@@ -160,7 +160,8 @@ public class PKCS11Manager {
 	  }
 
 
-	public static void dispose2() throws Throwable {
+
+	private static void dispose2() throws Throwable {
 		if (instance !=null){
 			instance.closeSession();
 			instance.libFinalize();
@@ -253,6 +254,13 @@ try{
 
     
 
+    /**
+     * Initialize library 
+     * @param cryptokiLib library file address
+     * @throws IOException
+     * @throws TokenException
+     * @throws CryptoException
+     */
     public PKCS11Manager(String cryptokiLib)
             throws IOException, TokenException, CryptoException {
         super();
@@ -1025,8 +1033,6 @@ try{
      *            the handleof the certificate on the token.
      * @return the DER encoded certificate, as a byte array.
      * @throws PKCS11Exception 
-     * @throws UnsupportedEncodingException
-     * @throws TokenException
      */
     public byte[] getDEREncodedCertificate(long certHandle)
             throws PKCS11Exception {
@@ -1538,6 +1544,7 @@ try{
 	 * It will get the token info
 	 * <b>Note: </b> You need to call getTokenList() before this 
 	 * @return the tokenInfo
+	 * @throws CryptoException 
 	 * @see PKCS11Manager#getTokenList();
 	 */
 	public HashMap<Long,CK_TOKEN_INFO> getTokenInfo() throws CryptoException {
