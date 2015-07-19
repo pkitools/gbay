@@ -43,7 +43,7 @@ import tools.pki.gbay.crypto.provider.SignatureTime;
 import tools.pki.gbay.errors.CryptoException;
 
 /**
- * Defualt settings of signatures
+ * Default settings for signatures
  * The Class DefualtSignatureSetting.
  */
 public class DefualtSignatureSetting implements SignatureSettingInterface {

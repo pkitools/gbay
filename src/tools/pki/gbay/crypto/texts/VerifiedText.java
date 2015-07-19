@@ -28,12 +28,23 @@ public class VerifiedText extends PlainText implements VerificationInterface {
 
 	}
 
+	/**
+	 * Generate VerifiedText object from signed text and original text
+	 * @param text original text
+	 * @param signedText Signed text
+	 */
 	public VerifiedText(String text, SignedTextInterface signedText) {
 		super(text);
 		this.base64signedValue = signedText.toBase64();
 		this.certificate = new HashSet<CertificateValiditor>();
 	}
 
+	/**
+	 * @param text
+	 * @param signedText
+	 * @param issuers
+	 * @param crl
+	 */
 	public VerifiedText(String text, SignedTextInterface signedText,
 			CertificateIssuer issuers, X509CRL crl) {
 		super(text);
@@ -119,6 +130,9 @@ public class VerifiedText extends PlainText implements VerificationInterface {
 		this.validated = validated;
 	}
 
+	/**
+	 * @param certificates
+	 */
 	public void setCertificates(Set<CertificateValiditor> certificates) {
 		if (certificates instanceof CertificateInterface)
 			this.certificate = certificates;

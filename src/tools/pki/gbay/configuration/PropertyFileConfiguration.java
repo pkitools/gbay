@@ -29,13 +29,8 @@ package tools.pki.gbay.configuration;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Set;
-
-import com.google.inject.Singleton;
-
 import tools.pki.gbay.crypto.keys.KeyStorage.CoupleKey;
 import tools.pki.gbay.crypto.keys.validation.CertificateChain;
-import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.provider.CaFinderInterface;
 import tools.pki.gbay.crypto.provider.CrlFinderInterface;
 import tools.pki.gbay.crypto.provider.KeySelectionInterface;
@@ -65,12 +60,11 @@ public class PropertyFileConfiguration extends SecurityConcepts implements Signa
 	private static final String	SIG_ISSUER_CALLER =	  "signature.settings.issuer.caller";
 	private static final String	SIG_CRL_CALLER =	  "signature.settings.crl.caller";
 	private static final String SIG_KEY_SELECTOR =  "signature.settings.key.caller";
-	private static final String ERRORS_MESSAGE_FILE =  "errors.settings.messafes.file";
-	
-  
-
-  
-   public PropertyFileConfiguration() {
+	/**
+ * Default constructor for loading settings of GBay from property files.
+ * It initiates and loads the configuration file
+ */
+public PropertyFileConfiguration() {
 
 	  PropertyLoader.initiate(CONFIG_FILE, SAVE_SETTINGS);
 		PropertyLoader.loadProperties();	

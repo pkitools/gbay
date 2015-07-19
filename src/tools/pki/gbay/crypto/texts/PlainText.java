@@ -32,48 +32,78 @@ import tools.pki.gbay.crypto.provider.CryptoServiceProvider;
 import tools.pki.gbay.errors.CryptoException;
 
 /**
- *
+ * A normal text which can be used for crypto operations and has basic functionalities attaches
  * @author Araz
  */
 public class PlainText extends BasicText{
 
 	/**
-	 * Constract the PlainText from a plain non-Encoded String
-	 * @param text
+	 * Construct the PlainText for future use
 	 */
-
 	public PlainText() {
 		super("");
 	}
 	
 	
 	
+	/**
+	 * Generate a text from encoded text
+	 * @param encodedText
+	 */
 	public PlainText(EncodedTextInterface encodedText) {
 		super(encodedText);
 	}
 
 
 
+	
+	/**
+	 * Generate text from byte array
+	 * @param content
+	 */
 	public PlainText(byte[] content) {
 		super(content);
 	}
 
 
 
+	/**
+	 * Generate text from a file
+	 * @param container
+	 * @throws CryptoException
+	 */
 	public PlainText(File container) throws CryptoException {
 		super(container);
 	}
 
 
 
+	/**
+	 * Generate text from string
+	 * @param text
+	 */
 	public PlainText(String text) {
 		super(text);
 	}
 	
-    public SignedText sign(CryptoServiceProvider signiner) throws CryptoException{
+
+	
+	/**
+	 * Sign the text using a provider
+	 * @param signiner
+	 * @return Signature
+	 * @throws CryptoException
+	 */
+	public SignedText sign(CryptoServiceProvider signiner) throws CryptoException{
 		return signiner.sign(this);    	
     }
     
+    /**
+     * Encrypt the text
+     * @param encryptor
+     * @return encrypted text
+     * @throws CryptoException
+     */
     public EncryptedText encrypt(CryptoServiceProvider encryptor) throws CryptoException{
     	return encryptor.encrypt(this);
     }

@@ -1,14 +1,19 @@
 package tools.pki.gbay.crypto.keys.validation;
 
+/**
+ * Interface for certificate validation results
+ * @author Android
+ *
+ */
 public interface ValidationResultInterface {
 
 	/**
-	 * @return the expired
+	 * @return true if it is expired
 	 */
 	public abstract boolean isExpired();
 
 	/**
-	 * @return the invalidCA
+	 * @return true of CA is not a valid one
 	 */
 	public abstract boolean isInvalidCA();
 
@@ -22,6 +27,9 @@ public interface ValidationResultInterface {
 	 */
 	public abstract boolean isRevoked();
 
+	/**
+	 * @return true if certificate validation is totally passed and is valid
+	 */
 	public abstract boolean isPassed();
 
 	/**

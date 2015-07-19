@@ -8,12 +8,19 @@ import org.apache.log4j.Logger;
 
 
 
+
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 import tools.pki.gbay.hardware.pcsc.CardInfo;
 import tools.pki.gbay.hardware.pcsc.PCSCHelper;
+import tools.pki.gbay.hardware.provider.PKCS11Manager;
 import iaik.pkcs.pkcs11.TokenException;
 
+/**
+ * To detect connected devices
+ * @author Android
+ *
+ */
 public class DeviceDetector {
 
     /**
@@ -26,6 +33,12 @@ public class DeviceDetector {
 	List<CardInfo> conectedCardsList = new ArrayList<CardInfo>();
 	int cardsNo;
 
+	/**
+	 * To check if any of cards in the provided list is connected 
+	 * @param candidates List of devices
+	 * @return List of connected cards
+	 * @throws CryptoException
+	 */
 	public static List<CardInfo> detectCardAndCriptoki(List<CardInfo> candidates) throws CryptoException {
 		 List<CardInfo> cards = new ArrayList<CardInfo>();
 		

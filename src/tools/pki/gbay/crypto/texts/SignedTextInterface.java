@@ -10,8 +10,17 @@ import tools.pki.gbay.crypto.keys.validation.CertificateRevocationList;
 import tools.pki.gbay.crypto.provider.CryptoServiceProvider;
 import tools.pki.gbay.errors.CryptoException;
 
+/**
+ * @author Android
+ *
+ */
 public interface SignedTextInterface {
 
+
+	/**
+	 * To be converted to base 64 encoded value
+	 * @return base64 encoded
+	 */
 	public abstract EncodedTextInterface toBase64();
 
 	/**
@@ -35,6 +44,12 @@ public interface SignedTextInterface {
 	 */
 	public abstract void setOriginalText(PlainText originalText);
 
+	/**
+	 * To be verified
+	 * @param csp
+	 * @return verification result
+	 * @throws CryptoException
+	 */
 	public abstract VerificationInterface verify(CryptoServiceProvider csp)
 			throws CryptoException;
 
@@ -44,7 +59,7 @@ public interface SignedTextInterface {
 	public abstract CertificateChain getTrustedIssuers();
 
 	/**
-	 * @param caCert the caCert to set
+	 * @param trustedIssuers Issuer certificate chain
 	 */
 	public abstract void setTrustedIssuers(CertificateChain trustedIssuers);
 

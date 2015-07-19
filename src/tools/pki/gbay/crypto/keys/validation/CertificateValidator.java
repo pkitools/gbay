@@ -70,9 +70,8 @@ import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class CertificateValidator.
+ * The Class CertificateValidator is to do  validation of certificates
  */
 public class CertificateValidator {
 	
@@ -159,6 +158,10 @@ public class CertificateValidator {
 	//@Inject
 	SignatureSettingInterface settings;
 	
+	/**
+	 * @param setting
+	 * @param certificate
+	 */
 	@Inject
 	public CertificateValidator(SignatureSettingInterface setting, X509Certificate certificate) {
 		super();
@@ -175,6 +178,10 @@ public class CertificateValidator {
 		crl = settings.getCrl(certificate);
 		cert = certificate;
 	}
+/**
+ * To validate a cert
+ * @param certificate
+ */
 @Inject
 	
 	public CertificateValidator(X509Certificate certificate) {

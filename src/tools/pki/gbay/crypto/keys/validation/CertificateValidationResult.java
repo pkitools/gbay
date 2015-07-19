@@ -1,5 +1,10 @@
 package tools.pki.gbay.crypto.keys.validation;
 
+/**
+ * Result of a certificate validation
+ * @author Android
+ *
+ */
 public class CertificateValidationResult implements ValidationResultInterface {
 boolean expired;
 protected boolean invalidCA;

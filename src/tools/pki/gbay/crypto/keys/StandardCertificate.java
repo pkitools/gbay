@@ -73,9 +73,8 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 
 import com.google.inject.Inject;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class StandardCertificate.
+ * The Class StandardCertificate is a normal X509 certificate .
  */
 public class StandardCertificate implements CertificateInterface {
 
@@ -227,8 +226,7 @@ public class StandardCertificate implements CertificateInterface {
 			try {
 				serialNumber = getExtensionValue(certificate, "1.2.3.4");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e);
 			}
 	
 			this.PublicExponent = ((java.security.interfaces.RSAPublicKey) certificate.getPublicKey()).getPublicExponent();
@@ -521,14 +519,6 @@ public class StandardCertificate implements CertificateInterface {
 		return this.issuer.getName();
 	}
 
-	/* (non-Javadoc)
-	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#setEndDate(java.util.Date)
-	 */
-	@Override
-	public void setEndDate(Date end) {
-		this.endDate = end;
-		
-	}
 
 	/**
 	 * Sets the serial number.
@@ -540,14 +530,7 @@ public class StandardCertificate implements CertificateInterface {
 		
 	}
 
-	/* (non-Javadoc)
-	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#setStartDate(java.util.Date)
-	 */
-	@Override
-	public void setStartDate(Date start) {
-		this.startDate = start;
-		
-	}
+
 
 	/**
 	 * Sets the subject dn.
@@ -558,13 +541,7 @@ public class StandardCertificate implements CertificateInterface {
 this.subjectDN = sdn;
 	}
 
-	/* (non-Javadoc)
-	 * @see tools.pki.gbay.crypto.keys.CertificateInterface#setIssuerName(java.lang.String)
-	 */
-	@Override
-	public void setIssuerName(String IssuerName) {
-		this.issuer.setName(IssuerName);
-	}
+
 
 
 }

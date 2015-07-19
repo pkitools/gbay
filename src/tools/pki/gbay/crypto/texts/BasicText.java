@@ -13,8 +13,27 @@ import tools.pki.gbay.util.general.FileInterface;
  * @author Araz
  */
 public abstract class BasicText {
-	public static int HEX_LENTGH = 16;
-   public static String HEX_SEPRATOR = " ";
+	/**
+	 * This is used for showing porposes
+	 */
+	private  int hexBytesLength = 16;
+   /**
+ * @param hexBytesLength number of bytes which a separator will be shown after
+ */
+public void setHexBytesLength(int hexBytesLength) {
+		this.hexBytesLength = hexBytesLength;
+	}
+
+
+	/**
+	 * 
+	 * @param hexBytesSeprater what to show between separated bytes 
+	 */
+	public void setHexBytesSeprater(String hexBytesSeprater) {
+		this.hexBytesSeprater = hexBytesSeprater;
+	}
+
+private  String hexBytesSeprater = " ";
    
 	byte[] byteRep;
 	/**
@@ -63,6 +82,10 @@ public abstract class BasicText {
 	}
 
 	
+	/**
+	 * Get the byte array of your text
+	 * @return text as bytes
+	 */
 	public byte[] toByte() {
 		return byteRep;
 	}
@@ -79,7 +102,7 @@ public String toString() {
  * @return the formatted string
  */
 public String toHexadecimalString(){
-	return toHexadecimalString(HEX_SEPRATOR, HEX_LENTGH);
+	return toHexadecimalString(hexBytesSeprater, hexBytesLength);
 }
 
 
@@ -120,7 +143,7 @@ public String toHexadecimalString(String byteSeparator,
  * @param byteRep
  * @param byteSeparator
  * @param wrapAfter
- * @return
+ * @return well formated byte array 
  */
 public static String toHexadecimalString(byte[] byteRep, String byteSeparator,
 		int wrapAfter) {

@@ -27,15 +27,31 @@ package tools.pki.gbay.crypto.keys;
 
 import java.util.Date;
 
+/**
+ * Interface of a certificate
+ * @author Android
+ */
 public interface CertificateInterface {
 
+	/**
+	 * @return when the certificate expires
+	 */
 	public abstract Date getEndDate();
+	/**
+	 * @return when certificate starts
+	 */
 	public abstract Date getStartDate();
+	/**
+	 * @return subject dn of certificate
+	 */
 	public abstract String getSubjectDN();
+	/**
+	 * @return Issuer name of certificate
+	 */
 	public abstract String getIssuerName();
-	public abstract void setEndDate(Date end);
-	public abstract void setStartDate(Date start);
-	public abstract void setIssuerName(String IssuerName);
+	/**
+	 * @return serial number. Serial number is mostly the unique value we are relying in all of our applications
+	 */
 	String getSerialNumber();
 
 }

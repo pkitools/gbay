@@ -104,6 +104,7 @@ public class Base64 implements EncodedTextInterface {
 	/**
 	 * To encode a plain inputStream
 	 * @param plainInputStream
+	 * @throws CryptoException 
 	 */
 	public Base64(InputStream plainInputStream) throws CryptoException {
 		log.info("Reading input stream");
@@ -139,17 +140,26 @@ public class Base64 implements EncodedTextInterface {
 	
 	/**
 	 * Decode the text to plain text
-	 * @return
+	 * @return decoded (original) value as byte array
 	 */
 	@Override
 	public byte[] decode(){
 		return org.bouncycastle.util.encoders.Base64.decode(encodedText);
 	}
 	
+	/** decode a base64 encoded text
+	 * @param encodedText
+	 * @return plain text
+	 */
 	public static byte[] decode(String encodedText){
 		return org.bouncycastle.util.encoders.Base64.decode(encodedText);
 	}
 
+	/**
+	 * encode a text to base64
+	 * @param plainText
+	 * @return base64 encoded text
+	 */
 	public static byte[] encode(String plainText){
 		return org.bouncycastle.util.encoders.Base64.encode(plainText.getBytes());
 	}
@@ -187,6 +197,12 @@ public class Base64 implements EncodedTextInterface {
 	}
 	
 	
+	/**
+	 * Check if a value is base64 encoded or not
+	 * @param in
+	 * @return true if value is base64 encoded
+	 * @throws IOException
+	 */
 	public static boolean isBase64(InputStream in) throws IOException {
 		long numBase64Chars = 0;
 		int numPadding = 0;

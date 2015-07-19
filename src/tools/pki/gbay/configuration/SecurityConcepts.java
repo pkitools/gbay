@@ -35,7 +35,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  */
 public class SecurityConcepts {
 	
-	  public static boolean DEBUG = true;
+	  /**
+	 * Indicates if we are on debug mode
+	 */
+	public static boolean DEBUG = true;
 
 
 	  /** The new line. */

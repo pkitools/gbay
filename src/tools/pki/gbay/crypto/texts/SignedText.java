@@ -54,7 +54,6 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.util.Store;
 
-// TODO: Auto-generated Javadoc
 /**
  * A signed text which contains signed values and can be verified .
  *

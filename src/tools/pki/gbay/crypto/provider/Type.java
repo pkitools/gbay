@@ -1,17 +1,60 @@
 package tools.pki.gbay.crypto.provider;
 
+/**
+ * Possible cryptography Providers
+ * @author Android
+ *
+ */
 public enum Type{
- smartCard(1), secureToken(4), softCert(2),Roaming(3) , None(-1); 
- public final int id;
+ /**
+ * Smart Cards 
+ */
+smartCard(1), /** PKI tokens
+ * 
+ */
+secureToken(4), /** P12 files in client side
+ * 
+ */
+softCert(2),/**
+ * Provide Server side Crypto operations
+ */
+Roaming(3) , /**
+ * None of the above
+ */
+None(-1); 
+ /**
+ * ID of the Cryptography provider type
+ */
+public final int id;
  private Type(int i){id = i;}
- public boolean Compare(int i){return id == i;}
+ /**
+ * @param i
+ * @return true if two types are equal
+ */
+public boolean Compare(int i){return id == i;}
  
- public static String SMART_CARD_TEXT = "smartcard";
- public static String TOKEN_TEXT = "soft";
- public static String SOFT_CERT_TEXT = "smartcard";
- public static String ROAMING_TEXT = "smartcard";
+ /**
+ * Friendly name 
+ */
+public static String SMART_CARD_TEXT = "smartcard";
+/**
+* Friendly name 
+*/
+public static String TOKEN_TEXT = "token";
+/**
+* Friendly name 
+*/ 
+public static String SOFT_CERT_TEXT = "soft-certs";
+/**
+* Friendly name 
+*/ 
+public static String ROAMING_TEXT = "roaming-certs";
  
- public static Type GetType(int _id)
+ /**
+ * @param _id
+ * @return Provider type
+ */
+public static Type GetType(int _id)
  {
 	 Type[] As = Type.values();
      for(int i = 0; i < As.length; i++)
@@ -22,7 +65,11 @@ public enum Type{
      return Type.None;
  }
  
- public static Type getType(String typetext){
+ /**
+ * @param typetext
+ * @return provider type
+ */
+public static Type getType(String typetext){
 	 
 	 if (typetext.equals(SMART_CARD_TEXT)){
 		 return smartCard;

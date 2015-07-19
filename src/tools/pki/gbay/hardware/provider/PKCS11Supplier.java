@@ -58,7 +58,6 @@ import tools.pki.gbay.hardware.cms.ManualSignerInfoGenerator;
 import tools.pki.gbay.hardware.pcsc.CardInfo;
 import tools.pki.gbay.hardware.pcsc.PCSCHelper;
 import tools.pki.gbay.hardware.pkcs11.PKCS11Errors;
-import tools.pki.gbay.hardware.pkcs11.PKCS11Manager;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;

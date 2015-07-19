@@ -68,6 +68,11 @@ public class KeyStorage {
 	private List<String> keyAlias = new ArrayList<String>();
 	private List<String> aliases = new ArrayList<String>();
 
+	/**
+	 * A key Pair
+	 * @author Araz
+	 *
+	 */
 	public class CoupleKey{
 		Logger log = Logger.getLogger(CoupleKey.class);
 		private PrivateKey privateKey;
@@ -82,6 +87,13 @@ public class KeyStorage {
 		public PrivateKey getPrivateKey() {
 			return privateKey;
 		}
+		/**
+		 * Construct key pair
+		 * @param privateKey
+		 * @param publicKey certificate
+		 * @param alias alias of key pair
+		 * @param pin
+		 */
 		public CoupleKey(PrivateKey privateKey,   CertificateValiditor publicKey, String alias , char[] pin) {
 			super();
 			this.privateKey = privateKey;
@@ -125,9 +137,10 @@ public class KeyStorage {
 SignatureSettingInterface setting;
 	
 	/**
-	 * Generate a keystore from a string
+	 * Generate a key store 
+	 * @param settings 
 	 * @param pin Pin number of store
-	 * @param storeContent string representror of keystrore
+	 * @param storeContent string representer of key store
 	 * @throws CryptoException @see tools.pki.gbay.errors.GlobalErrorCode#PROVIDER_NOT_FOUND or @see tools.pki.gbay.errors.GlobalErrorCode#INVALID_ALGORITHM or @see tools.pki.gbay.errors.GlobalErrorCode#CERT_INVALID_FORMAT or @see tools.pki.gbay.errors.GlobalErrorCode#FILE_IO_ERROR or @link {@link KeyStoreException}
 	 */
 	@Inject
@@ -201,7 +214,6 @@ SignatureSettingInterface setting;
 	 * </pre>
 	 * <p>
 	 * @see tools.pki.gbay.util.general.CryptoFile#setPin(char[]) 
-	 * @see tools.pki.gbay.util.general.CryptoFile#AegisFile(java.io.File, String) 
 	 * 
 	 * @param file p12 file. <i>Later on we may need to have other key stores supported</i> but now, just pfx
 	 * @throws CryptoException
@@ -251,7 +263,7 @@ try{
 	/**
 	 * Generate a Key store from a string from an specific alias
 	 * @param pin
-	 * @param byteArray
+	 * @param storeContent 
 	 * @param alias
 	 * @throws CryptoException
 	 */
@@ -365,14 +377,25 @@ try{
 		return (java.security.PrivateKey) keystore.getKey(alias, pin);
 	}
 
+	/**
+	 * 
+	 * @return all aliases in key store
+	 */
 	public List<String> getKeyAlias() {
 		return keyAlias;
 	}
 
+	/**
+	 * 
+	 * @return All certificates in key store
+	 */
 	public List<CertificateValiditor> getPublicKeys() {
 		return publicKeys;
 	}
 
+	/**
+	 * @return All key pairs in key store
+	 */
 	public List<CoupleKey> getPublicKeysWithPrivateKey() {
 		return keyCouples;
 	}
@@ -381,7 +404,7 @@ try{
 /**
  * Get key couples (public and private twins)	
  * @param selectingFunction if there is more than a couple of Keys this function can be used to set which pair be 
- * @return
+ * @return a key pair
  * @throws CryptoException
  * 
  */
@@ -403,10 +426,20 @@ try{
 		return keyCouples.get(selectedNo);
 	}
 
+	/**
+	 * @return Java KeyStore of this Key Store
+	 * 
+	 */
 	public KeyStore getKeyStore() {
 		return keyStore;
 	}
 	
+	/**
+	 * Save Key Store in a file (PKCS#12 File)
+	 * @param outputFile
+	 * @param pass password for the file to save
+	 * @throws CryptoException
+	 */
 	public void save(CryptoFile outputFile, char[] pass) throws CryptoException{
 		
 		try {

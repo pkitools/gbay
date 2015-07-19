@@ -40,7 +40,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Representing a CA
- * @author farhang
+ * @author Araz Farhang 
  *
  */
 public class CertificateIssuer extends CertificateValiditor {
@@ -52,8 +52,7 @@ public class CertificateIssuer extends CertificateValiditor {
 	/**
 	 * generate certificate issuer
 	 * @param name name of issuer (as appeared in DN or a part of DN)
-	 * @param fileaddress address of CA cert file
-	 * @param certificate {@link X509Certificate} of the issuer
+	 * @param certificates {@link X509Certificate} of the issuer
 	 * @throws NoSuchAlgorithmException 
 	 * @throws CertificateEncodingException 
 	 * @throws CryptoException 
@@ -107,8 +106,7 @@ public class CertificateIssuer extends CertificateValiditor {
 		this.name = name;
 	}
 	/**
-	 * Get address of CA cert file
-	 * @return address of CA cert file
+	 * set address of CA cert file
 	 * @throws CryptoException 
 	 */
 
@@ -130,7 +128,7 @@ public class CertificateIssuer extends CertificateValiditor {
 	}
 	/**
 	 * Set {@link X509Certificate} of the issuer
-	 * @param certificate {@link X509Certificate} of the issuer
+	 * @param certificates {@link X509Certificate} of the issuer
 	 */
 	public void setCertificates(X509Certificate certificates) {
 		setHascert();

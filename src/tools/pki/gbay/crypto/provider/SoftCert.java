@@ -116,6 +116,9 @@ public class SoftCert implements CryptoServiceProvider {
 	private final Type type = Type.softCert;
 
 	
+	/**
+	 * To provide operations for a File
+	 */
 	public  SoftCert() {
 		super();
 		SecurityConcepts.addProvider();
@@ -124,6 +127,7 @@ public class SoftCert implements CryptoServiceProvider {
 
 	/**
 	 * The Constructor.
+	 * @param ssi settings
 	 */
 	
 	
@@ -137,6 +141,7 @@ public class SoftCert implements CryptoServiceProvider {
 
 	/**
 	 * The Constructor.
+	 * @param ssi 
 	 *
 	 * @param keyStorage the key storage
 	 */
@@ -150,7 +155,6 @@ public class SoftCert implements CryptoServiceProvider {
 	 * The Constructor.
 	 *
 	 * @param keyStorage the key storage
-	 * @param settings the settings
 	 */
 	public SoftCert(KeyStorage keyStorage) {
 
@@ -214,10 +218,10 @@ public class SoftCert implements CryptoServiceProvider {
 		return keyStorage;
 	}
 
-	/* (non-Javadoc)
-	 * @see tools.pki.gbay.crypto.provider.CryptoServiceProvider#getSignedData()
+
+	/**
+	 * @return Signed Data
 	 */
-	@Override
 	public CMSSignedData getSignedData() {
 		return signedData;
 	}

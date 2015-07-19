@@ -2,6 +2,10 @@ package tools.pki.gbay.crypto.texts;
 
 import java.io.ByteArrayInputStream;
 
+/**
+ * @author Android
+ *
+ */
 public interface EncodedTextInterface {
 
 	/**
@@ -29,6 +33,9 @@ public interface EncodedTextInterface {
 	
 	
 
+	/**
+	 * @return
+	 */
 	public abstract Base64 toBase64();
 
 }

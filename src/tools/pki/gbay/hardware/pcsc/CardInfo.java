@@ -46,14 +46,28 @@ public class CardInfo {
         return (String) infos.get(attribute);
     }
     
+    /**
+     * description of device
+     * @return description of device
+     */
     public String getDescription(){
     	return getProperty("description");
     }
     
+    
+    /**
+     * Address of device's library (cryptoki driver)
+     * @return Address of PKCS#11 library
+     */
     public String getLib(){
     	return getProperty("lib");
     }
     
+    
+    /**
+     * ATTR of device if it is applicable
+     * @return ATTR of device
+     */
     public String getATR(){
     	return getProperty("atr");
     }

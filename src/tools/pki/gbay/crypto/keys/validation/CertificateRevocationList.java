@@ -64,47 +64,68 @@ import tools.pki.gbay.errors.GlobalErrorCode;
 
 
 
+/**
+ * Helper for a CRL {@link X509CRL}
+ * @author AndroidMan
+ *
+ */
 public final class CertificateRevocationList {
+	
+	Logger logger = Logger.getLogger(CertificateRevocationList.class);
+
+    
+
 	X509CRL crl;
 	boolean isRevoked;
     /**
      * Extracts the CRL distribution points from the certificate (if available)
      * and checks the certificate revocation status against the CRLs coming from
      * the distribution points. Supports HTTP, HTTPS, FTP and LDAP based URLs.
+     * @param crlbyte 
      * 
-     * @param cert
-     *            the certificate to be checked for revocation
      * @throws CertificateException 
      * @throws CRLException 
-     * @throws CertificateVerificationException
      *             if the certificate is revoked
      */
-	
-	Logger logger = Logger.getLogger(CertificateRevocationList.class);
-
-    
     public CertificateRevocationList(byte[] crlbyte) throws CRLException, CertificateException {
     	logger.info("Setting CertificateRevocationList from byte array ..."); 
     	logger.debug(crlbyte);
     	this.crl = fromByteArray(crlbyte);
     }
  
+    /**
+     * Generate object from JAVA CRL
+     * @param crl
+     */
     public CertificateRevocationList(X509CRL crl){
     	logger.info("Setting CertificateRevocationList from CRL ...");
     	this.crl = crl;
     }
   
+    /**
+     * @param crlURL
+     * @throws CertificateException
+     * @throws CRLException
+     * @throws IOException
+     * @throws CryptoException
+     * @throws NamingException
+     */
     public CertificateRevocationList(String crlURL) throws CertificateException, CRLException, IOException, CryptoException, NamingException {
 		logger.info("Getting CRL from "+ crlURL);
     	this.crl = downloadCRL(crlURL);
 	}
     
-   public CertificateRevocationList(X509Certificate certFromFile) throws CryptoException{
+   /**
+    * Generate CRL from the certificate itself 
+ * @param cert
+ * @throws CryptoException
+ */
+public CertificateRevocationList(X509Certificate cert) throws CryptoException{
 	   logger.info("Getting CertificateRevocationList from file");
-	   logger.debug(certFromFile);
+	   logger.debug(cert);
 	   List<String> crlList;
 	try {
-		crlList = getCrlDistributionPoints(certFromFile);
+		crlList = getCrlDistributionPoints(cert);
 		logger.debug(crlList.size() + " Distribution Point are found");
 	if (crlList != null){
 		for (String s : crlList){
@@ -130,6 +151,13 @@ public final class CertificateRevocationList {
 
 }
 
+
+/**
+ * Check if certificate is revoked
+ * @param cert
+ * @return true if certificate is revoked
+ * @throws CryptoException
+ */
 public boolean isRevoked(X509Certificate cert) throws CryptoException{
 	   if (cert!=null)
 	   return crl.isRevoked(cert);
@@ -239,6 +267,10 @@ public boolean isRevoked(X509Certificate cert) throws CryptoException{
      * Extracts all CRL distribution point URLs from the
      * "CRL Distribution Point" extension in a X.509 certificate. If CRL
      * distribution point extension is unavailable, returns an empty list.
+     * @param cert 
+     * @return List of all CRL DPs
+     * @throws CertificateParsingException 
+     * @throws IOException 
      */
     public static List<String> 
     getCrlDistributionPoints(X509Certificate cert) throws CertificateParsingException, IOException {
@@ -280,6 +312,13 @@ public boolean isRevoked(X509Certificate cert) throws CryptoException{
         return crlUrls;
     }
     
+    /**
+     * Read PEM or DER incuded CRL from byte array
+     * @param crlbyte
+     * @return CRL
+     * @throws CRLException
+     * @throws CertificateException
+     */
     public static X509CRL fromByteArray(byte[] crlbyte) throws CRLException, CertificateException{
 			CertificateFactory factory = null;
 			factory = CertificateFactory.getInstance("X509");
@@ -296,28 +335,15 @@ public boolean isRevoked(X509Certificate cert) throws CryptoException{
 		return crl;
 	}
 	
-	public static void main(String[] args) {
-		try {
-		
-			downloadCRLFromLDAP("ldap://ldap.digicert.com.my:389/c=MY");
-		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CRLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NamingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CryptoException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
+	/**
+	 * Open CRL file
+	 * @param address Address of a PEM or DER encoded CRL
+	 * @return CRL
+	 * @throws CertificateException
+	 * @throws IOException
+	 * @throws CRLException
+	 */
 	public static X509CRL openCRLFile(String address) throws CertificateException, IOException, CRLException {
 		CertificateFactory cf = CertificateFactory.getInstance("X509");
 		InputStream in = new FileInputStream(address);
@@ -325,16 +351,22 @@ public boolean isRevoked(X509Certificate cert) throws CryptoException{
 
 		X509CRL crl =null;
 		if ( org.apache.commons.codec.binary.Base64.isBase64(data)){
-			System.err.println("BASE64");
 			crl = (X509CRL) cf.generateCRL(new Base64InputStream(new ByteArrayInputStream(data)));	 
 		}
 		else{
-			System.out.println("no base64");
 			crl = (X509CRL) cf.generateCRL(new ByteArrayInputStream(data));
 		}
 return crl;
 
 	}
+	/**
+	 * Open a CRL (PEM or DER)
+	 * @param data byte array of CRL
+	 * @return CRL
+	 * @throws CertificateException
+	 * @throws IOException
+	 * @throws CRLException
+	 */
 	public static X509CRL openCRLByte(byte[] data) throws CertificateException, IOException, CRLException {
 		CertificateFactory cf = CertificateFactory.getInstance("X509");
 		if ( org.apache.commons.codec.binary.Base64.isBase64(data)){
@@ -346,7 +378,17 @@ return crl;
 			return (X509CRL) cf.generateCRL(new ByteArrayInputStream(data));
 		}
 	}
-	   public static X509CRL  getCrlFromCert(X509Certificate certFromFile) throws IOException, CertificateException, CRLException, NamingException, CryptoException {
+	   /**
+	    * Get CRL from a certificate by reading the certificate and extracting CRLD and downloaing the CRL from it
+	 * @param certFromFile
+	 * @return CRL or NULL if CRLD is not valid
+	 * @throws IOException
+	 * @throws CertificateException
+	 * @throws CRLException
+	 * @throws NamingException
+	 * @throws CryptoException
+	 */
+	public static X509CRL  getCrlFromCert(X509Certificate certFromFile) throws IOException, CertificateException, CRLException, NamingException, CryptoException {
 		   List<String> crlList;
 			crlList = getCrlDistributionPoints(certFromFile);
 		if (crlList != null){

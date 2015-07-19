@@ -4,6 +4,11 @@ import java.util.Set;
 
 import tools.pki.gbay.crypto.keys.CertificateValiditor;
 
+/**
+ * Interface to be used for verification results
+ * @author Android
+ *
+ */
 public interface VerificationInterface {
 
 	/**
@@ -41,9 +46,16 @@ public interface VerificationInterface {
 	 */
 	public abstract void setValidated(boolean validated);
 
+	/**
+	 * Indicates if verified
+	 * @return true if all verifications are passed
+	 */
 	public abstract boolean isPassed();
 
 
+	/**
+	 * @return all certificates that are in signature
+	 */
 	public abstract Set<CertificateValiditor> getCertificates();
 	
 

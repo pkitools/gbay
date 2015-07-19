@@ -39,10 +39,16 @@ public class EncryptedText extends PlainText{
 	byte[] encryptedText;
 	CMSEnvelopedData encryptrdData;
 	
+	/**
+	 * @param text original text
+	 */
 	public EncryptedText(String text) {
 		super(text);
 	}
 	
+	/**
+	 * @return original text
+	 */
 	public PlainText Decrypt(){
 		return originalText;
 		

@@ -76,9 +76,14 @@ public class PCSCHelper {
 
 
 
+    /**
+     * Construct a PCSC helper
+     * @param loadLib if true it will connect to the device as a PKCS#11 device
+     */
     public PCSCHelper(boolean loadLib) {
 
         try {
+        	
             System.out.println("connect to PCSC 1.0 resource manager");
 
             // load native library
@@ -161,14 +166,19 @@ public class PCSCHelper {
 
     }
 
-    public static void main(String[] args) {
+//    public static void main(String[] args) {
+//
+//        PCSCHelper a = new PCSCHelper(true);
+//        a.findCards();
+//        System.exit(0);
+//
+//    }
 
-        PCSCHelper a = new PCSCHelper(true);
-        a.findCards();
-        System.exit(0);
-
-    }
-
+    /**
+     * To get information of all connected devices
+     * <b>Construct the PCSHelper with true to be able to find cards</b>
+     * @return List of detail information of all connected devices
+     */
     public List<CardInfo> findCards() {
         
         ArrayList<CardInfo> cards = new ArrayList<CardInfo>();
@@ -217,6 +227,12 @@ public class PCSCHelper {
         return cards;
     }
 
+    /**
+     * To make a friendly representative of atr
+     * @param atr
+     * @param byteSeparator
+     * @return prettified ATR
+     */
     public String formatATR(byte[] atr, String byteSeparator) {
         int n, x;
         String w = new String();

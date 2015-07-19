@@ -39,13 +39,16 @@ import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
 /**
- * The Class CertificateChain.
+ * The Class CertificateChain is set of root and intermediate certificates
  */
 public class CertificateChain {
 
 	protected Set<CertificateIssuer> rootIssuers;
 	protected Set<CertificateIssuer> intermediateIssuers;
 
+	/**
+	 * 
+	 */
 	public CertificateChain() {
 		super();
 	
@@ -53,6 +56,11 @@ public class CertificateChain {
 		intermediateIssuers = new HashSet<CertificateIssuer>();
 	}
 	
+	/**
+	 * This function get the certificate, if it is self signed will be added as root certificate, if not will be added as intermediate cert
+	 * @param additionalCert the issuer certificate
+	 * @throws CryptoException
+	 */
 	public void AddIssuer(CertificateIssuer additionalCert) throws CryptoException{
 
 		try {
@@ -69,6 +77,10 @@ public class CertificateChain {
 		}
 	}
 	
+	/**
+	 * @param rootIssuers
+	 * @param intermediateIssuers
+	 */
 	public CertificateChain(Set<CertificateIssuer> rootIssuers,
 			Set<CertificateIssuer> intermediateIssuers) {
 		this();
@@ -99,6 +111,9 @@ public class CertificateChain {
 	public void setIntermediateIssuers(Set<CertificateIssuer> intermediateIssuers) {
 		this.intermediateIssuers = intermediateIssuers;
 	}
+	/**
+	 * @return the sum of intermediate and root certs
+	 */
 	public int size() {
 		
 		return rootIssuers.size()+intermediateIssuers.size();

@@ -19,9 +19,21 @@ import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
+/**
+ * Connection to PKCS#11 device
+ * @author Android
+ *
+ */
 public class Connection {
 	static Logger log = Logger.getLogger(Connection.class);
 
+	/**
+	 * Check if a mechanism is supported by a specified  {@link Token}}
+	 * @param token
+	 * @param mechanism
+	 * @return true if supported
+	 * @throws TokenException
+	 */
 	public static boolean isMechanismSupported(Token token, Long mechanism)
 			throws TokenException {
 
@@ -44,15 +56,12 @@ public class Connection {
 	 * 
 	 * @param pkcs11Module
 	 *            The PKCS#11 module to use.
-	 * @param output
-	 *            The output stream to write the user prompts to.
-	 * @param input
-	 *            The input stream where to read user input from.
+	 * @param tokenDetectionListener object to be called upon detection of a device
+	 * @param mechanism 
 	 * @return The selected token or null, if no token is available or the user
 	 *         canceled the action.
 	 * @throws TokenException
 	 * @throws CryptoException
-	 * @throws Exception
 	 * @preconditions (pkcs11Module <> null) and (output <> null) and (input <>
 	 *                null)
 	 * @postconditions
@@ -137,10 +146,6 @@ public class Connection {
 	 *            If the session should be a read-write session. This may be
 	 *            Token.SessionReadWriteBehavior.RO_SESSION or
 	 *            Token.SessionReadWriteBehavior.RW_SESSION.
-	 * @param output
-	 *            The output stream to write the user prompts to.
-	 * @param input
-	 *            The input stream where to read user input from.
 	 * @return The selected token or null, if no token is available or the user
 	 *         canceled the action.
 	 * @exception TokenException
@@ -166,10 +171,7 @@ public class Connection {
 	 *            If the session should be a read-write session. This may be
 	 *            Token.SessionReadWriteBehavior.RO_SESSION or
 	 *            Token.SessionReadWriteBehavior.RW_SESSION.
-	 * @param output
-	 *            The output stream to write the user prompts to.
-	 * @param input
-	 *            The input stream where to read user input from.
+	 * @param pin pin of device
 	 * @return The selected token or null, if no token is available or the user
 	 *         canceled the action.
 	 * @exception TokenException

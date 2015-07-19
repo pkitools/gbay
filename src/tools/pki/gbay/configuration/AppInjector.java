@@ -37,7 +37,7 @@ import com.google.inject.Singleton;
  */
 public class AppInjector extends AbstractModule {
 
-	/* (non-Javadoc)
+	/* Bind configurations from propertyfile to gbay
 	 * @see com.google.inject.AbstractModule#configure()
 	 */
 	@Override
