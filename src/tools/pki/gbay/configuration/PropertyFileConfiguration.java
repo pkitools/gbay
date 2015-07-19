@@ -45,9 +45,10 @@ import tools.pki.gbay.crypto.times.TimeInterface;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.util.general.PropertyLoader;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PropertyFileConfiguration.
+ * Is providing all configurations that Gbay Needs from property files by implementing SignatureSettingInterface and ErrorsSettingInterface
+ * @see SignatureSettingInterface @see {@link ErrorsSettingInterface}
  */
 //@Singleton
 public class PropertyFileConfiguration extends SecurityConcepts implements SignatureSettingInterface , ErrorsSettingInterface
@@ -79,7 +80,8 @@ public class PropertyFileConfiguration extends SecurityConcepts implements Signa
 
 
 
-/* (non-Javadoc)
+/* 
+ * Provide CA certificates from class spicified in property file
  * @see tools.pki.gbay.crypto.provider.CaFinderInterface#getIssuer(java.security.cert.X509Certificate)
  */
 @Override
@@ -145,7 +147,7 @@ public Integer selectKey(List<CoupleKey> keyCouples) {
  * @see tools.pki.gbay.crypto.provider.SignatureSettingInterface#getTimeInjectionSetiion()
  */
 @Override
-public SignatureTime getTimeInjectionSetiion() {
+public SignatureTime getTimeInjectionSetting() {
 	try {
 	boolean includetime = PropertyLoader.getBoolean(SIG_TIME_INCLUDE);
 

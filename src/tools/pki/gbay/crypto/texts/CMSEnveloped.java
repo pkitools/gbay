@@ -18,6 +18,8 @@ import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import tools.pki.gbay.configuration.SecurityConcepts;
+
 public class CMSEnveloped {
 	public static byte[] encrypt(X509Certificate certificate, String data)
 			throws Exception {
@@ -26,12 +28,12 @@ public class CMSEnveloped {
 		CMSEnvelopedDataGenerator fact = new CMSEnvelopedDataGenerator();
 
 		fact.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(
-				certificate).setProvider("BC"));
+				certificate).setProvider(SecurityConcepts.getProviderName()));
 		CMSTypedData msg = new CMSProcessableByteArray(data.getBytes());
 
 		CMSEnvelopedData ed = fact.generate(msg,
 				new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC)
-						.setProvider("BC").build());
+						.setProvider(SecurityConcepts.getProviderName()).build());
 		return ed.getEncoded();
 	}
 
@@ -48,7 +50,7 @@ public class CMSEnveloped {
 			RecipientInformation recipient = (RecipientInformation) it.next();
 			Security.addProvider(new BouncyCastleProvider());
 			recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(
-					privateKey).setProvider("BC"));
+					privateKey).setProvider(SecurityConcepts.getProviderName()));
 
 		}
 

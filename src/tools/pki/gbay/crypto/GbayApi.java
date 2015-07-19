@@ -44,6 +44,11 @@ import tools.pki.gbay.util.general.CryptoFile;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Initiator and provide common functionalities of Gbay PKI API for simple usages 
+ * @author Araz Farhang Dareshuri
+ *
+ */
 public class GbayApi  {
 	private static final Logger logger = Logger.getLogger(GbayApi.class);
 

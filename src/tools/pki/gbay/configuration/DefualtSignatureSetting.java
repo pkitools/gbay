@@ -42,8 +42,8 @@ import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.provider.SignatureTime;
 import tools.pki.gbay.errors.CryptoException;
 
-// TODO: Auto-generated Javadoc
 /**
+ * Defualt settings of signatures
  * The Class DefualtSignatureSetting.
  */
 public class DefualtSignatureSetting implements SignatureSettingInterface {
@@ -142,7 +142,7 @@ public class DefualtSignatureSetting implements SignatureSettingInterface {
 	 * @see tools.pki.gbay.crypto.provider.SignatureSettingInterface#getTimeInjectionSetiion()
 	 */
 	@Override
-	public SignatureTime getTimeInjectionSetiion() {
+	public SignatureTime getTimeInjectionSetting() {
 		
 		return signatureTime;
 	}

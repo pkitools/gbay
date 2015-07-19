@@ -33,6 +33,7 @@ import com.google.inject.Singleton;
 
 /**
  * The Class AppInjector.
+ * Binds defualt configurations from property files
  */
 public class AppInjector extends AbstractModule {
 

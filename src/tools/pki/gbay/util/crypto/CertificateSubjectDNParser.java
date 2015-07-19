@@ -5,6 +5,8 @@ package tools.pki.gbay.util.crypto;
 
 import java.util.StringTokenizer;
 
+import tools.pki.gbay.configuration.SecurityConcepts;
+
 public class CertificateSubjectDNParser
 {
 	String email = "";
@@ -189,31 +191,6 @@ public class CertificateSubjectDNParser
 	{
 		this.email = email;
 	}
-	/*
-	public static void main(String[] args)
-	{
-		SecurityConcepts.addProvider();
-		try
-		{
-			CertificateFactory cf = CertificateFactory.getInstance("X509","BC");
-			X509Certificate cer = (X509Certificate) cf.generateCertificate(new FileInputStream("epasscert.cer"));
-			CertificateSubjectDNParser parser = new CertificateSubjectDNParser(cer.getSubjectDN().getName());
-			System.out.println("Email : "+parser.getEmail());
-			System.out.println("Delegated : "+parser.getDelegatedName());
-			System.out.println("ID : "+parser.getId());
-			System.out.println("CommonName : "+parser.getOwnerName());
-			System.out.println("Principle Name : "+parser.getPrincipleName());
-		} catch (CertificateException e)
-		{
-			e.printStackTrace();
-		} catch (NoSuchProviderException e)
-		{
-			e.printStackTrace();
-		} catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
-	}*/
 
 	/**
 	 * @return the country

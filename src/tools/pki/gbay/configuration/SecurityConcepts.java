@@ -30,9 +30,8 @@ import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class SecurityConcepts.
+ * The Class SecurityConcepts. contents basic configurations and values for Gbay
  */
 public class SecurityConcepts {
 	

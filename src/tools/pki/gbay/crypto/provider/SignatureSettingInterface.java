@@ -10,7 +10,8 @@ import com.google.inject.Singleton;
 @com.google.inject.ImplementedBy(PropertyFileConfiguration.class)
 public interface SignatureSettingInterface extends CaFinderInterface, CrlFinderInterface, KeySelectionInterface {
 
-	public abstract SignatureTime getTimeInjectionSetiion();
+	
+	public abstract SignatureTime getTimeInjectionSetting();
 
 
 	public abstract boolean isEncapsulate();

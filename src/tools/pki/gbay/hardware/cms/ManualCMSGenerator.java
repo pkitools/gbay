@@ -319,11 +319,6 @@ public class ManualCMSGenerator {
             }
         }
 
-        //		aggiungo i certificati dei firmatari
-        //		CertStore store = CertStore.getInstance("Collection",
-        //				new CollectionCertStoreParameters(certList), "BC");
-        //		this.addCertificatesAndCRLs(store);
-
         if (certs.size() != 0) {
             ASN1EncodableVector v = new ASN1EncodableVector();
 

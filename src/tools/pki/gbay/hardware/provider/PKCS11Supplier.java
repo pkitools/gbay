@@ -623,7 +623,7 @@ for(int i =0 ;i<1 ; i++){
 				try {
 					log.info("Decrypting...");
 
-					Cipher c = Cipher.getInstance("RSA/ECB/PKCS1PADDING", "BC");
+					Cipher c = Cipher.getInstance("RSA/ECB/PKCS1PADDING", SecurityConcepts.getProviderName());
 
 					c.init(Cipher.DECRYPT_MODE, pubKey);
 
@@ -860,7 +860,7 @@ for(int i =0 ;i<1 ; i++){
 				// them
 				CertStore store = CertStore.getInstance("Collection",
 						new CollectionCertStoreParameters(signerCertsList),
-						"BC");
+						SecurityConcepts.getProviderName());
 
 				log.info("Adding certificates ... ");
 				gen.addCertificatesAndCRLs(store);

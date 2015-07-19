@@ -387,7 +387,7 @@ public class CertificateValidator {
         pkixParams.addCertStore(intermediateCertStore);
      pkixParams.setRevocationEnabled(false);
         // Build and verify the certification chain
-        CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", "BC");
+        CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", SecurityConcepts.getProviderName());
         PKIXCertPathBuilderResult result = 
             (PKIXCertPathBuilderResult) builder.build(pkixParams);
         return result;

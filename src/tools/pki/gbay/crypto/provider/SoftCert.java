@@ -367,10 +367,10 @@ public class SoftCert implements CryptoServiceProvider {
 			Store certs = new JcaCertStore(certificate);
 			log.debug("Checking to see if we need to inject time....");
 			final ASN1EncodableVector signedAttributes = new ASN1EncodableVector();
-			if (settings.getTimeInjectionSetiion().isIncludeTime()) {
+			if (settings.getTimeInjectionSetting().isIncludeTime()) {
 				final Attribute signingAttribute = new Attribute(
 						CMSAttributes.signingTime, new DERSet(new DERUTCTime(
-								settings.getTimeInjectionSetiion()
+								settings.getTimeInjectionSetting()
 										.getTimeSetter().GetCurrentTime())));
 				signedAttributes.add(signingAttribute);
 			}
@@ -392,43 +392,9 @@ public class SoftCert implements CryptoServiceProvider {
 
 				gen.addSignerInfoGenerator(signerGenerator);
 				gen.addCertificates(certs);
-
-				// gen.addSignerInfoGenerator(new
-				// CMSSignedDataGenerator().build(settings.getHashingAlgorythm(),
-				// privateKey,certificate.get(i)));
-				// gen.addCertificates(certs);
 			}
 
-			// CMSSignedData sigData = gen.generate(msg, false);
-			// this is attached
-			/*
-			 * CMSSignedData sigData = gen.generate(msg, true);
-			 * 
-			 * 
-			 * byte[] signedContent = Base64.encode((byte[]) sigData
-			 * .getSignedContent().getContent());
-			 * 
-			 * 
-			 * 
-			 * Signature signature = Signature.getInstance("SHA1WithRSA", "BC");
-			 * signature.initSign(privateKey); signature.update(data);
-			 * 
-			 * // List<X509Certificate> certList = new //
-			 * ArrayList<X509Certificate>(); CMSTypedData msg = new
-			 * CMSProcessableByteArray(signature.sign()); // CMSTypedData msg =
-			 * new CMSProcessableByteArray(data); // certList.add(certificate);
-			 * Store certs = new JcaCertStore(certificate);
-			 * CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
-			 * 
-			 * ContentSigner sha1Signer = new JcaContentSignerBuilder(
-			 * "SHA1withRSA").setProvider("BC").build(privateKey); for (int i =
-			 * 0; i < certificate.size(); i++) {
-			 * 
-			 * gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder( new
-			 * JcaDigestCalculatorProviderBuilder().setProvider(
-			 * "BC").build()).build(sha1Signer, certificate.get(i)));
-			 * gen.addCertificates(certs); }
-			 */
+
 			signedData = gen.generate(msg, settings.isEncapsulate());
 			signedValue = signedData.getEncoded();
 
