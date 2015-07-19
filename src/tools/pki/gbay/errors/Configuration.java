@@ -35,7 +35,7 @@ public class Configuration {
 ///		return ResourceBundle.getBundle(Error_PROPERTY_FILE);
 //	}
 	//public static ResourceBundle getResourceBoundler(){
-	/*	System.err.println("file: "+Error_PROPERTY_FILE);
+	/*	
 		if (rb!=null)
 			return rb;
 		else{

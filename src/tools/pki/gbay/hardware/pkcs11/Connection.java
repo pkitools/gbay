@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import tools.pki.gbay.configuration.SecurityConcepts;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
@@ -77,16 +78,15 @@ public class Connection {
 					"Argument \"pkcs11Module\" must not be null.");
 		}
 
-		System.out
-				.println("################################################################################");
-		System.out.println("getting list of all tokens");
+		log.debug(SecurityConcepts.StarLine);
+		log.debug("getting list of all tokens");
 		Slot[] slotsWithToken = pkcs11Module
 				.getSlotList(Module.SlotRequirement.TOKEN_PRESENT);
 		Token[] tokens = new Token[slotsWithToken.length];
 		Hashtable tokenIDtoToken = new Hashtable(tokens.length);
 		// tokenList = new Hashtable<Long, Token>();
 		for (int i = 0; i < slotsWithToken.length; i++) {
-			System.out.println("_________________________ "
+			log.debug(SecurityConcepts.StarLine + "Number of slots with token: "
 					+ slotsWithToken.length);
 			if (mechanism == -1L) {
 				log.info("No mechanism is specified");
@@ -122,12 +122,12 @@ public class Connection {
 					if (token != null) {
 						gotTokenID = true;
 					} else {
-						System.out.println("A token with the entered ID \""
+						log.debug("A token with the entered ID \""
 								+ selectedTokenID
 								+ "\" does not exist. Try again.");
 					}
 				} catch (NumberFormatException ex) {
-					System.out.println("The entered ID \"" + selectedTokenID
+					log.debug("The entered ID \"" + selectedTokenID
 							+ "\" is invalid. Try again.");
 				}
 			}
@@ -197,8 +197,6 @@ public class Connection {
 		if (tokenInfo.isLoginRequired()) {
 			session.login(Session.UserType.USER, pin.toCharArray());
 		}
-		// output.println("################################################################################");
-
 		return session;
 	}
 

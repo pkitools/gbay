@@ -3,7 +3,7 @@ package tools.pki.gbay.test.signature;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 
-import tools.pki.gbay.crypto.provider.CrlFinderInterface;
+import tools.pki.gbay.interfaces.CrlFinderInterface;
 
 public class Crlcaller implements CrlFinderInterface {
 	

@@ -29,9 +29,11 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import tools.pki.gbay.configuration.SecurityConcepts;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
+import tools.pki.gbay.interfaces.HardwareSettingsInterface;
 
 /**
  * This class uses the PKCS#11 Java api provieded by <a
@@ -51,6 +53,7 @@ import tools.pki.gbay.errors.GlobalErrorCode;
  */
 public class PKCS11Manager {
 
+	HardwareSettingsInterface settings ;
 	 public static final int CKR_OBJECT_HANDLE_INVALID = 0x00000082;
      public static final int CKR_OPERATION_ACTIVE = 0x00000090;
      public static final int CKR_OPERATION_NOT_INITIALIZED = 0x00000091;
@@ -111,7 +114,9 @@ public class PKCS11Manager {
      */
 	private boolean isInitialized;
 	
-   
+
+	
+	
 	/**
 	 * The information of connected slot
 	 */
@@ -291,7 +296,8 @@ try{
    
         } 
         catch (iaik.pkcs.pkcs11.wrapper.PKCS11Exception ex) {
-        	System.err.println("ALREADY");
+        	
+        	log.debug(ex);
         	if (ex.getErrorCode() == PKCS11Constants.CKR_CRYPTOKI_ALREADY_INITIALIZED) {
         		log.info("PKCS11 already loaded");
         		isInitialized = true;
@@ -551,17 +557,17 @@ try{
         if (getSession() < 0)
             return null;
 
-        System.out.println("\nStart single part sign operation...");
+        log.debug("\nStart single part sign operation...");
         try {
 			pkcs11Module.C_SignInit(getSession(), this.signatureMechanism,
 			        signatureKeyHandle,false);
 		
         if ((data.length > 0) && (data.length < 1024)) {
-            System.out.println("Signing ...");
+            log.debug("Signing ...");
             signature = pkcs11Module.C_Sign(getSession(), data);
-            System.out.println("FINISHED.");
+            log.debug("FINISHED.");
         } else
-            System.out.println("Error in data length!");
+            log.debug("Error in data length!");
 
         } catch (PKCS11Exception e) {
 			
@@ -595,7 +601,7 @@ try{
         byte[] helpBuffer;
         int bytesRead;
 
-        System.out.println("\nStart multiple part sign operation...");
+        log.debug("\nStart multiple part sign operation...");
         pkcs11Module.C_SignInit(getSession(), this.signatureMechanism,
                 signatureKeyHandle,false);
 
@@ -603,7 +609,7 @@ try{
             helpBuffer = new byte[bytesRead];
             // we need a buffer that only holds what to send for signing
             System.arraycopy(buffer, 0, helpBuffer, 0, bytesRead);
-            System.out.println("Byte letti: " + bytesRead);
+            log.debug("Byte letti: " + bytesRead);
 
             pkcs11Module.C_SignUpdate(getSession(), helpBuffer);
 
@@ -862,13 +868,14 @@ try{
         } else {
             log.info("found " + availableCertificates.length
                     + " certificates with matching ID");
-            for (int i = 0; i < availableCertificates.length; i++) {
-                if (i == 0) { // the first we find, we take as our certificate
-                    certificateHandle = availableCertificates[i];
-                    System.out.print("for verification we use ");
-                }
-                log.info("certificate " + i);
+            
+            if (settings!=null){
+            certificateHandle = settings.selectCertHandlerFromList(availableCertificates);
             }
+            else{
+certificateHandle = availableCertificates[0];
+            }
+            
         }
         pkcs11Module.C_FindObjectsFinal(getSession());
 
@@ -1012,7 +1019,7 @@ try{
      */
     public byte[] getDEREncodedCertificateFromLabel(String label)
             throws TokenException {
-        System.out.println("reading DER encoded certificate bytes");
+        log.debug("reading DER encoded certificate bytes");
         byte[] certBytes = null;
 
         long sessionHandle = getSession();
@@ -1037,28 +1044,30 @@ try{
     public byte[] getDEREncodedCertificate(long certHandle)
             throws PKCS11Exception {
 
-        System.out.println("reading certificate bytes");
+    	long session = getSession();
+    	//todo check session
+    	log.debug("reading certificate bytes from session "+session);
 
         byte[] certBytes = null;
         CK_ATTRIBUTE[] template = new CK_ATTRIBUTE[1];
         template[0] = new CK_ATTRIBUTE();
         template[0].type = PKCS11Constants.CKA_VALUE;
-        System.err.println(getSession());
-        pkcs11Module.C_GetAttributeValue(getSession(), certHandle, template , false);
+      
+        pkcs11Module.C_GetAttributeValue(session, certHandle, template , false);
         certBytes = (byte[]) template[0].pValue;
 
         try {
 			CertificateFactory cf = CertificateFactory.getInstance("X509");
 		 X509Certificate mycert = 	(X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certBytes));
-		 System.err.println("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC---"+mycert.getIssuerDN());
+
+		 log.info(SecurityConcepts.StarLine+"We have selected the cert from handler");
 			
 		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
 		}
         
         
-        System.err.println(new String(certBytes));
+        log.debug(new String(certBytes));
         return certBytes;
     }
 
@@ -1066,7 +1075,7 @@ try{
     private byte[] getDEREncodedCertificate(long certHandle, long sessionHandle)
             throws PKCS11Exception {
 
-        System.out.println("reading certificate bytes");
+        log.debug("reading certificate bytes");
 
         byte[] certBytes = null;
         CK_ATTRIBUTE[] template = new CK_ATTRIBUTE[1];
@@ -1466,8 +1475,7 @@ try{
 			closeSession();
 
     	} catch (PKCS11Exception e) {
-			System.err.println(e.getErrorCode());
-			System.err.println(e.getMessage());
+			log.warn(e);
     		if (e.getErrorCode() == CKR_PIN_INCORRECT){
 				log.info("User used an invalid pin, plz check your pin");
 				throw new CryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));
@@ -1478,8 +1486,8 @@ try{
     		else
     			throw new CryptoException(e);
 		} catch (TokenException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.info("A token exception is happened.");
+			log.error(e);
 		}
     	
     }

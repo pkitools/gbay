@@ -15,9 +15,13 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import org.apache.log4j.Logger;
+
 import tools.pki.gbay.util.general.FileUtil;
 
 public class FileUtil {
+
+	private static Logger log = Logger.getLogger(FileUtil.class);
 
 	public static String getFileType(String fileName) {
 
@@ -117,7 +121,7 @@ public class FileUtil {
 	}
 
 	public static byte[] getDataFromFile(String fileName) throws IOException {
-		System.out.println("file:" +fileName);
+		log .debug("file:" +fileName);
 		int i, len;
 		byte[] data = null;
 		FileInputStream fp = null;

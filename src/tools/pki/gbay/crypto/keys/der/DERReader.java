@@ -235,7 +235,7 @@ public class DERReader implements DER
           return fromIso88591(value);
 
         case UNIVERSAL_STRING:
-          // XXX The docs say UniversalString is encoded in four bytes
+          //  The docs say UniversalString is encoded in four bytes
           // per character, but Java has no support (yet) for UTF-32.
           //return new String(buf, "UTF-32");
         case BMP_STRING:

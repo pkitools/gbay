@@ -26,7 +26,7 @@
 package tools.pki.gbay.configuration;
 
 
-import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;

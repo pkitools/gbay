@@ -12,8 +12,11 @@ import java.util.ResourceBundle;
 
 import javax.swing.JOptionPane;
 
+import org.apache.log4j.Logger;
+
 public class CryptoError {
 	private static ClassLoader loader;
+	private static Logger log = Logger.getLogger(CryptoError.class);
 	private String title;
 	private String description;
 	private Component handler;
@@ -61,12 +64,14 @@ public class CryptoError {
 
 			//return new File();
 			
-			System.out.println("Name : " + address);
+			log.debug("Name : " + address);
 			File propFile = new File(address+ name + SUFFIX);
 
 			if (propFile.exists()){
 		
-				System.err.println("File is there");
+
+				log.info("Property file is detected");
+
 //				in = new FileInputStream(propFile);
 			//	URL[] urls = {propFile.toURI().toURL()};
 				//ClassLoader loader = new URLClassLoader(urls);
@@ -78,22 +83,22 @@ public class CryptoError {
 				return  bundle;
 			}
 			else{
-				System.out.println("check loader" + name);
+				log.debug("check loader" + name);
 			if (loader == null){
 				loader = ClassLoaderResolver.getClassLoader(1);
 			}
 								name = name.replace('/', '.');
 
 
-			System.out.println("Loader " + loader);
-				System.out.println(name + "  |  "+loader + " " + Configuration.local );
+				log.debug(name + "  |  "+loader + " " + Configuration.local );
 				// throws MissingResourceException on lookup failures:
 				return  ResourceBundle.getBundle(name,
 						Configuration.local, loader);
 
 			}
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+
+			log.error(e);
 			if (THROW_ON_LOAD_FAILURE) {
 				throw new IllegalArgumentException("could not load ["
 						+ name
@@ -163,7 +168,6 @@ public class CryptoError {
 		//loadBundle();
 		setVariables(param0, param1, param2);
 		error = err;
-		// System.err.println(variable1 + "var2:" + variable2 + "var3"+ variable3);
 		setMessage(getString(err.name(), variable1,variable2,variable3));	
 		this.variable1 = param0;
 		description = getString(err.name() + "." + Configuration.DESC_POSTFIX);
@@ -221,8 +225,7 @@ public class CryptoError {
 	}
 /*
 	public String getString(String key, Object[] args) {
-	System.err.println("Key:" +key + "Args :" + args[0] + " | "+args.length);
-		try {
+	try {
 			if (args!=null && args.length >0){
 				ResourceBundle bundle = Beans.isDesignTime() ? loadBundle() : RESOURCE_BUNDLE;
 
@@ -256,7 +259,6 @@ public class CryptoError {
 	}
 
 	public String getString(String key, String arg0) {
-		//System.err.println("Get string 1");
 		if (arg0 !=null)
 		return getString(key, new Object[] { arg0 });
 		else {

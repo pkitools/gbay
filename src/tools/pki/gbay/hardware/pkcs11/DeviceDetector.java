@@ -27,8 +27,7 @@ public class DeviceDetector {
      * The <code>Log4j</code> where logging messages are written.
      *  
      */
-    @SuppressWarnings("unused")
-	private Logger log = Logger.getLogger(DeviceDetector.class);
+	private static Logger log = Logger.getLogger(DeviceDetector.class);
     
 	List<CardInfo> conectedCardsList = new ArrayList<CardInfo>();
 	int cardsNo;
@@ -51,7 +50,7 @@ public class DeviceDetector {
 					//Card is inside
 					cards.add(ci);
 
-					System.out.println("FOUND");	
+					log.debug("FOUND");	
 				}
 				manager.libFinalize();
 					
@@ -59,13 +58,13 @@ public class DeviceDetector {
 					
 					if (e instanceof CryptoException){
 						if (((CryptoException) e).getErrorCode() == GlobalErrorCode.TOKEN_NOT_DETECTED.id)
-							System.out.println(((CryptoException) e).getErrorCode());
+							log.info(((CryptoException) e).getErrorCode());
 					}
-					e.printStackTrace();
+					log.error(e);
+
 			} catch (Throwable e) {
 			
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e);
 			}
 	//		finally{
 		//		try {

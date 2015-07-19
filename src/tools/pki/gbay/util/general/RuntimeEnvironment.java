@@ -37,8 +37,8 @@ public class RuntimeEnvironment
 			while(files.hasMoreElements())
 			{
 				JarEntry entry = (JarEntry) files.nextElement();
-//				System.out.println("Entry : "+entry.getName());
-//				System.out.println("Substring : "+entry.getName().substring(0,3));
+//				log.debug("Entry : "+entry.getName());
+//				log.debug("Substring : "+entry.getName().substring(0,3));
 				if (entry.getName().trim().substring(0, 3).equals("ver"))
 					return entry.getName().trim().substring(4);
 			}

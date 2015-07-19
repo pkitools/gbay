@@ -130,7 +130,6 @@ public enum GlobalErrorCode {
 		GlobalErrorCode[] As = GlobalErrorCode.values();
 		for (int i = 0; i < As.length; i++) {
 			if (As[i].Compare(_id)){
-			System.err.println(_id +" found");
 				return As[i];
 			}
 		}

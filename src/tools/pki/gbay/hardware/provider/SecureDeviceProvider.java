@@ -2,7 +2,9 @@ package tools.pki.gbay.hardware.provider;
 
 import java.io.IOException;
 import java.security.Security;
-import java.security.cert.CertificateException;
+
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import tools.pki.gbay.crypto.provider.CryptoServiceProvider;
 import tools.pki.gbay.crypto.provider.Type;
@@ -14,9 +16,8 @@ import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 import tools.pki.gbay.hardware.pkcs11.TokenFinderInterFace;
-
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import tools.pki.gbay.interfaces.DeviceFinderInterface;
+import tools.pki.gbay.interfaces.RecursiveSignerInterface;
 
 /**
  * Provide crypto operations for PKI hardware devices (PKCS#11 Smart cards and tokens)
@@ -85,7 +86,6 @@ public class SecureDeviceProvider extends PKCS11Supplier implements CryptoServic
 			try {
 				PKCS11Manager.dispose();
 			} catch (Throwable e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}*/
@@ -94,7 +94,7 @@ public class SecureDeviceProvider extends PKCS11Supplier implements CryptoServic
 
 	@Override
 	public EncryptedText encrypt(PlainText text) throws CryptoException {
-		// TODO Auto-generated method stub
+		// TODO Add encryption
 		return null;
 	}
 

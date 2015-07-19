@@ -48,10 +48,10 @@ import javax.security.auth.x500.X500Principal;
 import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.keys.validation.CertificateRevocationList;
-import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 import tools.pki.gbay.util.general.Convertors;
 
 import org.apache.log4j.Logger;

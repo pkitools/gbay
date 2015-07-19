@@ -1,7 +1,8 @@
-package tools.pki.gbay.crypto.provider;
+package tools.pki.gbay.interfaces;
 
 
 import tools.pki.gbay.configuration.PropertyFileConfiguration;
+import tools.pki.gbay.crypto.provider.SignatureTime;
 
 import com.google.inject.Singleton;
 

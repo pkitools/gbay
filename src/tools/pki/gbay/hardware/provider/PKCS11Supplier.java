@@ -32,7 +32,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.cert.CollectionCertStoreParameters;
@@ -47,8 +46,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import tools.pki.gbay.configuration.SecurityConcepts;
-import tools.pki.gbay.configuration.DefualtSignatureSetting;
-import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.texts.BasicText;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
@@ -58,6 +55,9 @@ import tools.pki.gbay.hardware.cms.ManualSignerInfoGenerator;
 import tools.pki.gbay.hardware.pcsc.CardInfo;
 import tools.pki.gbay.hardware.pcsc.PCSCHelper;
 import tools.pki.gbay.hardware.pkcs11.PKCS11Errors;
+import tools.pki.gbay.interfaces.DeviceFinderInterface;
+import tools.pki.gbay.interfaces.RecursiveSignerInterface;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -70,7 +70,6 @@ import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 
 import com.google.inject.Inject;
@@ -112,10 +111,11 @@ public class PKCS11Supplier {
 		return settings;
 	}
 
-	Logger log = Logger.getLogger(PKCS11Supplier.class);
-	private static int WRAP_AFTER = 16;
 	RecursiveSignerInterface addmoreSignature;
 	DeviceFinderInterface cardSelectingFunction;
+
+	Logger log = Logger.getLogger(PKCS11Supplier.class);
+	private static int WRAP_AFTER = 16;
 
 	List<CardInfo> conectedCardsList = new ArrayList<CardInfo>();
 
@@ -171,7 +171,7 @@ public class PKCS11Supplier {
 		if (cryptokiLib != null) {
 			this.variables.cryptokiLib = cryptokiLib;
 			this.variables.forcingCryptoki = true;
-			System.out.println("Forcing a cryptoki"+cryptokiLib);
+			log.debug("Forcing a cryptoki"+cryptokiLib);
 		}
 	}
 
@@ -240,14 +240,15 @@ public class PKCS11Supplier {
 		if (!isForcingCryptoki()) {
 			if (cardPresent) {
 				try {
+					log.info("A card is present, we are trying to get it worked...");
 
 					if (cards != null && cards.size()>1)
 						selectedSlot = cardSelectingFunction.selectCard(conectedCardsList);
 
 				} catch (Exception e) {
-					e.printStackTrace();
+					log.error(e);
 				}
-				System.err.println(selectedSlot);
+				log.debug("Selected slot is: "+selectedSlot);
 				ci = conectedCardsList.get(selectedSlot);
 				log.info("\n\nWe will use card: '"
 						+ ci.getProperty("description") + "' with criptoki '"
@@ -442,8 +443,7 @@ public class PKCS11Supplier {
 
 			byte[] signedBytes = null;
 			byte[] certBytes = null;
-			System.out
-					.println("============ Encrypting with pkcs11 token ============");
+			log.debug(SecurityConcepts.StarLine+"Encrypting with pkcs11 token");
 
 			long mechanism = -1L;
 			if (CMSSignedDataGenerator.ENCRYPTION_RSA.equals(encryptionAlg))
@@ -457,17 +457,13 @@ public class PKCS11Supplier {
 					mechanism = PKCS11Constants.CKM_RSA_PKCS;
 
 			if (mechanism != -1L) {
-				System.err.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"+mechanism);
-
+			
 				PKCS11Manager signAgent = PKCS11Manager.getInstance((getCryptokiLib()));
-				System.err.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"+signAgent.getCryptokiLibrary());
-
-				System.out
-						.println("Finding a token supporting required mechanism and "
+				log.debug("Using "+signAgent.getCryptokiLibrary()+" for " + mechanism + " mechanism");
+				log.info("Finding a token supporting required mechanism and "
 								+ "containing a suitable" + "certificate...");
 
 				long t = signAgent.findSuitableToken(mechanism);
-				System.err.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"+t);
 				// if suitable token found
 				if (t != -1L) {
 					signAgent.setMechanism(mechanism);
@@ -576,8 +572,7 @@ public class PKCS11Supplier {
 
 					byte[] decBytes = c.doFinal(signedBytes);
 
-					System.out
-							.println("Decrypted bytes (should match DigestInfo bytes):\n"
+					log.debug("Decrypted bytes (should match DigestInfo bytes):\n"
 									+ BasicText.toHexadecimalString(decBytes, " ", WRAP_AFTER));
 
 				
@@ -627,8 +622,7 @@ public class PKCS11Supplier {
 		//	}
 			//else
 			if (e instanceof TokenException){
-				System.err.println("Token Exception");
-				System.out.println(((TokenException)e).getMessage());
+				log.debug(((TokenException)e).getMessage());
 				 throw new CryptoException(new CryptoError(GlobalErrorCode.PIN_INCORRECT));				
 			}
 			else{
@@ -722,7 +716,7 @@ public class PKCS11Supplier {
 	 *            the filePath to set
 	 */
 	public void setOutputFilePath(String filePath) {
-		System.err.println(filePath);
+	log.info("Setting output PATH");
 		this.variables.filePath = filePath;
 	}
 

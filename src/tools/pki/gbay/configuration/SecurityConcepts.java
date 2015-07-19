@@ -52,16 +52,7 @@ public class SecurityConcepts {
 
 	  protected static final String DEFUALTISSUERFILE = "trust.conf"; 
 
-	  /**
-	   * Debug.
-	   *
-	   * @param text the text
-	   */
-	  public static void debug(Object text){
-		  if (PropertyFileConfiguration.DEBUG){
-			  System.out.println(text);
-		  }
-	  }
+	
 
 	   /**
 	    * The Constructor.

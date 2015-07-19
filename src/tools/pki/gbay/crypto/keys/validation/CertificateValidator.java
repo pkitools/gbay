@@ -62,13 +62,14 @@ import org.apache.log4j.Logger;
 
 
 
+
 import com.google.inject.Inject;
 
 import tools.pki.gbay.configuration.SecurityConcepts;
-import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 
 /**
  * The Class CertificateValidator is to do  validation of certificates

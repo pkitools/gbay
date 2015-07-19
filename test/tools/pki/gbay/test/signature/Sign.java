@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,10 +15,10 @@ import org.junit.Test;
 import tools.pki.gbay.configuration.AppInjector;
 import tools.pki.gbay.configuration.PropertyFileConfiguration;
 import tools.pki.gbay.crypto.GbayApi;
-import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.texts.SignedText;
 import tools.pki.gbay.crypto.texts.VerifiedText;
 import tools.pki.gbay.errors.CryptoException;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -24,7 +26,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 public class Sign {
-
+Logger log = Logger.getLogger(Sign.class);
 	private Injector injector;
 
 	@Before
@@ -66,7 +68,7 @@ public class Sign {
 	try{
 		System.err.println(st.getSignedVal());
 		VerifiedText vt = appTest.verify("hi", st.getSignedVal());
-		System.out.println(vt.isPassed());
+		log.debug(vt.isPassed());
 		
 	}
 	catch (CryptoException err){

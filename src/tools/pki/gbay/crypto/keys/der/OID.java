@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.StringTokenizer;
 
+import org.apache.log4j.Logger;
+
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
+import tools.pki.gbay.hardware.pkcs11.DeviceDetector;
 
 /**
  * This immutable class represents an object identifier, or OID.
@@ -36,9 +39,13 @@ import tools.pki.gbay.errors.GlobalErrorCode;
 public class OID implements Cloneable, Comparable, java.io.Serializable
 {
 
+	
   // Fields.
   // ------------------------------------------------------------------------
 
+	private static Logger log = Logger.getLogger(OID.class);
+
+	
   /* Serial version id for serialization. */
   static final long serialVersionUID = 5722492029044597779L;
   
@@ -203,10 +210,9 @@ public class OID implements Cloneable, Comparable, java.io.Serializable
       }
     catch (ArrayIndexOutOfBoundsException aioobe)
       {
-        aioobe.printStackTrace();
+       log.error(aioobe);
         throw aioobe;
       } catch (CryptoException e) {
-		// TODO Auto-generated catch block
 		throw e;
 	}
   }

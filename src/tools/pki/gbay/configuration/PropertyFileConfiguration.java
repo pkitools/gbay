@@ -29,15 +29,18 @@ package tools.pki.gbay.configuration;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
 import tools.pki.gbay.crypto.keys.KeyStorage.CoupleKey;
 import tools.pki.gbay.crypto.keys.validation.CertificateChain;
-import tools.pki.gbay.crypto.provider.CaFinderInterface;
-import tools.pki.gbay.crypto.provider.CrlFinderInterface;
-import tools.pki.gbay.crypto.provider.KeySelectionInterface;
-import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.provider.SignatureTime;
 import tools.pki.gbay.crypto.times.TimeInterface;
 import tools.pki.gbay.errors.CryptoException;
+import tools.pki.gbay.interfaces.CaFinderInterface;
+import tools.pki.gbay.interfaces.CrlFinderInterface;
+import tools.pki.gbay.interfaces.ErrorsSettingInterface;
+import tools.pki.gbay.interfaces.HardwareSettingsInterface;
+import tools.pki.gbay.interfaces.KeySelectionInterface;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 import tools.pki.gbay.util.general.PropertyLoader;
 
 /**
@@ -46,7 +49,7 @@ import tools.pki.gbay.util.general.PropertyLoader;
  * @see SignatureSettingInterface @see {@link ErrorsSettingInterface}
  */
 //@Singleton
-public class PropertyFileConfiguration extends SecurityConcepts implements SignatureSettingInterface , ErrorsSettingInterface
+public class PropertyFileConfiguration extends SecurityConcepts implements SignatureSettingInterface , ErrorsSettingInterface , HardwareSettingsInterface
 {
 
   /** The debug. */
@@ -60,6 +63,8 @@ public class PropertyFileConfiguration extends SecurityConcepts implements Signa
 	private static final String	SIG_ISSUER_CALLER =	  "signature.settings.issuer.caller";
 	private static final String	SIG_CRL_CALLER =	  "signature.settings.crl.caller";
 	private static final String SIG_KEY_SELECTOR =  "signature.settings.key.caller";
+	private static final String SIG_HARDWARE_KEY_SELECTOR =  "signature.settings.hardware.key.caller";
+
 	/**
  * Default constructor for loading settings of GBay from property files.
  * It initiates and loads the configuration file
@@ -190,6 +195,23 @@ public boolean isEncapsulate() {
 @Override
 public String getHashingAlgorythm() {
 	return PropertyLoader.getSystemString(SIG_ALGO);
+}
+
+
+
+
+
+@Override
+public long selectCertHandlerFromList(long[] availableCertificates) {
+	Class<?> b;
+	try {
+		b = Class.forName(PropertyLoader.getString(SIG_KEY_SELECTOR));
+		 HardwareSettingsInterface keyCaller = (HardwareSettingsInterface) b.newInstance();
+		 return keyCaller.selectCertHandlerFromList(availableCertificates);
+	} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		e.printStackTrace();
+	}
+	return 0;
 }
 
 }

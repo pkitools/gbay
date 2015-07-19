@@ -45,10 +45,10 @@ import tools.pki.gbay.crypto.keys.validation.CertificateChain;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
 import tools.pki.gbay.crypto.keys.validation.CertificateValidationResult;
 import tools.pki.gbay.crypto.keys.validation.CertificateValidator;
-import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 import tools.pki.gbay.util.general.CryptoFile;
 import tools.pki.gbay.util.general.FileUtil;
 
@@ -61,7 +61,7 @@ import com.google.inject.Inject;
  */
 public class CertificateValiditor extends StandardCertificate {
 
-	Logger log = Logger.getLogger(CertificateValiditor.class);
+	static Logger log = Logger.getLogger(CertificateValiditor.class);
 
 	/**
 	 * Read cert from byte array
@@ -99,12 +99,11 @@ public class CertificateValiditor extends StandardCertificate {
 
 	private static FileInputStream fileToStream(File file)
 			throws CryptoException {
-		System.err.println(file);
 		FileInputStream fs = null;
 		try {
 			fs = new FileInputStream(file);
 		} catch (FileNotFoundException e) {
-			System.out.println("File not found" + file.getAbsolutePath());
+			log.debug("File not found" + file.getAbsolutePath());
 			throw new CryptoException(new CryptoError(
 					GlobalErrorCode.FILE_NOT_FOUND));
 		}

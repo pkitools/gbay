@@ -26,9 +26,11 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-
 import java.util.Vector;
 
+
+
+import org.apache.log4j.Logger;
 
 import com.ibm.opencard.terminal.pcsc10.OCFPCSC1;
 import com.ibm.opencard.terminal.pcsc10.Pcsc10Constants;
@@ -72,6 +74,7 @@ public class PCSCHelper {
     private String type = null;
 
     private String[] readers = null;
+	private Logger log = Logger.getLogger(PCSCHelper.class);
 
 
 
@@ -84,7 +87,7 @@ public class PCSCHelper {
 
         try {
         	
-            System.out.println("connect to PCSC 1.0 resource manager");
+            log.debug("connect to PCSC 1.0 resource manager");
 
             // load native library
             if(loadLib) OCFPCSC1.loadLib();
@@ -99,12 +102,12 @@ public class PCSCHelper {
             context = pcsc
                     .SCardEstablishContext(Pcsc10Constants.SCARD_SCOPE_USER);
 
-            System.out.println("Driver initialized");
+            log.debug("Driver initialized");
 
             loadProperties();
 
         } catch (PcscException e) {
-            System.out.println(e);
+            log.debug(e);
         }
 
         /* add one slot */
@@ -113,7 +116,7 @@ public class PCSCHelper {
 
     private void loadProperties() {
 
-        System.out.println("Loading properties...");
+        log.debug("Loading properties...");
 
         Properties prop = new Properties();
         InputStream propertyStream;
@@ -124,7 +127,7 @@ public class PCSCHelper {
             try {
                 prop.load(propertyStream);
             } catch (IOException e2) {
-                System.out.println(e2);
+                log.debug(e2);
             }
             //prop.list(System.out);
         }
@@ -186,17 +189,17 @@ public class PCSCHelper {
         try {
             int numReaders = getReaders().length;
             
-            System.out.println("Found " + numReaders + " readers.");
+            log.debug("Found " + numReaders + " readers.");
 
             String currReader = null;
             for (int i = 0; i < getReaders().length; i++) {
                 currReader = getReaders()[i];
-                System.out.println("\nChecking card in reader '"
+                log.debug("\nChecking card in reader '"
                         + currReader + "'.");
                 if (isCardPresent(currReader)) {
-                    System.out.println("Card is present in reader '"
+                    log.debug("Card is present in reader '"
                             + currReader + "' , ATR String follows:");
-                    System.out.println("ATR: " + formatATR(cachedATR, " "));
+                    log.debug("ATR: " + formatATR(cachedATR, " "));
 
                     CardInfo ci = (CardInfo) getCardInfos().get(
                             formatATR(cachedATR, ""));
@@ -204,25 +207,24 @@ public class PCSCHelper {
                     if (ci != null) {
                         cards.add(ci);
                         
-                        System.out
-                                .println("\nInformations found for this card:");
-                        System.out.println("Description:\t"
+                        log.debug("\nInformations found for this card:");
+                        log.debug("Description:\t"
                                 + ci.getProperty("description"));
-                        System.out.println("Manufacturer:\t"
+                        log.debug("Manufacturer:\t"
                                 + ci.getProperty("manufacturer"));
-                        System.out.println("ATR:\t\t" + ci.getProperty("atr"));
-                        System.out.println("Criptoki:\t"
+                        log.debug("ATR:\t\t" + ci.getProperty("atr"));
+                        log.debug("Criptoki:\t"
                                 + ci.getProperty("lib"));
                     }
 
                 } else {
-                    System.out.println("No card in reader '" + currReader
+                    log.debug("No card in reader '" + currReader
                             + "'!");
                 }
             }
 
         } catch (Exception e) {
-            System.out.println(e);
+            log.debug(e);
         }
         return cards;
     }
@@ -275,15 +277,13 @@ public class PCSCHelper {
                 if (((rState[0].EventState & SCARD_STATE_MUTE) != 0)
                         && ((rState[0].EventState & SCARD_STATE_PRESENT) != 0)) {
 
-                    System.out
-                            .println("Card present but unresponsive in reader "
+                    log.error("Card present but unresponsive in reader "
                                     + name);
                 }
 
             } catch (PcscException e) {
-                System.out.println("Exception:");
-                System.out.println(e);
-                System.out.println("Reader " + name + " is not responsive!");
+                log.error(e);
+                log.debug("Reader " + name + " is not responsive!");
             }
 
             cachedATR = rState[0].ATR;

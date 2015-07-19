@@ -1,4 +1,4 @@
-package tools.pki.gbay.crypto.provider;
+package tools.pki.gbay.interfaces;
 
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;

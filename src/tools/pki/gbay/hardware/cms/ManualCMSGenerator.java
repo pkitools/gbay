@@ -186,7 +186,7 @@ public class ManualCMSGenerator {
             while (it.hasNext()) {
                 X509Certificate c = (X509Certificate) it.next();
          /**
-          * TODO Structure is deprecated need to use holder: need to change any were using certs
+          * Structure is deprecated need to use holder: need to change any were using certs
           * certs.add(new X509CertificateHolder(Certificate.getInstance((ASN1Sequence) makeObj(c.getEncoded()))));       
           */
                 certs.add(new X509CertificateStructure((ASN1Sequence) makeObj(c

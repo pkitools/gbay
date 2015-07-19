@@ -45,6 +45,7 @@ import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
 
+import org.apache.log4j.Logger;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.CMSException;
@@ -61,6 +62,7 @@ import org.bouncycastle.util.Store;
  */
 public class SignedText extends PlainText implements SignedTextInterface {
 	
+Logger log = Logger.getLogger(SignedText.class);
 	/** The signer public key. */
 	List<CertificateInterface> signerPublicKey;
 	
@@ -233,11 +235,11 @@ public class SignedText extends PlainText implements SignedTextInterface {
     	CMSSignedData signedData = new CMSSignedData(signedVal); 
 		CMSProcessable processable = signedData.getSignedContent();
 		if (processable == null){
-			System.out.println("Not attached");
+			log.debug("Not attached");
 			attached = false;
 		}
 		else{
-			System.out.println("Is attached");
+			log.debug("Is attached");
 			attached = true;
 		}
 		return signedData;

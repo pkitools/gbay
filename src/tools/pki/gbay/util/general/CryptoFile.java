@@ -144,7 +144,7 @@ Logger log = Logger.getLogger(CryptoFile.class);
     			outputStream.write(bytes, 0, read);
     		}
      
-    		System.out.println("Done!");
+    		log.debug("Done!");
      
     	} catch (IOException e) {
     		e.printStackTrace();

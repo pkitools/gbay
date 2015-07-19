@@ -71,7 +71,7 @@ import tools.pki.gbay.errors.GlobalErrorCode;
  */
 public final class CertificateRevocationList {
 	
-	Logger logger = Logger.getLogger(CertificateRevocationList.class);
+	static Logger log = Logger.getLogger(CertificateRevocationList.class);
 
     
 
@@ -88,8 +88,8 @@ public final class CertificateRevocationList {
      *             if the certificate is revoked
      */
     public CertificateRevocationList(byte[] crlbyte) throws CRLException, CertificateException {
-    	logger.info("Setting CertificateRevocationList from byte array ..."); 
-    	logger.debug(crlbyte);
+    	log.info("Setting CertificateRevocationList from byte array ..."); 
+    	log.debug(crlbyte);
     	this.crl = fromByteArray(crlbyte);
     }
  
@@ -98,7 +98,7 @@ public final class CertificateRevocationList {
      * @param crl
      */
     public CertificateRevocationList(X509CRL crl){
-    	logger.info("Setting CertificateRevocationList from CRL ...");
+    	log.info("Setting CertificateRevocationList from CRL ...");
     	this.crl = crl;
     }
   
@@ -111,7 +111,7 @@ public final class CertificateRevocationList {
      * @throws NamingException
      */
     public CertificateRevocationList(String crlURL) throws CertificateException, CRLException, IOException, CryptoException, NamingException {
-		logger.info("Getting CRL from "+ crlURL);
+		log.info("Getting CRL from "+ crlURL);
     	this.crl = downloadCRL(crlURL);
 	}
     
@@ -121,15 +121,15 @@ public final class CertificateRevocationList {
  * @throws CryptoException
  */
 public CertificateRevocationList(X509Certificate cert) throws CryptoException{
-	   logger.info("Getting CertificateRevocationList from file");
-	   logger.debug(cert);
+	   log.info("Getting CertificateRevocationList from file");
+	   log.debug(cert);
 	   List<String> crlList;
 	try {
 		crlList = getCrlDistributionPoints(cert);
-		logger.debug(crlList.size() + " Distribution Point are found");
+		log.debug(crlList.size() + " Distribution Point are found");
 	if (crlList != null){
 		for (String s : crlList){
-			logger.info("Downloading crl from " + s);
+			log.info("Downloading crl from " + s);
 			this.crl = downloadCRL(s);
 			return;
 		}
@@ -238,17 +238,16 @@ public boolean isRevoked(X509Certificate cert) throws CryptoException{
     	    while (is.read(buf) != -1) {
     	    }
     	} catch (Exception e) {
-    	    System.out.println("Got exception while is -> bytearr conversion: " + e);
+    	    log.debug("Got exception while is -> bytearr conversion: " + e);
     	}
     	PlainText pt= new PlainText(buf);
     	Base64 b64 = new Base64(new String(buf));
-    	System.err.println(new String(b64.decode()));
-    	System.out.println(pt.toHexadecimalString());
+    	log.debug(pt.toHexadecimalString());
          try{   
        Files.copy(is, new File("a4.crl").toPath()); 
          }
          catch(IOException e){
-        	 System.out.println(e.getMessage());
+        	 log.debug(e.getMessage());
          }
 			X509CRL crl = null;
 			CertificateFactory factory = null;
@@ -301,7 +300,7 @@ public boolean isRevoked(X509Certificate cert) throws CryptoException{
                     if (genNames[j].getTagNo() == GeneralName.uniformResourceIdentifier) {
                         String url = DERIA5String.getInstance(
                                 genNames[j].getName()).getString();
-                       System.out.println("URL : " + url);
+                       log.debug("URL : " + url);
                         crlUrls.add(url);
                     }
                 }
@@ -370,11 +369,12 @@ return crl;
 	public static X509CRL openCRLByte(byte[] data) throws CertificateException, IOException, CRLException {
 		CertificateFactory cf = CertificateFactory.getInstance("X509");
 		if ( org.apache.commons.codec.binary.Base64.isBase64(data)){
-			System.err.println("BASE64");
+			log.info("Your CRL is BASE64 encoded, we decode and then open");
 			return (X509CRL) cf.generateCRL(new Base64InputStream(new ByteArrayInputStream(data)));	 
 		}
 		else{
-			System.out.println("no base64");
+			log.info("Openning DER encoded CRL...");
+
 			return (X509CRL) cf.generateCRL(new ByteArrayInputStream(data));
 		}
 	}

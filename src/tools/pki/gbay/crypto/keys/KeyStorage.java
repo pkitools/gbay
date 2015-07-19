@@ -45,13 +45,13 @@ import org.apache.log4j.Logger;
 import com.google.inject.Inject;
 
 import tools.pki.gbay.configuration.PropertyFileConfiguration;
-import tools.pki.gbay.crypto.provider.KeySelectionInterface;
-import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.texts.EncodedTextInterface;
 import tools.pki.gbay.crypto.texts.PlainText;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
+import tools.pki.gbay.interfaces.KeySelectionInterface;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 import tools.pki.gbay.util.general.CryptoFile;
 
 /**

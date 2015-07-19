@@ -1,4 +1,4 @@
-package tools.pki.gbay.hardware.provider;
+package tools.pki.gbay.interfaces;
 
 import java.util.List;
 

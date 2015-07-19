@@ -59,6 +59,8 @@ import tools.pki.gbay.crypto.texts.VerifiedText;
 import tools.pki.gbay.errors.CryptoError;
 import tools.pki.gbay.errors.CryptoException;
 import tools.pki.gbay.errors.GlobalErrorCode;
+import tools.pki.gbay.interfaces.KeySelectionInterface;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;

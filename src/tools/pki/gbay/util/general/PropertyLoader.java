@@ -36,8 +36,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
-// TODO: Auto-generated Javadoc
-// ----------------------------------------------------------------------------
+
 /**
  * A simple class for loading java.util.Properties backed by .properties files
  * deployed as classpath resources.

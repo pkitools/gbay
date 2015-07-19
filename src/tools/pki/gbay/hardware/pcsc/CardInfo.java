@@ -32,7 +32,7 @@ public class CardInfo {
      * @param value information to store.
      */
     public void addProperty(String attribute, Object value) {
-       System.err.println(attribute+"  | "+(String)value);
+     
     	infos.put(attribute, value);
     }
 
@@ -74,7 +74,6 @@ public class CardInfo {
     
     @Override
     public String toString() {
-    	// TODO Auto-generated method stub
     	return getProperty("description");
     }
 

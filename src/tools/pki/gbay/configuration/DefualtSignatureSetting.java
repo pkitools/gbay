@@ -35,12 +35,12 @@ import com.google.inject.Inject;
 import tools.pki.gbay.crypto.keys.KeyStorage.CoupleKey;
 import tools.pki.gbay.crypto.keys.validation.CertificateChain;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
-import tools.pki.gbay.crypto.provider.CaFinderInterface;
-import tools.pki.gbay.crypto.provider.CrlFinderInterface;
-import tools.pki.gbay.crypto.provider.KeySelectionInterface;
-import tools.pki.gbay.crypto.provider.SignatureSettingInterface;
 import tools.pki.gbay.crypto.provider.SignatureTime;
 import tools.pki.gbay.errors.CryptoException;
+import tools.pki.gbay.interfaces.CaFinderInterface;
+import tools.pki.gbay.interfaces.CrlFinderInterface;
+import tools.pki.gbay.interfaces.KeySelectionInterface;
+import tools.pki.gbay.interfaces.SignatureSettingInterface;
 
 /**
  * Default settings for signatures
@@ -169,8 +169,7 @@ public class DefualtSignatureSetting implements SignatureSettingInterface {
 	 */
 	@Override
 	public Integer selectKey(List<CoupleKey> keyCouples) {
-		// TODO Auto-generated method stub
-		return null;
+		return 0;
 	}
 
  

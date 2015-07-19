@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package tools.pki.gbay.configuration;
+package tools.pki.gbay.interfaces;
 
 /**
  * @author Araz Farhang Dareshuri

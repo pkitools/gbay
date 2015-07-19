@@ -9,17 +9,21 @@ import java.util.List;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
+
 import tools.pki.gbay.crypto.keys.KeyStorage.CoupleKey;
 import tools.pki.gbay.crypto.keys.validation.CertificateRevocationList;
-import tools.pki.gbay.crypto.provider.CrlFinderInterface;
-import tools.pki.gbay.crypto.provider.KeySelectionInterface;
 import tools.pki.gbay.errors.CryptoException;
+import tools.pki.gbay.interfaces.CrlFinderInterface;
+import tools.pki.gbay.interfaces.KeySelectionInterface;
 
 public class Keycaller implements KeySelectionInterface , CrlFinderInterface{
 
+	private static Logger log = Logger.getLogger(Keycaller.class);
+
 	@Override
 	public Integer selectKey(List<CoupleKey> keyCouples) {
-		System.err.println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+	log.debug("Returning first key couple");
 		return 0;
 	}
 
@@ -29,8 +33,7 @@ try {
 	return		CertificateRevocationList.getCrlFromCert(cert);
 } catch (CertificateException | CRLException | IOException | NamingException
 		| CryptoException e) {
-	// TODO Auto-generated catch block
-	e.printStackTrace();
+	log.error(e);
 }
 return null;
 		

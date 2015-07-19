@@ -4,8 +4,8 @@ import java.security.cert.X509Certificate;
 
 import tools.pki.gbay.crypto.keys.validation.CertificateChain;
 import tools.pki.gbay.crypto.keys.validation.CertificateIssuer;
-import tools.pki.gbay.crypto.provider.CaFinderInterface;
 import tools.pki.gbay.errors.CryptoException;
+import tools.pki.gbay.interfaces.CaFinderInterface;
 
 public class Issuercaller implements CaFinderInterface {
 
